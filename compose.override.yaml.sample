@@ -1,0 +1,27 @@
+services:
+  gopher:
+    environment:
+      MODE: debug # debug or release
+
+  auth:
+    environment:
+      MODE: debug # debug or release
+      AUTH_PG_URL: postgres://root:root@auth-db:5432/auth?sslmode=disable
+      REDIS_URL: auth-redis:6379
+      SECRET_KEY: secret-key # copy part of /ms/utils/key/private_key.pem key
+  auth-db:
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: auth
+
+  support:
+    environment:
+      MODE: debug # debug or release
+      SUPPORT_PG_URL: postgres://root:root@support-db:5432/support?sslmode=disable
+      SECRET_KEY: secret-key # copy part of /ms/utils/key/private_key.pem key
+  support-db:
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: support

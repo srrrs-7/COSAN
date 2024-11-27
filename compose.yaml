@@ -1,0 +1,48 @@
+services:
+  gopher:
+    image: golang:latest
+
+  ui:
+    build:
+      dockerfile: ./.image/ui/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./ms/ui:/app
+
+  auth:
+    build:
+      dockerfile: ./.image/auth/Dockerfile
+    ports:
+      - 8080:8080
+    depends_on:
+      - auth-db
+  auth-db:
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    volumes:
+      - ./ms/auth/migrator/data:/var/lib/postgresql/data
+  auth-redis:
+    image: redis:latest
+    ports:
+      - 6378:6379
+
+  support:
+    build:
+      dockerfile: ./.image/support/Dockerfile
+    ports:
+      - 8081:8080
+  support-db:
+    image: postgres:latest
+    ports:
+      - 5433:5432
+    volumes:
+      - ./ms/support/migrator/data:/var/lib/postgresql/data
+
+  migrator:
+    build:
+      dockerfile: ./.image/migrator/Dockerfile
+    volumes:
+      - ./ms/auth/migrator:/go/auth/migrator
+      - ./ms/support/migrator:/go/support/migrator
