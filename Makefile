@@ -7,6 +7,9 @@ ui:
 	docker compose up -d ui --build
 	sleep 5
 	open http://localhost:8000
+ui-build:
+	docker compose run --rm ui deno task build
+	docker compose run --rm ui deno task preview
 ui-check:
 	docker compose run --rm ui deno task check
 
