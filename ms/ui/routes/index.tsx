@@ -1,25 +1,12 @@
-import { useSignal } from "@preact/signals";
-import Counter from "../islands/Counter.tsx";
+import LoginForm from "../islands/LoginForm.tsx";
 
-export default function Home() {
-  const count = useSignal(3);
-  return (
-    <div class="px-4 py-8 mx-auto bg-[#86efac]">
-      <div class="max-w-screen-md mx-auto flex flex-col items-center justify-center">
-        <img
-          class="my-6"
-          src="/logo.svg"
-          width="128"
-          height="128"
-          alt="the Fresh logo: a sliced lemon dripping with juice"
-        />
-        <h1 class="text-4xl font-bold">Welcome to Fresh</h1>
-        <p class="my-4">
-          Try updating this message in the
-          <code class="mx-2">./routes/index.tsx</code> file, and refresh.
-        </p>
-        <Counter count={count} />
-      </div>
-    </div>
-  );
+export default function Login() {
+    return (
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;">
+            <h1 style="font-size: 48px;">COSAN</h1>
+            <p style="font-size: 24px; font-weight: bold; margin-bottom: 24px;">「あなたの古参歴、唯一の証」</p>
+            <p></p>
+            <LoginForm />
+        </div>
+    )
 }

@@ -7,6 +7,8 @@ ui:
 	docker compose up -d ui --build
 	sleep 5
 	open http://localhost:8000
+ui-check:
+	docker compose run --rm ui deno task check
 
 auth:
 	docker compose up -d auth-db auth-redis --build
