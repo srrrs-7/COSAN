@@ -13,6 +13,9 @@ export default function Register() {
                 <p>利用規約とプライバシーポリシーに同意する</p>
             </div>
             <RegisterForm />
+            <div style="margin-top: 24px;">
+                <a href="/www">ログイン画面へ戻る</a>
+            </div>
         </div>
     )
 }

@@ -14,7 +14,7 @@ export default function Login() {
             <p style="margin-bottom: 24px;">新たにできたお店?</p>
             <LoginForm />
             <div style="margin-top: 24px;">
-                <a href="">無料新規登録はこちら</a>
+                <a href="/www/register">無料新規登録はこちら</a>
             </div>
         </div>
     )

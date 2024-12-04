@@ -81,6 +81,9 @@ export default function Agreement() {
                     </section>
                 </div>
             </div>
+            <div style="margin-top: 24px;">
+                <a href="/mb/register">登録画面へ戻る</a>
+            </div>
         </div>
     )
 }
