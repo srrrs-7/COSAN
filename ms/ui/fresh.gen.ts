@@ -6,10 +6,8 @@ import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
 import * as $api_joke from "./routes/api/joke.ts";
 import * as $index from "./routes/index.tsx";
-import * as $mb_agreement from "./routes/mb/agreement.tsx";
 import * as $mb_index from "./routes/mb/index.tsx";
 import * as $mb_register from "./routes/mb/register.tsx";
-import * as $www_agreement from "./routes/www/agreement.tsx";
 import * as $www_index from "./routes/www/index.tsx";
 import * as $www_register from "./routes/www/register.tsx";
 import * as $LoginForm from "./islands/LoginForm.tsx";
@@ -22,10 +20,8 @@ const manifest = {
     "./routes/_app.tsx": $_app,
     "./routes/api/joke.ts": $api_joke,
     "./routes/index.tsx": $index,
-    "./routes/mb/agreement.tsx": $mb_agreement,
     "./routes/mb/index.tsx": $mb_index,
     "./routes/mb/register.tsx": $mb_register,
-    "./routes/www/agreement.tsx": $www_agreement,
     "./routes/www/index.tsx": $www_index,
     "./routes/www/register.tsx": $www_register,
   },

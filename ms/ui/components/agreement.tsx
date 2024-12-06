@@ -1,10 +1,13 @@
 export default function Agreement() {
     return (
-        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;">
-            <h1 style="font-size: 48px;">COSAN</h1>
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 10px;">
+            <p>利用規約とプライバシーポリシーへの同意が必要です</p>
+            <div style="display: flex; flex-direction: row; gap: 8px; margin-bottom: 24px;">
+                <input type="checkbox" />
+                <p>利用規約とプライバシーポリシーに同意する</p>
+            </div>
             <p style="font-size: 24px; font-weight: bold; margin-bottom: 24px;">利用規約</p>
-
-            <div style="width: 700px; height: 500px; overflow: auto;">
+            <div style="width: 400px; height: 300px; overflow: auto;">
                 <div style="padding: 20px; ">
                     <section style="margin-bottom: 10px;">
                         <h2>第1条（適用範囲）</h2>
@@ -80,9 +83,6 @@ export default function Agreement() {
                         <p>本ポリシーは必要に応じて改定されます。改定後の内容は、本サービス上に掲載された時点で効力を生じます。</p>
                     </section>
                 </div>
-            </div>
-            <div style="margin-top: 24px;">
-                <a href="/mb/register">登録画面へ戻る</a>
             </div>
         </div>
     )
