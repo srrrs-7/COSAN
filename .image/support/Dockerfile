@@ -1,16 +1,12 @@
-FROM golang:latest AS builder
+FROM rust:latest AS builder
 
-ADD ./ms /go/ms
-WORKDIR /go/ms/support/src
+ADD ./ms /ms
+WORKDIR /ms/support/support
 
-ARG GOOS=linux
-ARG GOARCH=amd64
-ARG CGO_ENABLED=false
-RUN go build -ldflags="-s -w" -o /go/bin/api ./cmd/main.go
+RUN cargo b --release
 
-FROM scratch
-COPY --from=builder /go/bin/api /usr/local/bin/api
-
+FROM debian:stable-slim
+COPY --from=builder /ms/support/support/target/release/support /usr/local/bin/api
 EXPOSE 8080
 
 CMD [ "/usr/local/bin/api" ]

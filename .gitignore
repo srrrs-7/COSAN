@@ -1,14 +1,12 @@
 compose.override.yaml
 data
-
-# dotenv environment variable files
+cargo.lock
+debug
+target
 .env
 .env.development.local
 .env.test.local
 .env.production.local
 .env.local
-
-# Fresh build directory
 _fresh/
-# npm dependencies
 node_modules/

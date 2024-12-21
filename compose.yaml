@@ -1,6 +1,13 @@
 services:
   gopher:
     image: golang:latest
+    volumes:
+      - ./ms/auth:/go/auth
+
+  rustacean:
+    image: rust:latest
+    volumes:
+      - ./ms/support/support:/support
 
   ui:
     build:
@@ -38,11 +45,11 @@ services:
     ports:
       - 5433:5432
     volumes:
-      - ./ms/support/migrator/data:/var/lib/postgresql/data
+      - ./ms/support/.migrator/data:/var/lib/postgresql/data
 
   migrator:
     build:
       dockerfile: ./.image/migrator/Dockerfile
     volumes:
       - ./ms/auth/migrator:/go/auth/migrator
-      - ./ms/support/migrator:/go/support/migrator
+      - ./ms/support/.migrator:/go/support/migrator

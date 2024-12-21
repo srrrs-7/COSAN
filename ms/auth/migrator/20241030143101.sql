@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS staff_certificate_scopes (
 COMMENT ON TABLE staff_certificate_scopes IS 'available service domain information';
 COMMENT ON COLUMN staff_certificate_scopes.company_id IS 'company id';
 COMMENT ON COLUMN staff_certificate_scopes.staff_id IS 'staff id';
-COMMENT ON COLUMN staff_certificate_scopes.certificate_domain_id IS 'avairable domain id';
+COMMENT ON COLUMN staff_certificate_scopes.certificate_domain_id IS 'available domain id';
 
 
 INSERT INTO certificate_domains (name)
