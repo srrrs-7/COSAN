@@ -5,7 +5,7 @@ WORKDIR /ms/support/support
 
 RUN cargo b --release
 
-FROM debian:stable-slim
+FROM gcr.io/distroless/cc-debian12
 COPY --from=builder /ms/support/support/target/release/support /usr/local/bin/api
 EXPOSE 8080
 
