@@ -4,7 +4,6 @@ import (
 	"auth/driver/model"
 	"auth/router/response"
 	"context"
-	"fmt"
 	"net/url"
 	"utils/utilhttp"
 )
@@ -12,15 +11,13 @@ import (
 type AuthService struct {
 	AuthRepo  Autheticator
 	CacheRepo Cacher
-	MasterUrl string
 	SecretKey string
 }
 
-func NewAuth(a Autheticator, c Cacher, m, sk string) AuthService {
+func NewAuth(a Autheticator, c Cacher, sk string) AuthService {
 	return AuthService{
 		AuthRepo:  a,
 		CacheRepo: c,
-		MasterUrl: m,
 		SecretKey: sk,
 	}
 }
@@ -73,10 +70,5 @@ func (a AuthService) requestParams(sid string, psswd string) (*url.URL, url.Valu
 	params.Add("login_id", sid)
 	params.Add("password", psswd)
 
-	baseUrl, err := url.Parse(fmt.Sprintf("%s/login", a.MasterUrl))
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return baseUrl, params, nil
+	return nil, nil, nil
 }

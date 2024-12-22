@@ -19,7 +19,6 @@ import (
 
 const (
 	MODE        = "MODE"
-	MASTER_URL  = "MASTER_URL"
 	AUTH_PG_URL = "AUTH_PG_URL"
 	REDIS_URL   = "REDIS_URL"
 	SECRET_KEY  = "SECRET_KEY"
@@ -32,7 +31,6 @@ const (
 
 type Env struct {
 	Mode      string
-	MasterUrl string
 	AuthPgUrl string
 	RedisUrl  string
 	SecretKey string
@@ -41,13 +39,12 @@ type Env struct {
 func newEnv() Env {
 	e := Env{
 		Mode:      os.Getenv(MODE),
-		MasterUrl: os.Getenv(MASTER_URL),
 		AuthPgUrl: os.Getenv(AUTH_PG_URL),
 		RedisUrl:  os.Getenv(REDIS_URL),
 		SecretKey: os.Getenv(SECRET_KEY),
 	}
 
-	if e.Mode == "" || e.MasterUrl == "" || e.AuthPgUrl == "" || e.RedisUrl == "" || e.SecretKey == "" {
+	if e.Mode == "" || e.AuthPgUrl == "" || e.RedisUrl == "" || e.SecretKey == "" {
 		panic(fmt.Sprintf("either of env is an empty string.: %v", e))
 	} else if e.Mode != DEBUG && e.Mode != RELEASE {
 		panic(fmt.Sprintf("invalid mode: debug or release only but got %v", e.Mode))
@@ -68,7 +65,6 @@ func main() {
 		service.NewAuth(
 			repository.NewAuthRepo(gormDb, query.NewAuthQuery()),
 			repository.NewCacheRepo(env.RedisUrl),
-			env.MasterUrl,
 			env.SecretKey,
 		),
 		service.NewCert(
