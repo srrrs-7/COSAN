@@ -6,7 +6,7 @@ require (
 	github.com/go-chi/chi v1.5.5
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.6.0
-	gorm.io/driver/postgres v1.5.9
+	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.25.12
 )
 

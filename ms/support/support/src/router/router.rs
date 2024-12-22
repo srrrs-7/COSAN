@@ -42,53 +42,66 @@ pub async fn new_router() -> Result<(), anyhow::Error> {
 }
 
 async fn health_check() -> Result<Json<HealthCheckResponse>, StatusCode> {
+    info!("Health check");
     Ok(Json(HealthCheckResponse { status: "ok" }))
 }
 
 async fn get_protagonist() -> Result<&'static str, StatusCode> {
+    info!("Get protagonist");
     Ok("The protagonist is a person")
 }
 
 async fn create_protagonist() -> Result<&'static str, StatusCode> {
+    info!("Create protagonist");
     Ok("The protagonist has been created")
 }
 
 async fn update_protagonist() -> Result<&'static str, StatusCode> {
+    info!("Update protagonist");
     Ok("The protagonist has been updated")
 }
 
 async fn delete_protagonist() -> Result<&'static str, StatusCode> {
+    info!("Delete protagonist");
     Ok("The protagonist has been deleted")
 }
 
 async fn get_supporter() -> Result<&'static str, StatusCode> {
+    info!("Get supporter");
     Ok("The supporter is a person")
 }
 
 async fn create_supporter() -> Result<&'static str, StatusCode> {
+    info!("Create supporter");
     Ok("The supporter has been created")
 }
 
 async fn update_supporter() -> Result<&'static str, StatusCode> {
+    info!("Update supporter");
     Ok("The supporter has been updated")
 }
 
 async fn delete_supporter() -> Result<&'static str, StatusCode> {
+    info!("Delete supporter");
     Ok("The supporter has been deleted")
 }
 
 async fn get_protagonist_supporter() -> Result<&'static str, StatusCode> {
+    info!("Get protagonist supporter");
     Ok("The protagonist supporter is a person")
 }
 
 async fn create_protagonist_supporter() -> Result<&'static str, StatusCode> {
+    info!("Create protagonist supporter");
     Ok("The protagonist supporter has been created")
 }
 
 async fn update_protagonist_supporter() -> Result<&'static str, StatusCode> {
+    info!("Update protagonist supporter");
     Ok("The protagonist supporter has been updated")
 }
 
 async fn delete_protagonist_supporter() -> Result<&'static str, StatusCode> {
+    info!("Delete protagonist supporter");
     Ok("The protagonist supporter has been deleted")
 }
