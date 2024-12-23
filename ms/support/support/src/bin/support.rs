@@ -2,15 +2,7 @@ use tracing::error;
 use dotenv::dotenv;
 use std::env;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-mod router {
-    pub mod router;
-    pub mod response;
-}
-use crate::router::router::new_router;
-mod driver {
-    pub mod driver;
-}
-use crate::driver::driver::new_database;
+use support::router::router::AppRouter;
 
 const SUPPORT_PG_URL: &'static str = "SUPPORT_PG_URL";
 
@@ -21,11 +13,12 @@ async fn main() {
         .init();
 
     dotenv().ok();
-    if let Err(e) = new_database(&env::var(SUPPORT_PG_URL).expect("DATABASE_URL must be set")).await {
-        error!("Error: {:?}", e);
+    if env::var(SUPPORT_PG_URL).is_err() {
+        error!("{} is not set", SUPPORT_PG_URL);
+        return;
     }
 
-    if let Err(e) = new_router().await {
+    if let Err(e) = AppRouter::new().serve().await {
         error!("Error: {:?}", e);
     }
 }

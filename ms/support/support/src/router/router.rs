@@ -10,35 +10,45 @@ use tracing::info;
 
 use super::response::{HealthCheckResponse};
 
-pub async fn new_router() -> Result<(), anyhow::Error> {
-    let router = Router::new()
-        .route("/health", get(health_check))
-        .route("/protagonist",
-            get(get_protagonist)
-            .post(create_protagonist)
-            .put(update_protagonist)
-            .delete(delete_protagonist)
-        ).route("/supporter",
-            get(get_supporter)
-            .post(create_supporter)
-            .put(update_supporter)
-            .delete(delete_supporter)
-        ).route("/protagonist_supporter",
-            get(get_protagonist_supporter)
-            .post(create_protagonist_supporter)
-            .put(update_protagonist_supporter)
-            .delete(delete_protagonist_supporter)
-        );
+pub struct AppRouter {
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
-    info!("Listening on {}", addr);
+}
 
-    Server::bind(&addr)
-        .serve(router.into_make_service())
-        .await
-        .map_err(|e| anyhow::anyhow!("Failed to start server: {}", e))?;
+impl AppRouter {
+    pub fn new() -> Self {
+        Self {}
+    }
 
-    Ok(())
+    pub async fn serve(&self) -> Result<(), anyhow::Error> {
+        let router = Router::new()
+            .route("/health", get(health_check))
+            .route("/protagonist",
+                get(get_protagonist)
+                .post(create_protagonist)
+                .put(update_protagonist)
+                .delete(delete_protagonist)
+            ).route("/supporter",
+                get(get_supporter)
+                .post(create_supporter)
+                .put(update_supporter)
+                .delete(delete_supporter)
+            ).route("/protagonist_supporter",
+                get(get_protagonist_supporter)
+                .post(create_protagonist_supporter)
+                .put(update_protagonist_supporter)
+                .delete(delete_protagonist_supporter)
+            );
+    
+        let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
+        info!("Listening on {}", addr);
+    
+        Server::bind(&addr)
+            .serve(router.into_make_service())
+            .await
+            .map_err(|e| anyhow::anyhow!("Failed to start server: {}", e))?;
+    
+        Ok(())
+    }
 }
 
 async fn health_check() -> Result<Json<HealthCheckResponse>, StatusCode> {
