@@ -2,7 +2,7 @@ use tracing::error;
 use dotenv::dotenv;
 use std::env;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use support::router::router::AppRouter;
+use lib::router::router::AppRouter;
 
 const SUPPORT_PG_URL: &'static str = "SUPPORT_PG_URL";
 
