@@ -1,18 +1,15 @@
 use axum::{
-    routing::{delete, get, post, put},
-    Router,
-    Server,
     http::StatusCode,
-    Json,
+    routing::{delete, get, post, put},
+    Json, Router, Server,
 };
 use std::net::SocketAddr;
 use tracing::info;
+use super::response::{
+    HealthCheckResponse,
+};
 
-use super::response::{HealthCheckResponse};
-
-pub struct AppRouter {
-
-}
+pub struct AppRouter {}
 
 impl AppRouter {
     pub fn new() -> Self {
@@ -22,31 +19,39 @@ impl AppRouter {
     pub async fn serve(&self) -> Result<(), anyhow::Error> {
         let router = Router::new()
             .route("/health", get(health_check))
-            .route("/protagonist",
-                get(get_protagonist)
-                .post(create_protagonist)
-                .put(update_protagonist)
-                .delete(delete_protagonist)
-            ).route("/supporter",
-                get(get_supporter)
-                .post(create_supporter)
-                .put(update_supporter)
-                .delete(delete_supporter)
-            ).route("/protagonist_supporter",
-                get(get_protagonist_supporter)
-                .post(create_protagonist_supporter)
-                .put(update_protagonist_supporter)
-                .delete(delete_protagonist_supporter)
+            .nest(
+                "/protagonist",
+                Router::new()
+                    .route("/", get(get_protagonist))
+                    .route("/", post(create_protagonist))
+                    .route("/", put(update_protagonist))
+                    .route("/", delete(delete_protagonist)),
+            )
+            .nest(
+                "/supporter",
+                Router::new()
+                    .route("/", get(get_supporter))
+                    .route("/", post(create_supporter))
+                    .route("/", put(update_supporter))
+                    .route("/", delete(delete_supporter)),
+            )
+            .nest(
+                "/protagonist_supporter",
+                Router::new()
+                    .route("/", get(get_protagonist_supporter))
+                    .route("/", post(create_protagonist_supporter))
+                    .route("/", put(update_protagonist_supporter))
+                    .route("/", delete(delete_protagonist_supporter)),
             );
-    
+
         let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
         info!("Listening on {}", addr);
-    
+
         Server::bind(&addr)
             .serve(router.into_make_service())
             .await
             .map_err(|e| anyhow::anyhow!("Failed to start server: {}", e))?;
-    
+
         Ok(())
     }
 }

@@ -1,8 +1,14 @@
-use tracing::error;
 use dotenv::dotenv;
 use std::env;
-use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use lib::router::router::AppRouter;
+use tracing::error;
+use tracing_subscriber::{
+    layer::SubscriberExt, 
+    util::SubscriberInitExt
+};
+use lib::{
+    driver::database::new_database,
+    router::router::AppRouter
+};
 
 const SUPPORT_PG_URL: &'static str = "SUPPORT_PG_URL";
 
@@ -18,7 +24,14 @@ async fn main() {
         return;
     }
 
-    if let Err(e) = AppRouter::new().serve().await {
+    let url = env::var(SUPPORT_PG_URL).unwrap();
+    if let Err(e) = new_database(&url).await {
+        error!("Error: {:?}", e);
+        return;
+    }
+
+    let router = AppRouter::new();
+    if let Err(e) = router.serve().await {
         error!("Error: {:?}", e);
     }
 }
