@@ -5,11 +5,7 @@ use super::response::{
     HealthCheckResponse, UpdateProtagonistResponse, UpdateProtagonistSupporterResponse,
     UpdateSupporterResponse,
 };
-use axum::{
-    http::StatusCode,
-    routing::{delete, get, post, put},
-    Json, Router, Server,
-};
+use axum::{http::StatusCode, routing::get, Json, Router, Server};
 use std::net::SocketAddr;
 use tracing::info;
 
@@ -25,27 +21,33 @@ impl AppRouter {
             .route("/health", get(health_check))
             .nest(
                 "/protagonist",
-                Router::new()
-                    .route("/", get(get_protagonist))
-                    .route("/", post(create_protagonist))
-                    .route("/", put(update_protagonist))
-                    .route("/", delete(delete_protagonist)),
+                Router::new().route(
+                    "/",
+                    get(get_protagonist)
+                        .post(create_protagonist)
+                        .put(update_protagonist)
+                        .delete(delete_protagonist),
+                ),
             )
             .nest(
                 "/supporter",
-                Router::new()
-                    .route("/", get(get_supporter))
-                    .route("/", post(create_supporter))
-                    .route("/", put(update_supporter))
-                    .route("/", delete(delete_supporter)),
+                Router::new().route(
+                    "/",
+                    get(get_supporter)
+                        .post(create_supporter)
+                        .put(update_supporter)
+                        .delete(delete_supporter),
+                ),
             )
             .nest(
                 "/protagonist_supporter",
-                Router::new()
-                    .route("/", get(get_protagonist_supporter))
-                    .route("/", post(create_protagonist_supporter))
-                    .route("/", put(update_protagonist_supporter))
-                    .route("/", delete(delete_protagonist_supporter)),
+                Router::new().route(
+                    "/",
+                    get(get_protagonist_supporter)
+                        .post(create_protagonist_supporter)
+                        .put(update_protagonist_supporter)
+                        .delete(delete_protagonist_supporter),
+                ),
             );
 
         let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
