@@ -1,4 +1,10 @@
-use super::response::HealthCheckResponse;
+use super::response::{
+    CreateProtagonistResponse, CreateProtagonistSupporterResponse, CreateSupporterResponse,
+    DeleteProtagonistResponse, DeleteProtagonistSupporterResponse, DeleteSupporterResponse,
+    GetProtagonistResponse, GetProtagonistSupporterResponse, GetSupporterResponse,
+    HealthCheckResponse, UpdateProtagonistResponse, UpdateProtagonistSupporterResponse,
+    UpdateSupporterResponse,
+};
 use axum::{
     http::StatusCode,
     routing::{delete, get, post, put},
@@ -59,62 +65,94 @@ async fn health_check() -> Result<Json<HealthCheckResponse>, StatusCode> {
     Ok(Json(HealthCheckResponse { status: "ok" }))
 }
 
-async fn get_protagonist() -> Result<&'static str, StatusCode> {
+async fn get_protagonist() -> Result<Json<GetProtagonistResponse>, StatusCode> {
     info!("Get protagonist");
-    Ok("The protagonist is a person")
+    Ok(Json(GetProtagonistResponse {
+        id: 1,
+        name: "Alice".to_string(),
+    }))
 }
 
-async fn create_protagonist() -> Result<&'static str, StatusCode> {
+async fn create_protagonist() -> Result<Json<CreateProtagonistResponse>, StatusCode> {
     info!("Create protagonist");
-    Ok("The protagonist has been created")
+    Ok(Json(CreateProtagonistResponse {
+        status: "The protagonist has been created".to_string(),
+    }))
 }
 
-async fn update_protagonist() -> Result<&'static str, StatusCode> {
+async fn update_protagonist() -> Result<Json<UpdateProtagonistResponse>, StatusCode> {
     info!("Update protagonist");
-    Ok("The protagonist has been updated")
+    Ok(Json(UpdateProtagonistResponse {
+        status: "The protagonist has been updated".to_string(),
+    }))
 }
 
-async fn delete_protagonist() -> Result<&'static str, StatusCode> {
+async fn delete_protagonist() -> Result<Json<DeleteProtagonistResponse>, StatusCode> {
     info!("Delete protagonist");
-    Ok("The protagonist has been deleted")
+    Ok(Json(DeleteProtagonistResponse {
+        status: "The protagonist has been deleted".to_string(),
+    }))
 }
 
-async fn get_supporter() -> Result<&'static str, StatusCode> {
+async fn get_supporter() -> Result<Json<GetSupporterResponse>, StatusCode> {
     info!("Get supporter");
-    Ok("The supporter is a person")
+    Ok(Json(GetSupporterResponse {
+        id: 1,
+        name: "Bob".to_string(),
+    }))
 }
 
-async fn create_supporter() -> Result<&'static str, StatusCode> {
+async fn create_supporter() -> Result<Json<CreateSupporterResponse>, StatusCode> {
     info!("Create supporter");
-    Ok("The supporter has been created")
+    Ok(Json(CreateSupporterResponse {
+        status: "The supporter has been created".to_string(),
+    }))
 }
 
-async fn update_supporter() -> Result<&'static str, StatusCode> {
+async fn update_supporter() -> Result<Json<UpdateSupporterResponse>, StatusCode> {
     info!("Update supporter");
-    Ok("The supporter has been updated")
+    Ok(Json(UpdateSupporterResponse {
+        status: "The supporter has been updated".to_string(),
+    }))
 }
 
-async fn delete_supporter() -> Result<&'static str, StatusCode> {
+async fn delete_supporter() -> Result<Json<DeleteSupporterResponse>, StatusCode> {
     info!("Delete supporter");
-    Ok("The supporter has been deleted")
+    Ok(Json(DeleteSupporterResponse {
+        status: "The supporter has been deleted".to_string(),
+    }))
 }
 
-async fn get_protagonist_supporter() -> Result<&'static str, StatusCode> {
+async fn get_protagonist_supporter() -> Result<Json<GetProtagonistSupporterResponse>, StatusCode> {
     info!("Get protagonist supporter");
-    Ok("The protagonist supporter is a person")
+    Ok(Json(GetProtagonistSupporterResponse {
+        protagonist_id: 1,
+        protagonist_name: "Alice".to_string(),
+        supporter_id: 1,
+        supporter_name: "Bob".to_string(),
+    }))
 }
 
-async fn create_protagonist_supporter() -> Result<&'static str, StatusCode> {
+async fn create_protagonist_supporter(
+) -> Result<Json<CreateProtagonistSupporterResponse>, StatusCode> {
     info!("Create protagonist supporter");
-    Ok("The protagonist supporter has been created")
+    Ok(Json(CreateProtagonistSupporterResponse {
+        status: "The protagonist supporter has been created".to_string(),
+    }))
 }
 
-async fn update_protagonist_supporter() -> Result<&'static str, StatusCode> {
+async fn update_protagonist_supporter(
+) -> Result<Json<UpdateProtagonistSupporterResponse>, StatusCode> {
     info!("Update protagonist supporter");
-    Ok("The protagonist supporter has been updated")
+    Ok(Json(UpdateProtagonistSupporterResponse {
+        status: "The protagonist supporter has been updated".to_string(),
+    }))
 }
 
-async fn delete_protagonist_supporter() -> Result<&'static str, StatusCode> {
+async fn delete_protagonist_supporter(
+) -> Result<Json<DeleteProtagonistSupporterResponse>, StatusCode> {
     info!("Delete protagonist supporter");
-    Ok("The protagonist supporter has been deleted")
+    Ok(Json(DeleteProtagonistSupporterResponse {
+        status: "The protagonist supporter has been deleted".to_string(),
+    }))
 }

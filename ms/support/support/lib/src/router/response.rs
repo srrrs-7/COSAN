@@ -17,14 +17,137 @@ impl IntoResponse for HealthCheckResponse {
 }
 
 #[derive(Serialize)]
-pub struct ProtagonistSupportResponse {
+pub struct GetProtagonistResponse {
+    pub id: u64,
+    pub name: String,
+}
+
+impl IntoResponse for GetProtagonistResponse {
+    fn into_response(self) -> Response {
+        (StatusCode::OK, Json(self)).into_response()
+    }
+}
+
+#[derive(Serialize)]
+pub struct CreateProtagonistResponse {
+    pub status: String,
+}
+
+impl IntoResponse for CreateProtagonistResponse {
+    fn into_response(self) -> Response {
+        (StatusCode::CREATED, Json(self)).into_response()
+    }
+}
+
+#[derive(Serialize)]
+pub struct UpdateProtagonistResponse {
+    pub status: String,
+}
+
+impl IntoResponse for UpdateProtagonistResponse {
+    fn into_response(self) -> Response {
+        (StatusCode::OK, Json(self)).into_response()
+    }
+}
+
+#[derive(Serialize)]
+pub struct DeleteProtagonistResponse {
+    pub status: String,
+}
+
+impl IntoResponse for DeleteProtagonistResponse {
+    fn into_response(self) -> Response {
+        (StatusCode::OK, Json(self)).into_response()
+    }
+}
+
+#[derive(Serialize)]
+pub struct GetSupporterResponse {
+    pub id: u64,
+    pub name: String,
+}
+
+impl IntoResponse for GetSupporterResponse {
+    fn into_response(self) -> Response {
+        (StatusCode::OK, Json(self)).into_response()
+    }
+}
+
+#[derive(Serialize)]
+pub struct CreateSupporterResponse {
+    pub status: String,
+}
+
+impl IntoResponse for CreateSupporterResponse {
+    fn into_response(self) -> Response {
+        (StatusCode::CREATED, Json(self)).into_response()
+    }
+}
+
+#[derive(Serialize)]
+pub struct UpdateSupporterResponse {
+    pub status: String,
+}
+
+impl IntoResponse for UpdateSupporterResponse {
+    fn into_response(self) -> Response {
+        (StatusCode::OK, Json(self)).into_response()
+    }
+}
+
+#[derive(Serialize)]
+pub struct DeleteSupporterResponse {
+    pub status: String,
+}
+
+impl IntoResponse for DeleteSupporterResponse {
+    fn into_response(self) -> Response {
+        (StatusCode::OK, Json(self)).into_response()
+    }
+}
+
+#[derive(Serialize)]
+pub struct GetProtagonistSupporterResponse {
     pub protagonist_id: u64,
     pub protagonist_name: String,
     pub supporter_id: u64,
     pub supporter_name: String,
 }
 
-impl IntoResponse for ProtagonistSupportResponse {
+impl IntoResponse for GetProtagonistSupporterResponse {
+    fn into_response(self) -> Response {
+        (StatusCode::OK, Json(self)).into_response()
+    }
+}
+
+#[derive(Serialize)]
+pub struct CreateProtagonistSupporterResponse {
+    pub status: String,
+}
+
+impl IntoResponse for CreateProtagonistSupporterResponse {
+    fn into_response(self) -> Response {
+        (StatusCode::CREATED, Json(self)).into_response()
+    }
+}
+
+#[derive(Serialize)]
+pub struct UpdateProtagonistSupporterResponse {
+    pub status: String,
+}
+
+impl IntoResponse for UpdateProtagonistSupporterResponse {
+    fn into_response(self) -> Response {
+        (StatusCode::OK, Json(self)).into_response()
+    }
+}
+
+#[derive(Serialize)]
+pub struct DeleteProtagonistSupporterResponse {
+    pub status: String,
+}
+
+impl IntoResponse for DeleteProtagonistSupporterResponse {
     fn into_response(self) -> Response {
         (StatusCode::OK, Json(self)).into_response()
     }
