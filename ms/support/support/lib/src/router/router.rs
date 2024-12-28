@@ -1,3 +1,4 @@
+use super::response::HealthCheckResponse;
 use axum::{
     http::StatusCode,
     routing::{delete, get, post, put},
@@ -5,9 +6,6 @@ use axum::{
 };
 use std::net::SocketAddr;
 use tracing::info;
-use super::response::{
-    HealthCheckResponse,
-};
 
 pub struct AppRouter {}
 

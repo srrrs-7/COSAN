@@ -9,7 +9,11 @@ tokio = { version = "1", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
 tower-http = { version = "0.4", features = ["trace"] }
 anyhow = "1.0"
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 sqlx = { version = "0.7", features = [ "postgres", "runtime-tokio-rustls", "macros" ] }
 dotenv = "0.15"
+slog = { version = "2", features = ["max_level_trace", "release_max_level_debug"] }
+slog-term = "2"
+slog-json = "2"
+slog-async = "2"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["json"] }

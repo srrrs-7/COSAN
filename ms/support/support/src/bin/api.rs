@@ -1,37 +1,43 @@
 use dotenv::dotenv;
+use lib::{driver::database::new_database, router::router::AppRouter, util::slog::new_logger};
 use std::env;
-use tracing::error;
-use tracing_subscriber::{
-    layer::SubscriberExt, 
-    util::SubscriberInitExt
-};
-use lib::{
-    driver::database::new_database,
-    router::router::AppRouter
-};
+use tracing::{error, info, span, Level};
 
 const SUPPORT_PG_URL: &'static str = "SUPPORT_PG_URL";
 
-#[tokio::main]
-async fn main() {
-    tracing_subscriber::registry()
-        .with(tracing_subscriber::fmt::layer())
-        .init();
+#[derive(Debug)]
+struct Env {
+    support_pg_url: String,
+}
 
+async fn init_env() -> Env {
     dotenv().ok();
     if env::var(SUPPORT_PG_URL).is_err() {
         error!("{} is not set", SUPPORT_PG_URL);
-        return;
+        panic!();
     }
 
-    let url = env::var(SUPPORT_PG_URL).unwrap();
-    if let Err(e) = new_database(&url).await {
+    Env {
+        support_pg_url: env::var(SUPPORT_PG_URL).unwrap(),
+    }
+}
+
+#[tokio::main]
+async fn main() {
+    new_logger().await;
+    let _span = span!(Level::INFO, "main");
+
+    let env = init_env().await;
+    info!("Env: {:?}", env);
+
+    if let Err(e) = new_database(&env.support_pg_url).await {
         error!("Error: {:?}", e);
-        return;
+        panic!();
     }
 
     let router = AppRouter::new();
     if let Err(e) = router.serve().await {
         error!("Error: {:?}", e);
+        panic!();
     }
 }
