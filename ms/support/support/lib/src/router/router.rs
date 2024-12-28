@@ -6,7 +6,7 @@ use super::request::{
 use super::response::{
     CreateProtagonistResponse, CreateProtagonistSupporterResponse, CreateSupporterResponse,
     DeleteProtagonistResponse, DeleteProtagonistSupporterResponse, DeleteSupporterResponse,
-    GetProtagonistResponse, GetProtagonistSupporterResponse, GetSupporterResponse,
+    ErrorResponse, GetProtagonistResponse, GetProtagonistSupporterResponse, GetSupporterResponse,
     HealthCheckResponse, UpdateProtagonistResponse, UpdateProtagonistSupporterResponse,
     UpdateSupporterResponse,
 };
@@ -14,7 +14,6 @@ use axum::{
     routing::{delete, get, post, put},
     {
         extract::{Path, Query},
-        http::StatusCode,
         Json, Router, Server,
     },
 };
@@ -68,7 +67,7 @@ impl AppRouter {
     }
 }
 
-async fn health_check() -> Result<Json<HealthCheckResponse>, StatusCode> {
+async fn health_check() -> Result<Json<HealthCheckResponse>, ()> {
     info!("Health check");
     Ok(Json(HealthCheckResponse { status: "ok" }))
 }
@@ -76,7 +75,7 @@ async fn health_check() -> Result<Json<HealthCheckResponse>, StatusCode> {
 async fn get_protagonist(
     Path(id): Path<u64>,
     Query(query): Query<GetProtagonistRequest>,
-) -> Result<Json<GetProtagonistResponse>, StatusCode> {
+) -> Result<Json<GetProtagonistResponse>, Json<ErrorResponse>> {
     info!("Get protagonist");
 
     info!("Protagonist id: {}", id);
@@ -90,11 +89,14 @@ async fn get_protagonist(
 
 async fn create_protagonist(
     Json(body): Json<CreateProtagonistRequest>,
-) -> Result<Json<CreateProtagonistResponse>, StatusCode> {
+) -> Result<Json<CreateProtagonistResponse>, Json<ErrorResponse>> {
     info!("Create protagonist");
 
     if body.name.is_empty() {
-        return Err(StatusCode::BAD_REQUEST);
+        return Err(Json(ErrorResponse {
+            error: "Bad Request".to_string(),
+            message: "The name is empty".to_string(),
+        }));
     }
 
     info!("Protagonist name: {}", body.name);
@@ -106,11 +108,14 @@ async fn create_protagonist(
 
 async fn update_protagonist(
     Json(body): Json<UpdateProtagonistRequest>,
-) -> Result<Json<UpdateProtagonistResponse>, StatusCode> {
+) -> Result<Json<UpdateProtagonistResponse>, Json<ErrorResponse>> {
     info!("Update protagonist");
 
     if body.name.is_empty() {
-        return Err(StatusCode::BAD_REQUEST);
+        return Err(Json(ErrorResponse {
+            error: "Bad Request".to_string(),
+            message: "The name is empty".to_string(),
+        }));
     }
 
     info!("Protagonist name: {}", body.name);
@@ -122,7 +127,7 @@ async fn update_protagonist(
 
 async fn delete_protagonist(
     Path(id): Path<u64>,
-) -> Result<Json<DeleteProtagonistResponse>, StatusCode> {
+) -> Result<Json<DeleteProtagonistResponse>, Json<ErrorResponse>> {
     info!("Delete protagonist");
 
     info!("Protagonist id: {}", id);
@@ -135,7 +140,7 @@ async fn delete_protagonist(
 async fn get_supporter(
     Path(id): Path<u64>,
     Query(query): Query<GetSupporterRequest>,
-) -> Result<Json<GetSupporterResponse>, StatusCode> {
+) -> Result<Json<GetSupporterResponse>, Json<ErrorResponse>> {
     info!("Get supporter");
 
     info!("Supporter id: {}", id);
@@ -149,11 +154,14 @@ async fn get_supporter(
 
 async fn create_supporter(
     Json(body): Json<CreateSupporterRequest>,
-) -> Result<Json<CreateSupporterResponse>, StatusCode> {
+) -> Result<Json<CreateSupporterResponse>, Json<ErrorResponse>> {
     info!("Create supporter");
 
     if body.name.is_empty() {
-        return Err(StatusCode::BAD_REQUEST);
+        return Err(Json(ErrorResponse {
+            error: "Bad Request".to_string(),
+            message: "The name is empty".to_string(),
+        }));
     }
 
     info!("Supporter name: {}", body.name);
@@ -165,11 +173,14 @@ async fn create_supporter(
 
 async fn update_supporter(
     Json(body): Json<UpdateSupporterRequest>,
-) -> Result<Json<UpdateSupporterResponse>, StatusCode> {
+) -> Result<Json<UpdateSupporterResponse>, Json<ErrorResponse>> {
     info!("Update supporter");
 
     if body.name.is_empty() {
-        return Err(StatusCode::BAD_REQUEST);
+        return Err(Json(ErrorResponse {
+            error: "Bad Request".to_string(),
+            message: "The name is empty".to_string(),
+        }));
     }
 
     info!("Supporter name: {}", body.name);
@@ -181,7 +192,7 @@ async fn update_supporter(
 
 async fn delete_supporter(
     Path(id): Path<u64>,
-) -> Result<Json<DeleteSupporterResponse>, StatusCode> {
+) -> Result<Json<DeleteSupporterResponse>, Json<ErrorResponse>> {
     info!("Delete supporter");
 
     info!("Supporter id: {}", id);
@@ -194,7 +205,7 @@ async fn delete_supporter(
 async fn get_protagonist_supporter(
     Path(id): Path<u64>,
     Query(query): Query<GetProtagonistRequest>,
-) -> Result<Json<GetProtagonistSupporterResponse>, StatusCode> {
+) -> Result<Json<GetProtagonistSupporterResponse>, Json<ErrorResponse>> {
     info!("Get protagonist supporter");
 
     info!("Protagonist supporter id: {}", id);
@@ -210,7 +221,7 @@ async fn get_protagonist_supporter(
 
 async fn create_protagonist_supporter(
     Json(body): Json<CreateProtagonistSupporterRequest>,
-) -> Result<Json<CreateProtagonistSupporterResponse>, StatusCode> {
+) -> Result<Json<CreateProtagonistSupporterResponse>, Json<ErrorResponse>> {
     info!("Create protagonist supporter");
 
     info!("Protagonist id: {}", body.protagonist_id);
@@ -223,12 +234,15 @@ async fn create_protagonist_supporter(
 
 async fn update_protagonist_supporter(
     Json(body): Json<UpdateProtagonistSupporterRequest>,
-) -> Result<Json<UpdateProtagonistSupporterResponse>, StatusCode> {
+) -> Result<Json<UpdateProtagonistSupporterResponse>, Json<ErrorResponse>> {
     info!("Update protagonist supporter");
 
     // check if the protagonist supporter exists or not or int
     if body.id == 0 || body.protagonist_id == 0 || body.supporter_id == 0 {
-        return Err(StatusCode::BAD_REQUEST);
+        return Err(Json(ErrorResponse {
+            error: "Bad Request".to_string(),
+            message: "The name is empty".to_string(),
+        }));
     }
 
     info!("Protagonist id: {}", body.protagonist_id);
@@ -242,7 +256,7 @@ async fn update_protagonist_supporter(
 
 async fn delete_protagonist_supporter(
     Path(id): Path<u64>,
-) -> Result<Json<DeleteProtagonistSupporterResponse>, StatusCode> {
+) -> Result<Json<DeleteProtagonistSupporterResponse>, Json<ErrorResponse>> {
     info!("Delete protagonist supporter");
 
     info!("Protagonist supporter id: {}", id);
