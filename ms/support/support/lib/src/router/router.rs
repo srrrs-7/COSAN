@@ -10,9 +10,14 @@ use super::response::{
     HealthCheckResponse, UpdateProtagonistResponse, UpdateProtagonistSupporterResponse,
     UpdateSupporterResponse,
 };
-use axum::extract::Query;
-use axum::routing::{delete, post, put};
-use axum::{extract::Path, http::StatusCode, routing::get, Json, Router, Server};
+use axum::{
+    routing::{delete, get, post, put},
+    {
+        extract::{Path, Query},
+        http::StatusCode,
+        Json, Router, Server,
+    },
+};
 use std::net::SocketAddr;
 use tracing::info;
 
