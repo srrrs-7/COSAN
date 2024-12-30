@@ -10,6 +10,7 @@ use super::response::{
 };
 use crate::domain::service::SupportService;
 use crate::driver::model;
+use axum::extract::Query;
 use axum::{
     routing::{delete, get, post, put},
     {
@@ -80,7 +81,7 @@ impl AppRouter {
         Ok(router)
     }
 
-    async fn health_check(Path(id): Path<u64>) -> Result<Json<HealthCheckResponse>, ()> {
+    async fn health_check(Query(id): Query<u64>) -> Result<Json<HealthCheckResponse>, ()> {
         info!("Health check");
         Ok(Json(HealthCheckResponse { id, status: "ok" }))
     }
