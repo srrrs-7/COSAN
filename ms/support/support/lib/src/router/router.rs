@@ -1,60 +1,37 @@
 use super::request::{
     CreateProtagonistRequest, CreateProtagonistSupporterRequest, CreateSupporterRequest,
-    GetProtagonistRequest, GetSupporterRequest, UpdateProtagonistRequest,
-    UpdateProtagonistSupporterRequest, UpdateSupporterRequest,
+    UpdateProtagonistRequest, UpdateSupporterRequest,
 };
 use super::response::{
     CreateProtagonistResponse, CreateProtagonistSupporterResponse, CreateSupporterResponse,
     DeleteProtagonistResponse, DeleteProtagonistSupporterResponse, DeleteSupporterResponse,
     ErrorResponse, GetProtagonistResponse, GetProtagonistSupporterResponse, GetSupporterResponse,
-    HealthCheckResponse, UpdateProtagonistResponse, UpdateProtagonistSupporterResponse,
-    UpdateSupporterResponse,
+    HealthCheckResponse, UpdateProtagonistResponse, UpdateSupporterResponse,
 };
+use crate::domain::service::SupportService;
+use crate::driver::model;
 use axum::{
     routing::{delete, get, post, put},
     {
-        extract::{Path, Query},
+        extract::{Path, State},
         Json, Router, Server,
     },
 };
 use std::net::SocketAddr;
 use tracing::info;
 
-pub struct AppRouter {}
+#[derive(Clone)]
+pub struct AppRouter {
+    service: SupportService,
+}
 
 impl AppRouter {
-    pub fn new() -> Self {
-        Self {}
+    pub fn new(service: SupportService) -> Self {
+        Self { service }
     }
 
     pub async fn serve(&self) -> Result<(), anyhow::Error> {
-        let router = Router::new()
-            .route("/health", get(health_check))
-            .nest(
-                "/protagonist",
-                Router::new()
-                    .route("/:id", get(get_protagonist))
-                    .route("/", post(create_protagonist))
-                    .route("/", put(update_protagonist))
-                    .route("/:id", delete(delete_protagonist)),
-            )
-            .nest(
-                "/supporter",
-                Router::new()
-                    .route("/:id", get(get_supporter))
-                    .route("/", post(create_supporter))
-                    .route("/", put(update_supporter))
-                    .route("/:id", delete(delete_supporter)),
-            )
-            .nest(
-                "/protagonist_supporter",
-                Router::new()
-                    .route("/:id", get(get_protagonist_supporter))
-                    .route("/", post(create_protagonist_supporter))
-                    .route("/", put(update_protagonist_supporter))
-                    .route("/:id", delete(delete_protagonist_supporter)),
-            );
-
+        let router = Self::init_router(self).await?;
         let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
         info!("Listening on {}", addr);
 
@@ -65,203 +42,327 @@ impl AppRouter {
 
         Ok(())
     }
-}
 
-async fn health_check() -> Result<Json<HealthCheckResponse>, ()> {
-    info!("Health check");
-    Ok(Json(HealthCheckResponse { status: "ok" }))
-}
+    async fn init_router(&self) -> Result<Router, anyhow::Error> {
+        let router = Router::new()
+            .route("/health", get(Self::health_check))
+            .nest(
+                "/protagonist",
+                Router::new()
+                    .route("/:protagonist_id", get(Self::get_protagonist))
+                    .route("/", post(Self::create_protagonist))
+                    .route("/", put(Self::update_protagonist))
+                    .route("/:protagonist_id", delete(Self::delete_protagonist)),
+            )
+            .nest(
+                "/supporter",
+                Router::new()
+                    .route("/:supporter_id", get(Self::get_supporter))
+                    .route("/", post(Self::create_supporter))
+                    .route("/", put(Self::update_supporter))
+                    .route("/:supporter_id", delete(Self::delete_supporter)),
+            )
+            .nest(
+                "/protagonist_supporter",
+                Router::new()
+                    .route("/:protagonist_id", get(Self::get_protagonist_supporter))
+                    .route("/", post(Self::create_protagonist_supporter))
+                    .route(
+                        "/:protagonist_supporter_id",
+                        delete(Self::delete_protagonist_supporter),
+                    ),
+            )
+            .with_state(self.service.clone());
 
-async fn get_protagonist(
-    Path(id): Path<u64>,
-    Query(query): Query<GetProtagonistRequest>,
-) -> Result<Json<GetProtagonistResponse>, Json<ErrorResponse>> {
-    info!("Get protagonist");
-
-    info!("Protagonist id: {}", id);
-    info!("Query: {:?}", query);
-
-    Ok(Json(GetProtagonistResponse {
-        id: id,
-        name: "Alice".to_string(),
-    }))
-}
-
-async fn create_protagonist(
-    Json(body): Json<CreateProtagonistRequest>,
-) -> Result<Json<CreateProtagonistResponse>, Json<ErrorResponse>> {
-    info!("Create protagonist");
-
-    if body.name.is_empty() {
-        return Err(Json(ErrorResponse {
-            error: "Bad Request".to_string(),
-            message: "The name is empty".to_string(),
-        }));
+        Ok(router)
     }
 
-    info!("Protagonist name: {}", body.name);
-
-    Ok(Json(CreateProtagonistResponse {
-        status: "The protagonist has been created".to_string(),
-    }))
-}
-
-async fn update_protagonist(
-    Json(body): Json<UpdateProtagonistRequest>,
-) -> Result<Json<UpdateProtagonistResponse>, Json<ErrorResponse>> {
-    info!("Update protagonist");
-
-    if body.name.is_empty() {
-        return Err(Json(ErrorResponse {
-            error: "Bad Request".to_string(),
-            message: "The name is empty".to_string(),
-        }));
+    async fn health_check(Path(id): Path<u64>) -> Result<Json<HealthCheckResponse>, ()> {
+        info!("Health check");
+        Ok(Json(HealthCheckResponse { id, status: "ok" }))
     }
 
-    info!("Protagonist name: {}", body.name);
+    async fn get_protagonist(
+        State(service): State<SupportService>,
+        Path(protagonist_id): Path<u64>,
+    ) -> Result<Json<GetProtagonistResponse>, Json<ErrorResponse>> {
+        info!("Get protagonist");
 
-    Ok(Json(UpdateProtagonistResponse {
-        status: "The protagonist has been updated".to_string(),
-    }))
-}
+        let protagonist = service
+            .get_protagonist(i64::try_from(protagonist_id).unwrap())
+            .await;
 
-async fn delete_protagonist(
-    Path(id): Path<u64>,
-) -> Result<Json<DeleteProtagonistResponse>, Json<ErrorResponse>> {
-    info!("Delete protagonist");
-
-    info!("Protagonist id: {}", id);
-
-    Ok(Json(DeleteProtagonistResponse {
-        status: "The protagonist has been deleted".to_string(),
-    }))
-}
-
-async fn get_supporter(
-    Path(id): Path<u64>,
-    Query(query): Query<GetSupporterRequest>,
-) -> Result<Json<GetSupporterResponse>, Json<ErrorResponse>> {
-    info!("Get supporter");
-
-    info!("Supporter id: {}", id);
-    info!("Query: {:?}", query);
-
-    Ok(Json(GetSupporterResponse {
-        id: 1,
-        name: "Bob".to_string(),
-    }))
-}
-
-async fn create_supporter(
-    Json(body): Json<CreateSupporterRequest>,
-) -> Result<Json<CreateSupporterResponse>, Json<ErrorResponse>> {
-    info!("Create supporter");
-
-    if body.name.is_empty() {
-        return Err(Json(ErrorResponse {
-            error: "Bad Request".to_string(),
-            message: "The name is empty".to_string(),
-        }));
+        match protagonist {
+            Ok(protagonist) => Ok(Json(protagonist)),
+            Err(err) => {
+                return Err(Json(ErrorResponse {
+                    error: err.to_string(),
+                    message: "Protagonist already exists".to_string(),
+                }));
+            }
+        }
     }
 
-    info!("Supporter name: {}", body.name);
+    async fn create_protagonist(
+        State(service): State<SupportService>,
+        Json(body): Json<CreateProtagonistRequest>,
+    ) -> Result<Json<CreateProtagonistResponse>, Json<ErrorResponse>> {
+        info!("Create protagonist");
 
-    Ok(Json(CreateSupporterResponse {
-        status: "The supporter has been created".to_string(),
-    }))
-}
+        let valid = body.validate().await;
+        if valid.is_err() {
+            return Err(Json(ErrorResponse {
+                error: "Bad Request".to_string(),
+                message: valid.err().unwrap().to_string(),
+            }));
+        }
 
-async fn update_supporter(
-    Json(body): Json<UpdateSupporterRequest>,
-) -> Result<Json<UpdateSupporterResponse>, Json<ErrorResponse>> {
-    info!("Update supporter");
+        let protagonist = service
+            .create_protagonist(model::CreateProtagonist {
+                protagonist_id: -1,
+                last_name: body.last_name,
+                first_name: body.first_name,
+                email: body.email,
+                country: body.country,
+            })
+            .await;
 
-    if body.name.is_empty() {
-        return Err(Json(ErrorResponse {
-            error: "Bad Request".to_string(),
-            message: "The name is empty".to_string(),
-        }));
+        match protagonist {
+            Ok(protagonist) => Ok(Json(protagonist)),
+            Err(err) => Err(Json(ErrorResponse {
+                error: err.to_string(),
+                message: "Protagonist already exists".to_string(),
+            })),
+        }
     }
 
-    info!("Supporter name: {}", body.name);
+    async fn update_protagonist(
+        State(service): State<SupportService>,
+        Json(body): Json<UpdateProtagonistRequest>,
+    ) -> Result<Json<UpdateProtagonistResponse>, Json<ErrorResponse>> {
+        info!("Update protagonist");
 
-    Ok(Json(UpdateSupporterResponse {
-        status: "The supporter has been updated".to_string(),
-    }))
-}
+        let valid = body.validate().await;
+        if valid.is_err() {
+            return Err(Json(ErrorResponse {
+                error: "Bad Request".to_string(),
+                message: valid.err().unwrap().to_string(),
+            }));
+        }
 
-async fn delete_supporter(
-    Path(id): Path<u64>,
-) -> Result<Json<DeleteSupporterResponse>, Json<ErrorResponse>> {
-    info!("Delete supporter");
+        let protagonist = service
+            .update_protagonist(model::UpdateProtagonist {
+                protagonist_id: body.protagonist_id,
+                last_name: body.last_name,
+                first_name: body.first_name,
+                email: body.email,
+                country: body.country,
+            })
+            .await;
 
-    info!("Supporter id: {}", id);
-
-    Ok(Json(DeleteSupporterResponse {
-        status: "The supporter has been deleted".to_string(),
-    }))
-}
-
-async fn get_protagonist_supporter(
-    Path(id): Path<u64>,
-    Query(query): Query<GetProtagonistRequest>,
-) -> Result<Json<GetProtagonistSupporterResponse>, Json<ErrorResponse>> {
-    info!("Get protagonist supporter");
-
-    info!("Protagonist supporter id: {}", id);
-    info!("Query: {:?}", query);
-
-    Ok(Json(GetProtagonistSupporterResponse {
-        protagonist_id: 1,
-        protagonist_name: "Alice".to_string(),
-        supporter_id: 1,
-        supporter_name: "Bob".to_string(),
-    }))
-}
-
-async fn create_protagonist_supporter(
-    Json(body): Json<CreateProtagonistSupporterRequest>,
-) -> Result<Json<CreateProtagonistSupporterResponse>, Json<ErrorResponse>> {
-    info!("Create protagonist supporter");
-
-    info!("Protagonist id: {}", body.protagonist_id);
-    info!("Supporter id: {}", body.supporter_id);
-
-    Ok(Json(CreateProtagonistSupporterResponse {
-        status: "The protagonist supporter has been created".to_string(),
-    }))
-}
-
-async fn update_protagonist_supporter(
-    Json(body): Json<UpdateProtagonistSupporterRequest>,
-) -> Result<Json<UpdateProtagonistSupporterResponse>, Json<ErrorResponse>> {
-    info!("Update protagonist supporter");
-
-    // check if the protagonist supporter exists or not or int
-    if body.id == 0 || body.protagonist_id == 0 || body.supporter_id == 0 {
-        return Err(Json(ErrorResponse {
-            error: "Bad Request".to_string(),
-            message: "The name is empty".to_string(),
-        }));
+        match protagonist {
+            Ok(protagonist) => Ok(Json(protagonist)),
+            Err(err) => Err(Json(ErrorResponse {
+                error: err.to_string(),
+                message: "Protagonist already exists".to_string(),
+            })),
+        }
     }
 
-    info!("Protagonist id: {}", body.protagonist_id);
-    info!("Supporter id: {}", body.supporter_id);
-    info!("Protagonist supporter id: {}", body.id);
+    async fn delete_protagonist(
+        State(service): State<SupportService>,
+        Path(protagonist_id): Path<u64>,
+    ) -> Result<Json<DeleteProtagonistResponse>, Json<ErrorResponse>> {
+        info!("Delete protagonist");
 
-    Ok(Json(UpdateProtagonistSupporterResponse {
-        status: "The protagonist supporter has been updated".to_string(),
-    }))
-}
+        let result = service
+            .delete_protagonist(i64::try_from(protagonist_id).unwrap())
+            .await;
 
-async fn delete_protagonist_supporter(
-    Path(id): Path<u64>,
-) -> Result<Json<DeleteProtagonistSupporterResponse>, Json<ErrorResponse>> {
-    info!("Delete protagonist supporter");
+        match result {
+            Ok(_) => Ok(Json(DeleteProtagonistResponse {
+                status: "The protagonist has been deleted".to_string(),
+            })),
+            Err(err) => Err(Json(ErrorResponse {
+                error: err.to_string(),
+                message: "Protagonist not found".to_string(),
+            })),
+        }
+    }
 
-    info!("Protagonist supporter id: {}", id);
+    async fn get_supporter(
+        State(service): State<SupportService>,
+        Path(supporter_id): Path<u64>,
+    ) -> Result<Json<GetSupporterResponse>, Json<ErrorResponse>> {
+        info!("Get supporter");
 
-    Ok(Json(DeleteProtagonistSupporterResponse {
-        status: "The protagonist supporter has been deleted".to_string(),
-    }))
+        let supporter = service
+            .get_supporter(i64::try_from(supporter_id).unwrap())
+            .await;
+
+        match supporter {
+            Ok(supporter) => Ok(Json(supporter)),
+            Err(err) => Err(Json(ErrorResponse {
+                error: err.to_string(),
+                message: "Supporter not found".to_string(),
+            })),
+        }
+    }
+
+    async fn create_supporter(
+        State(service): State<SupportService>,
+        Json(body): Json<CreateSupporterRequest>,
+    ) -> Result<Json<CreateSupporterResponse>, Json<ErrorResponse>> {
+        info!("Create supporter");
+
+        let valid = body.validate().await;
+        if valid.is_err() {
+            return Err(Json(ErrorResponse {
+                error: "Bad Request".to_string(),
+                message: valid.err().unwrap().to_string(),
+            }));
+        }
+
+        let supporter = service
+            .create_supporter(model::CreateSupporter {
+                supporter_id: -1,
+                last_name: body.last_name,
+                first_name: body.first_name,
+                email: body.email,
+                country: body.country,
+            })
+            .await;
+
+        match supporter {
+            Ok(supporter) => Ok(Json(supporter)),
+            Err(err) => Err(Json(ErrorResponse {
+                error: err.to_string(),
+                message: "Supporter already exists".to_string(),
+            })),
+        }
+    }
+
+    async fn update_supporter(
+        State(service): State<SupportService>,
+        Json(body): Json<UpdateSupporterRequest>,
+    ) -> Result<Json<UpdateSupporterResponse>, Json<ErrorResponse>> {
+        info!("Update supporter");
+
+        let valid = body.validate().await;
+        if valid.is_err() {
+            return Err(Json(ErrorResponse {
+                error: "Bad Request".to_string(),
+                message: valid.err().unwrap().to_string(),
+            }));
+        }
+
+        let supporter = service
+            .update_supporter(model::UpdateSupporter {
+                supporter_id: body.supporter_id,
+                last_name: body.last_name,
+                first_name: body.first_name,
+                email: body.email,
+                country: body.country,
+            })
+            .await;
+
+        match supporter {
+            Ok(supporter) => Ok(Json(supporter)),
+            Err(err) => Err(Json(ErrorResponse {
+                error: err.to_string(),
+                message: "Supporter already exists".to_string(),
+            })),
+        }
+    }
+
+    async fn delete_supporter(
+        State(service): State<SupportService>,
+        Path(supporter_id): Path<u64>,
+    ) -> Result<Json<DeleteSupporterResponse>, Json<ErrorResponse>> {
+        info!("Delete supporter");
+
+        let result = service
+            .delete_supporter(i64::try_from(supporter_id).unwrap())
+            .await;
+
+        match result {
+            Ok(_) => Ok(Json(DeleteSupporterResponse {
+                status: "The supporter has been deleted".to_string(),
+            })),
+            Err(err) => Err(Json(ErrorResponse {
+                error: err.to_string(),
+                message: "Supporter not found".to_string(),
+            })),
+        }
+    }
+
+    async fn get_protagonist_supporter(
+        State(service): State<SupportService>,
+        Path(protagonist_supporter_id): Path<u64>,
+    ) -> Result<Json<GetProtagonistSupporterResponse>, Json<ErrorResponse>> {
+        info!("Get protagonist supporter");
+
+        let protagonist_supporter = service
+            .get_protagonist_supporter(i64::try_from(protagonist_supporter_id).unwrap())
+            .await;
+
+        match protagonist_supporter {
+            Ok(protagonist_supporter) => Ok(Json(protagonist_supporter)),
+            Err(err) => Err(Json(ErrorResponse {
+                error: err.to_string(),
+                message: "Protagonist supporter not found".to_string(),
+            })),
+        }
+    }
+
+    async fn create_protagonist_supporter(
+        State(service): State<SupportService>,
+        Json(body): Json<CreateProtagonistSupporterRequest>,
+    ) -> Result<Json<CreateProtagonistSupporterResponse>, Json<ErrorResponse>> {
+        info!("Create protagonist supporter");
+
+        let valid = body.validate().await;
+        if valid.is_err() {
+            return Err(Json(ErrorResponse {
+                error: "Bad Request".to_string(),
+                message: valid.err().unwrap().to_string(),
+            }));
+        }
+
+        let protagonist_supporter = service
+            .create_protagonist_supporter(model::CreateProtagonistSupporter {
+                protagonist_id: i64::try_from(body.protagonist_id).unwrap(),
+                supporter_id: i64::try_from(body.supporter_id).unwrap(),
+            })
+            .await;
+
+        match protagonist_supporter {
+            Ok(protagonist_supporter) => Ok(Json(protagonist_supporter)),
+            Err(err) => Err(Json(ErrorResponse {
+                error: err.to_string(),
+                message: "Protagonist supporter already exists".to_string(),
+            })),
+        }
+    }
+
+    async fn delete_protagonist_supporter(
+        State(service): State<SupportService>,
+        Path(protagonist_supporter_id): Path<u64>,
+    ) -> Result<Json<DeleteProtagonistSupporterResponse>, Json<ErrorResponse>> {
+        info!("Delete protagonist supporter");
+
+        let result = service
+            .delete_protagonist_supporter(i64::try_from(protagonist_supporter_id).unwrap())
+            .await;
+
+        match result {
+            Ok(_) => Ok(Json(DeleteProtagonistSupporterResponse {
+                status: "The protagonist supporter relation has been deleted".to_string(),
+            })),
+            Err(err) => Err(Json(ErrorResponse {
+                error: err.to_string(),
+                message: "Supporter not found".to_string(),
+            })),
+        }
+    }
 }

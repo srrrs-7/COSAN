@@ -1,5 +1,10 @@
 use dotenv::dotenv;
-use lib::{driver::database::new_database, router::router::AppRouter, util::slog::new_logger};
+use lib::{
+    domain::service::SupportService,
+    driver::{database::new_database, repository::SupportRepository},
+    router::router::AppRouter,
+    util::slog::new_logger,
+};
 use std::env;
 use tracing::{error, info, span, Level};
 
@@ -30,14 +35,10 @@ async fn main() {
     let env = init_env().await;
     info!("Env: {:?}", env);
 
-    if let Err(e) = new_database(&env.support_pg_url).await {
-        error!("Error: {:?}", e);
-        panic!();
-    }
+    let support_service = SupportService::new(SupportRepository::new(
+        new_database(&env.support_pg_url).await.unwrap(),
+    ));
 
-    let router = AppRouter::new();
-    if let Err(e) = router.serve().await {
-        error!("Error: {:?}", e);
-        panic!();
-    }
+    let router = AppRouter::new(support_service);
+    router.serve().await.unwrap();
 }

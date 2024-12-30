@@ -7,6 +7,7 @@ use serde::Serialize;
 
 #[derive(Serialize)]
 pub struct HealthCheckResponse {
+    pub id: u64,
     pub status: &'static str,
 }
 
@@ -18,8 +19,11 @@ impl IntoResponse for HealthCheckResponse {
 
 #[derive(Serialize)]
 pub struct GetProtagonistResponse {
-    pub id: u64,
-    pub name: String,
+    pub protagonist_id: u64,
+    pub protagonist_last_name: String,
+    pub protagonist_first_name: String,
+    pub protagonist_email: String,
+    pub protagonist_country: String,
 }
 
 impl IntoResponse for GetProtagonistResponse {
@@ -30,7 +34,11 @@ impl IntoResponse for GetProtagonistResponse {
 
 #[derive(Serialize)]
 pub struct CreateProtagonistResponse {
-    pub status: String,
+    pub protagonist_id: u64,
+    pub protagonist_last_name: String,
+    pub protagonist_first_name: String,
+    pub protagonist_email: String,
+    pub protagonist_country: String,
 }
 
 impl IntoResponse for CreateProtagonistResponse {
@@ -41,7 +49,11 @@ impl IntoResponse for CreateProtagonistResponse {
 
 #[derive(Serialize)]
 pub struct UpdateProtagonistResponse {
-    pub status: String,
+    pub protagonist_id: u64,
+    pub protagonist_last_name: String,
+    pub protagonist_first_name: String,
+    pub protagonist_email: String,
+    pub protagonist_country: String,
 }
 
 impl IntoResponse for UpdateProtagonistResponse {
@@ -63,8 +75,11 @@ impl IntoResponse for DeleteProtagonistResponse {
 
 #[derive(Serialize)]
 pub struct GetSupporterResponse {
-    pub id: u64,
-    pub name: String,
+    pub supporter_id: u64,
+    pub supporter_last_name: String,
+    pub supporter_first_name: String,
+    pub supporter_email: String,
+    pub supporter_country: String,
 }
 
 impl IntoResponse for GetSupporterResponse {
@@ -75,7 +90,11 @@ impl IntoResponse for GetSupporterResponse {
 
 #[derive(Serialize)]
 pub struct CreateSupporterResponse {
-    pub status: String,
+    pub supporter_id: u64,
+    pub supporter_last_name: String,
+    pub supporter_first_name: String,
+    pub supporter_email: String,
+    pub supporter_country: String,
 }
 
 impl IntoResponse for CreateSupporterResponse {
@@ -86,7 +105,11 @@ impl IntoResponse for CreateSupporterResponse {
 
 #[derive(Serialize)]
 pub struct UpdateSupporterResponse {
-    pub status: String,
+    pub supporter_id: u64,
+    pub supporter_last_name: String,
+    pub supporter_first_name: String,
+    pub supporter_email: String,
+    pub supporter_country: String,
 }
 
 impl IntoResponse for UpdateSupporterResponse {
@@ -108,10 +131,10 @@ impl IntoResponse for DeleteSupporterResponse {
 
 #[derive(Serialize)]
 pub struct GetProtagonistSupporterResponse {
-    pub protagonist_id: u64,
-    pub protagonist_name: String,
     pub supporter_id: u64,
-    pub supporter_name: String,
+    pub supporter_last_name: String,
+    pub supporter_first_name: String,
+    pub supporter_country: String,
 }
 
 impl IntoResponse for GetProtagonistSupporterResponse {
@@ -122,23 +145,12 @@ impl IntoResponse for GetProtagonistSupporterResponse {
 
 #[derive(Serialize)]
 pub struct CreateProtagonistSupporterResponse {
-    pub status: String,
+    pub protagonist_supporter_id: u64,
 }
 
 impl IntoResponse for CreateProtagonistSupporterResponse {
     fn into_response(self) -> Response {
         (StatusCode::CREATED, Json(self)).into_response()
-    }
-}
-
-#[derive(Serialize)]
-pub struct UpdateProtagonistSupporterResponse {
-    pub status: String,
-}
-
-impl IntoResponse for UpdateProtagonistSupporterResponse {
-    fn into_response(self) -> Response {
-        (StatusCode::OK, Json(self)).into_response()
     }
 }
 
