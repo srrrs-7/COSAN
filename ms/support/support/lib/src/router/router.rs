@@ -81,7 +81,7 @@ impl AppRouter {
         Ok(router)
     }
 
-    async fn health_check(Query(id): Query<u64>) -> Result<Json<HealthCheckResponse>, ()> {
+    async fn health_check(Query(id): Query<String>) -> Result<Json<HealthCheckResponse>, ()> {
         info!("Health check");
         Ok(Json(HealthCheckResponse { id, status: "ok" }))
     }

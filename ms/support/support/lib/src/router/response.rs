@@ -7,7 +7,7 @@ use serde::Serialize;
 
 #[derive(Serialize)]
 pub struct HealthCheckResponse {
-    pub id: u64,
+    pub id: String,
     pub status: &'static str,
 }
 
