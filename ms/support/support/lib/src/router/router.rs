@@ -65,7 +65,10 @@ impl AppRouter {
             .nest(
                 "/protagonist_supporter",
                 Router::new()
-                    .route("/:protagonist_id", get(Self::get_protagonist_supporter))
+                    .route(
+                        "/:protagonist_supporter_id",
+                        get(Self::get_protagonist_supporter),
+                    )
                     .route("/", post(Self::create_protagonist_supporter))
                     .route(
                         "/:protagonist_supporter_id",
