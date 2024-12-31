@@ -22,7 +22,7 @@ impl SupportRepository {
             SELECT 
                 protagonist_id, last_name, first_name, email, country
             FROM 
-                protagonist
+                protagonists
             WHERE 
                 protagonist_id = $1;
             "#,
@@ -47,7 +47,7 @@ impl SupportRepository {
         let row = sqlx::query_as::<_, model::CreateProtagonist>(
             r#"
             INSERT INTO 
-                protagonist (last_name, first_name, email, country)
+                protagonists (last_name, first_name, email, country)
             VALUES 
                 ($1, $2, $3, $4)
             RETURNING 
@@ -76,7 +76,7 @@ impl SupportRepository {
     ) -> Result<entity::Protagonist, sqlx::Error> {
         let row = sqlx::query_as::<_, model::UpdateProtagonist>(
             r#"
-            UPDATE protagonist
+            UPDATE protagonists
                 SET last_name = $1, first_name = $2, email = $3, country = $4
             WHERE 
                 protagonist_id = $5
@@ -227,7 +227,7 @@ impl SupportRepository {
             SELECT 
                 supporter_id, supporter_last_name, supporter_first_name, supporter_country
             FROM 
-                protagonist_supporter
+                protagonist_supporters
             WHERE 
                 protagonist_id = $1;
             "#,
@@ -251,7 +251,7 @@ impl SupportRepository {
         sqlx::query(
             r#"
             INSERT INTO 
-                protagonist_supporter (protagonist_id, supporter_id)
+                protagonist_supporters (protagonist_id, supporter_id)
             VALUES 
                 ($1, $2);
             "#,
@@ -271,7 +271,7 @@ impl SupportRepository {
         sqlx::query(
             r#"
             DELETE FROM 
-                protagonist_supporter
+                protagonist_supporters
             WHERE 
                 protagonist_id = $1;
             "#,
