@@ -131,9 +131,9 @@ impl IntoResponse for DeleteSupporterResponse {
 #[derive(Serialize)]
 pub struct GetProtagonistSupporterResponse {
     pub supporter_id: u64,
-    pub supporter_last_name: String,
-    pub supporter_first_name: String,
-    pub supporter_country: String,
+    pub last_name: String,
+    pub first_name: String,
+    pub country: String,
 }
 
 impl IntoResponse for GetProtagonistSupporterResponse {

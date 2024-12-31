@@ -57,9 +57,9 @@ pub struct UpdateSupporter {
 #[derive(Debug, FromRow)]
 pub struct GetProtagonistSupporter {
     pub supporter_id: i64,
-    pub supporter_last_name: String,
-    pub supporter_first_name: String,
-    pub supporter_country: String,
+    pub last_name: String,
+    pub first_name: String,
+    pub country: String,
 }
 
 #[derive(Debug, FromRow)]

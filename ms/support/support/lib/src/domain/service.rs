@@ -138,9 +138,9 @@ impl SupportService {
         match protagonist_supporter {
             Ok(protagonist_supporter) => Ok(response::GetProtagonistSupporterResponse {
                 supporter_id: u64::try_from(protagonist_supporter.supporter_id).unwrap(),
-                supporter_last_name: protagonist_supporter.supporter_last_name,
-                supporter_first_name: protagonist_supporter.supporter_first_name,
-                supporter_country: protagonist_supporter.supporter_country,
+                last_name: protagonist_supporter.last_name,
+                first_name: protagonist_supporter.first_name,
+                country: protagonist_supporter.country,
             }),
             Err(err) => Err(err),
         }

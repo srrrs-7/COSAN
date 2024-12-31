@@ -225,11 +225,14 @@ impl SupportRepository {
         let row = sqlx::query_as::<_, model::GetProtagonistSupporter>(
             r#"
             SELECT 
-                supporter_id, supporter_last_name, supporter_first_name, supporter_country
+                s.supporter_id, s.last_name, s.first_name, s.country
             FROM 
-                protagonist_supporters
+                protagonist_supporters AS p
+            INNER JOIN
+                supporters AS s 
+                    ON p.supporter_id = s.supporter_id
             WHERE 
-                protagonist_id = $1;
+                p.protagonist_id = $1;
             "#,
         )
         .bind(i64::try_from(id).unwrap())
@@ -238,9 +241,9 @@ impl SupportRepository {
 
         Ok(entity::ProtagonistSupporter {
             supporter_id: row.supporter_id,
-            supporter_last_name: row.supporter_last_name,
-            supporter_first_name: row.supporter_first_name,
-            supporter_country: row.supporter_country,
+            last_name: row.last_name,
+            first_name: row.first_name,
+            country: row.country,
         })
     }
 
