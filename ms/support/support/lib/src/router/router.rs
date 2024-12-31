@@ -74,7 +74,7 @@ impl AppRouter {
                         "/:protagonist_supporter_id",
                         delete(Self::delete_protagonist_supporter),
                     ),
-            )
+            );
 
             let router = Router::new()
                 .nest("/support/v1", inner_router)
