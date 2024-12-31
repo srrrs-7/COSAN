@@ -44,7 +44,7 @@ impl AppRouter {
     }
 
     async fn init_router(&self) -> Result<Router, anyhow::Error> {
-        let router = Router::new()
+        let inner_router = Router::new()
             .route("/health", get(Self::health_check))
             .nest(
                 "/protagonist",
@@ -75,7 +75,10 @@ impl AppRouter {
                         delete(Self::delete_protagonist_supporter),
                     ),
             )
-            .with_state(self.service.clone());
+
+            let router = Router::new()
+                .nest("/v1/support", inner_router)
+                .with_state(self.service.clone());
 
         Ok(router)
     }

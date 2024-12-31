@@ -2,6 +2,11 @@ services:
   gopher:
     environment:
       MODE: debug # debug or release
+  
+  ui:
+    environment:
+      AUTH_URL: http://auth:8080/auth/v1
+      SUPPORT_URL: http://support:8080/support/v1
 
   auth:
     environment:
