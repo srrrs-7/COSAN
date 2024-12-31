@@ -304,15 +304,15 @@ impl AppRouter {
     async fn get_protagonist_supporter(
         State(service): State<SupportService>,
         Path(protagonist_supporter_id): Path<u64>,
-    ) -> Result<Json<GetProtagonistSupporterResponse>, Json<ErrorResponse>> {
+    ) -> Result<Json<Vec<GetProtagonistSupporterResponse>>, Json<ErrorResponse>> {
         info!("Get protagonist supporter");
 
-        let protagonist_supporter = service
+        let protagonist_supporters = service
             .get_protagonist_supporter(i64::try_from(protagonist_supporter_id).unwrap())
             .await;
 
-        match protagonist_supporter {
-            Ok(protagonist_supporter) => Ok(Json(protagonist_supporter)),
+        match protagonist_supporters {
+            Ok(protagonist_supporters) => Ok(Json(protagonist_supporters)),
             Err(err) => Err(Json(ErrorResponse {
                 error: err.to_string(),
                 message: "Protagonist supporter not found".to_string(),

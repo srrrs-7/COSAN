@@ -221,8 +221,8 @@ impl SupportRepository {
     pub async fn get_protagonist_supporter(
         &self,
         id: i64,
-    ) -> Result<entity::ProtagonistSupporter, sqlx::Error> {
-        let row = sqlx::query_as::<_, model::GetProtagonistSupporter>(
+    ) -> Result<Vec<entity::ProtagonistSupporter>, sqlx::Error> {
+        let rows = sqlx::query_as::<_, model::GetProtagonistSupporter>(
             r#"
             SELECT 
                 s.supporter_id, s.last_name, s.first_name, s.country
@@ -236,15 +236,20 @@ impl SupportRepository {
             "#,
         )
         .bind(i64::try_from(id).unwrap())
-        .fetch_one(&self.db)
+        .fetch_all(&self.db)
         .await?;
 
-        Ok(entity::ProtagonistSupporter {
-            supporter_id: row.supporter_id,
-            last_name: row.last_name,
-            first_name: row.first_name,
-            country: row.country,
-        })
+        let mut protagonist_supporters = Vec::new();
+        for row in rows {
+            protagonist_supporters.push(entity::ProtagonistSupporter {
+                supporter_id: row.supporter_id,
+                last_name: row.last_name,
+                first_name: row.first_name,
+                country: row.country,
+            });
+        }
+
+        Ok(protagonist_supporters)
     }
 
     pub async fn create_protagonist_supporter(

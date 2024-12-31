@@ -132,16 +132,22 @@ impl SupportService {
     pub async fn get_protagonist_supporter(
         &self,
         id: i64,
-    ) -> Result<response::GetProtagonistSupporterResponse, sqlx::Error> {
-        let protagonist_supporter = self.repository.get_protagonist_supporter(id).await;
+    ) -> Result<Vec<response::GetProtagonistSupporterResponse>, sqlx::Error> {
+        let protagonist_supporters = self.repository.get_protagonist_supporter(id).await;
 
-        match protagonist_supporter {
-            Ok(protagonist_supporter) => Ok(response::GetProtagonistSupporterResponse {
-                supporter_id: u64::try_from(protagonist_supporter.supporter_id).unwrap(),
-                last_name: protagonist_supporter.last_name,
-                first_name: protagonist_supporter.first_name,
-                country: protagonist_supporter.country,
-            }),
+        match protagonist_supporters {
+            Ok(protagonist_supporters) => {
+                let mut response = Vec::new();
+                for protagonist_supporter in protagonist_supporters {
+                    response.push(response::GetProtagonistSupporterResponse {
+                        supporter_id: u64::try_from(protagonist_supporter.supporter_id).unwrap(),
+                        last_name: protagonist_supporter.last_name,
+                        first_name: protagonist_supporter.first_name,
+                        country: protagonist_supporter.country,
+                    })
+                }
+                Ok(response)
+            }
             Err(err) => Err(err),
         }
     }
