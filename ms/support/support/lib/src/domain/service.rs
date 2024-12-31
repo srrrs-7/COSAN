@@ -163,8 +163,10 @@ impl SupportService {
 
         match protagonist_supporter {
             Ok(protagonist_supporter) => Ok(response::CreateProtagonistSupporterResponse {
-                protagonist_supporter_id: u64::try_from(protagonist_supporter.protagonist_id)
-                    .unwrap(),
+                protagonist_supporter_id: u64::try_from(
+                    protagonist_supporter.protagonist_supporter_id,
+                )
+                .unwrap(),
             }),
             Err(err) => Err(err),
         }

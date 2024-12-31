@@ -256,22 +256,23 @@ impl SupportRepository {
         &self,
         protagonist_supporter: model::CreateProtagonistSupporter,
     ) -> Result<entity::ProtagonistSupporterRelation, sqlx::Error> {
-        sqlx::query(
+        let row = sqlx::query_as::<_, model::CreateProtagonistSupporter>(
             r#"
             INSERT INTO 
                 protagonist_supporters (protagonist_id, supporter_id)
             VALUES 
-                ($1, $2);
+                ($1, $2)
+            RETURNING 
+                protagonist_supporter_id, protagonist_id, supporter_id;
             "#,
         )
         .bind(protagonist_supporter.protagonist_id)
         .bind(protagonist_supporter.supporter_id)
-        .execute(&self.db)
+        .fetch_one(&self.db)
         .await?;
 
         Ok(entity::ProtagonistSupporterRelation {
-            protagonist_id: protagonist_supporter.protagonist_id,
-            supporter_id: protagonist_supporter.supporter_id,
+            protagonist_supporter_id: row.protagonist_supporter_id,
         })
     }
 

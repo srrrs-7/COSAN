@@ -336,6 +336,7 @@ impl AppRouter {
 
         let protagonist_supporter = service
             .create_protagonist_supporter(model::CreateProtagonistSupporter {
+                protagonist_supporter_id: -1,
                 protagonist_id: i64::try_from(body.protagonist_id).unwrap(),
                 supporter_id: i64::try_from(body.supporter_id).unwrap(),
             })

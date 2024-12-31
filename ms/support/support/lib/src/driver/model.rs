@@ -64,6 +64,7 @@ pub struct GetProtagonistSupporter {
 
 #[derive(Debug, FromRow)]
 pub struct CreateProtagonistSupporter {
+    pub protagonist_supporter_id: i64,
     pub protagonist_id: i64,
     pub supporter_id: i64,
 }

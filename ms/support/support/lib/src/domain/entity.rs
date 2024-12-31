@@ -22,6 +22,5 @@ pub struct ProtagonistSupporter {
 }
 
 pub struct ProtagonistSupporterRelation {
-    pub protagonist_id: i64,
-    pub supporter_id: i64,
+    pub protagonist_supporter_id: i64,
 }
