@@ -77,7 +77,7 @@ impl AppRouter {
             )
 
             let router = Router::new()
-                .nest("/v1/support", inner_router)
+                .nest("/support/v1", inner_router)
                 .with_state(self.service.clone());
 
         Ok(router)
