@@ -10,3 +10,4 @@ target
 .env.local
 _fresh/
 node_modules/
+coverage/
