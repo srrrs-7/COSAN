@@ -162,14 +162,17 @@ impl AppRouter {
             ));
         }
 
+        // protagonist_id is set to -1 because it is auto-incremented in the database
         let protagonist = service
-            .create_protagonist(model::CreateProtagonist {
-                protagonist_id: -1,
-                last_name: body.last_name,
-                first_name: body.first_name,
-                email: body.email,
-                country: body.country,
-            })
+            .create_protagonist(model::CreateProtagonist::new(
+                -1,
+                body.last_name,
+                body.first_name,
+                body.login_id,
+                body.password,
+                body.email,
+                body.country,
+            ))
             .await;
 
         match protagonist {
@@ -205,13 +208,15 @@ impl AppRouter {
         }
 
         let protagonist = service
-            .update_protagonist(model::UpdateProtagonist {
-                protagonist_id: body.protagonist_id,
-                last_name: body.last_name,
-                first_name: body.first_name,
-                email: body.email,
-                country: body.country,
-            })
+            .update_protagonist(model::UpdateProtagonist::new(
+                body.protagonist_id,
+                body.last_name,
+                body.first_name,
+                body.login_id,
+                body.password,
+                body.email,
+                body.country,
+            ))
             .await;
 
         match protagonist {
@@ -364,14 +369,17 @@ impl AppRouter {
             ));
         }
 
+        // support_id is set to -1 because it is auto-incremented in the database
         let supporter = service
-            .create_supporter(model::CreateSupporter {
-                supporter_id: -1,
-                last_name: body.last_name,
-                first_name: body.first_name,
-                email: body.email,
-                country: body.country,
-            })
+            .create_supporter(model::CreateSupporter::new(
+                -1,
+                body.last_name,
+                body.first_name,
+                body.login_id,
+                body.password,
+                body.email,
+                body.country,
+            ))
             .await;
 
         match supporter {
@@ -407,13 +415,15 @@ impl AppRouter {
         }
 
         let supporter = service
-            .update_supporter(model::UpdateSupporter {
-                supporter_id: body.supporter_id,
-                last_name: body.last_name,
-                first_name: body.first_name,
-                email: body.email,
-                country: body.country,
-            })
+            .update_supporter(model::UpdateSupporter::new(
+                body.supporter_id,
+                body.last_name,
+                body.first_name,
+                body.login_id,
+                body.password,
+                body.email,
+                body.country,
+            ))
             .await;
 
         match supporter {

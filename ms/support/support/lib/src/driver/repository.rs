@@ -210,7 +210,7 @@ impl SupportRepository {
         let row = sqlx::query_as::<_, model::UpdateSupporter>(
             r#"
             UPDATE supporters
-                SET last_name = $1, first_name = $2, email = $3, country = $4
+                SET last_name = $1, first_name = $2, login_id = $3, password = $4, email = $5, country = $6
             WHERE 
                 supporter_id = $5
             RETURNING 

@@ -14,13 +14,11 @@ impl GetProtagonistRequest {
     }
 
     pub async fn validate(self) -> Result<Self, anyhow::Error> {
-        let id_regex = Regex::new(r"^[a-zA-Z0-9]+$").unwrap();
-        if !id_regex.is_match(&self.login_id) {
+        let login_regex = Regex::new(r"^[a-zA-Z0-9]+$").unwrap();
+        if !login_regex.is_match(&self.login_id) {
             return Err(anyhow!("Invalid login id format."));
         }
-
-        let password_regex = Regex::new(r"^[a-zA-Z0-9]+$").unwrap();
-        if !password_regex.is_match(&self.password) {
+        if !login_regex.is_match(&self.password) {
             return Err(anyhow!("Invalid password format."));
         }
 
@@ -32,6 +30,8 @@ impl GetProtagonistRequest {
 pub struct CreateProtagonistRequest {
     pub last_name: String,
     pub first_name: String,
+    pub login_id: String,
+    pub password: String,
     pub email: String,
     pub country: String,
 }
@@ -44,6 +44,14 @@ impl CreateProtagonistRequest {
         }
         if !name_regex.is_match(&self.first_name) {
             return Err(anyhow!("Invalid first name: Contains invalid characters. Only alphabets, numbers, spaces, hyphens, and apostrophes are allowed."));
+        }
+
+        let login_regex = Regex::new(r"^[a-zA-Z0-9]+$").unwrap();
+        if !login_regex.is_match(&self.login_id) {
+            return Err(anyhow!("Invalid login id format."));
+        }
+        if !login_regex.is_match(&self.password) {
+            return Err(anyhow!("Invalid password format."));
         }
 
         let email_regex = Regex::new(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").unwrap();
@@ -64,6 +72,8 @@ pub struct UpdateProtagonistRequest {
     pub protagonist_id: i64,
     pub last_name: String,
     pub first_name: String,
+    pub login_id: String,
+    pub password: String,
     pub email: String,
     pub country: String,
 }
@@ -81,6 +91,14 @@ impl UpdateProtagonistRequest {
         }
         if !name_regex.is_match(&self.first_name) {
             return Err(anyhow!("Invalid first name: Contains invalid characters. Only alphabets, numbers, spaces, hyphens, and apostrophes are allowed."));
+        }
+
+        let login_regex = Regex::new(r"^[a-zA-Z0-9]+$").unwrap();
+        if !login_regex.is_match(&self.login_id) {
+            return Err(anyhow!("Invalid login id format."));
+        }
+        if !login_regex.is_match(&self.password) {
+            return Err(anyhow!("Invalid password format."));
         }
 
         let email_regex = Regex::new(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").unwrap();
@@ -126,6 +144,8 @@ impl GetSupporterRequest {
 pub struct CreateSupporterRequest {
     pub last_name: String,
     pub first_name: String,
+    pub login_id: String,
+    pub password: String,
     pub email: String,
     pub country: String,
 }
@@ -138,6 +158,14 @@ impl CreateSupporterRequest {
         }
         if !name_regex.is_match(&self.first_name) {
             return Err(anyhow!("Invalid first name: Contains invalid characters. Only alphabets, numbers, spaces, hyphens, and apostrophes are allowed."));
+        }
+
+        let login_regex = Regex::new(r"^[a-zA-Z0-9]+$").unwrap();
+        if !login_regex.is_match(&self.login_id) {
+            return Err(anyhow!("Invalid login id format."));
+        }
+        if !login_regex.is_match(&self.password) {
+            return Err(anyhow!("Invalid password format."));
         }
 
         let email_regex = Regex::new(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").unwrap();
@@ -158,6 +186,8 @@ pub struct UpdateSupporterRequest {
     pub supporter_id: i64,
     pub last_name: String,
     pub first_name: String,
+    pub login_id: String,
+    pub password: String,
     pub email: String,
     pub country: String,
 }
@@ -175,6 +205,14 @@ impl UpdateSupporterRequest {
         }
         if !name_regex.is_match(&self.first_name) {
             return Err(anyhow!("Invalid first name: Contains invalid characters. Only alphabets, numbers, spaces, hyphens, and apostrophes are allowed."));
+        }
+
+        let login_regex = Regex::new(r"^[a-zA-Z0-9]+$").unwrap();
+        if !login_regex.is_match(&self.login_id) {
+            return Err(anyhow!("Invalid login id format."));
+        }
+        if !login_regex.is_match(&self.password) {
+            return Err(anyhow!("Invalid password format."));
         }
 
         let email_regex = Regex::new(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").unwrap();
