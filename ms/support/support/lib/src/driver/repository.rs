@@ -31,6 +31,10 @@ impl SupportRepository {
         .fetch_one(&self.db)
         .await?;
 
+        if !row.is_valid() {
+            return Ok(None);
+        }
+
         Ok(Some(entity::Protagonist::new(
             row.protagonist_id,
             row.last_name,
@@ -62,6 +66,10 @@ impl SupportRepository {
         .bind(protagonist.country)
         .fetch_one(&self.db)
         .await?;
+
+        if !row.is_valid() {
+            return Ok(None);
+        }
 
         Ok(Some(entity::Protagonist::new(
             row.protagonist_id,
@@ -95,6 +103,10 @@ impl SupportRepository {
         .bind(protagonist.protagonist_id)
         .fetch_one(&self.db)
         .await?;
+
+        if !row.is_valid() {
+            return Ok(None);
+        }
 
         Ok(Some(entity::Protagonist::new(
             row.protagonist_id,
@@ -142,6 +154,10 @@ impl SupportRepository {
         .fetch_one(&self.db)
         .await?;
 
+        if !row.is_valid() {
+            return Ok(None);
+        }
+
         Ok(Some(entity::Protagonist::new(
             row.protagonist_id,
             row.last_name,
@@ -168,6 +184,10 @@ impl SupportRepository {
         .bind(supporter_id)
         .fetch_one(&self.db)
         .await?;
+
+        if !row.is_valid() {
+            return Ok(None);
+        }
 
         Ok(Some(entity::Supporter::new(
             row.supporter_id,
@@ -201,6 +221,10 @@ impl SupportRepository {
         .fetch_one(&self.db)
         .await?;
 
+        if !row.is_valid() {
+            return Ok(None);
+        }
+
         Ok(Some(entity::Supporter::new(
             row.supporter_id,
             row.last_name,
@@ -233,6 +257,10 @@ impl SupportRepository {
         .bind(supporter.supporter_id)
         .fetch_one(&self.db)
         .await?;
+
+        if !row.is_valid() {
+            return Ok(None);
+        }
 
         Ok(Some(entity::Supporter::new(
             row.supporter_id,
@@ -280,6 +308,10 @@ impl SupportRepository {
         .fetch_one(&self.db)
         .await?;
 
+        if !row.is_valid() {
+            return Ok(None);
+        }
+
         Ok(Some(entity::Supporter::new(
             row.supporter_id,
             row.last_name,
@@ -309,6 +341,10 @@ impl SupportRepository {
         .bind(i64::try_from(id).unwrap())
         .fetch_all(&self.db)
         .await?;
+
+        if rows.is_empty() {
+            return Ok(None);
+        }
 
         let protagonist_supporters = rows
             .into_iter()
@@ -343,6 +379,10 @@ impl SupportRepository {
         .bind(protagonist_supporter.supporter_id)
         .fetch_one(&self.db)
         .await?;
+
+        if !row.is_valid() {
+            return Ok(None);
+        }
 
         Ok(Some(entity::ProtagonistSupporterRelation::new(
             row.protagonist_supporter_id,
