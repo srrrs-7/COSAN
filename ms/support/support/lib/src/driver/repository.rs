@@ -53,7 +53,7 @@ impl SupportRepository {
             INSERT INTO 
                 protagonists (last_name, first_name, login_id, password, email, country)
             VALUES 
-                ($1, $2, $3, $4 $5, $6)
+                ($1, $2, $3, $4, $5, $6)
             RETURNING 
                 protagonist_id, last_name, first_name, email, country;
             "#,
@@ -207,7 +207,7 @@ impl SupportRepository {
             INSERT INTO 
                 supporters (last_name, first_name, login_id, password, email, country)
             VALUES 
-                ($1, $2, $3, $4 $5, $6)
+                ($1, $2, $3, $4, $5, $6)
             RETURNING 
                 supporter_id, last_name, first_name, email, country;
             "#,
@@ -243,7 +243,7 @@ impl SupportRepository {
             UPDATE supporters
                 SET last_name = $1, first_name = $2, login_id = $3, password = $4, email = $5, country = $6
             WHERE 
-                supporter_id = $5
+                supporter_id = $7
             RETURNING 
                 supporter_id, last_name, first_name, email, country;
             "#,
