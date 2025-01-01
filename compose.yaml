@@ -1,7 +1,7 @@
 services:
   gopher:
     image: golang:latest
-    working_dir: /go/ms/auth
+    working_dir: /go/ms/auth/src
     volumes:
       - ./ms:/go/ms
 

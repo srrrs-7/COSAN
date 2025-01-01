@@ -12,5 +12,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: cosan services init
         run: make init
-      - name: cosan services unittest
-        run: make unittest MODE=ci
+      - name: cosan service unittest
+        run: make unittest
