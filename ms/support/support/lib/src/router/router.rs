@@ -121,7 +121,7 @@ impl AppRouter {
         match protagonist {
             Ok(protagonist) => Ok((http::StatusCode::OK, Json(protagonist))),
             Err(err) => {
-                if err.to_string().contains("not found") {
+                if err.to_string().contains("no rows") {
                     Err((
                         http::StatusCode::NOT_FOUND,
                         Json(ErrorResponse {
@@ -290,7 +290,7 @@ impl AppRouter {
         match protagonist {
             Ok(protagonist) => Ok((http::StatusCode::OK, Json(protagonist))),
             Err(err) => {
-                if err.to_string().contains("not found") {
+                if err.to_string().contains("no rows") {
                     Err((
                         http::StatusCode::NOT_FOUND,
                         Json(ErrorResponse {
@@ -327,7 +327,7 @@ impl AppRouter {
         match supporter {
             Ok(supporter) => Ok((http::StatusCode::OK, Json(supporter))),
             Err(err) => {
-                if err.to_string().contains("not found") {
+                if err.to_string().contains("no rows") {
                     Err((
                         http::StatusCode::NOT_FOUND,
                         Json(ErrorResponse {
@@ -496,7 +496,7 @@ impl AppRouter {
         match supporter {
             Ok(supporter) => Ok((http::StatusCode::OK, Json(supporter))),
             Err(err) => {
-                if err.to_string().contains("not found") {
+                if err.to_string().contains("no rows") {
                     Err((
                         http::StatusCode::NOT_FOUND,
                         Json(ErrorResponse {
@@ -536,7 +536,7 @@ impl AppRouter {
                 Json(protagonist_supporters.into_iter().collect()),
             )),
             Err(err) => {
-                if err.to_string().contains("not found") {
+                if err.to_string().contains("no rows") {
                     Err((
                         http::StatusCode::NOT_FOUND,
                         Json(ErrorResponse {

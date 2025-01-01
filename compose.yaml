@@ -11,6 +11,12 @@ services:
     volumes:
       - ./ms:/ms
 
+  deno:
+    image: denoland/deno:latest
+    working_dir: /ms/ui
+    volumes:
+      - ./ms:/ms
+
   ui:
     build:
       dockerfile: ./.image/ui/Dockerfile
