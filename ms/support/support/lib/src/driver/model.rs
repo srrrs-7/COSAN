@@ -27,7 +27,7 @@ impl GetProtagonist {
     }
 
     pub fn is_valid(&self) -> bool {
-        !self.protagonist_id >= 0
+        self.protagonist_id >= 0
             && !self.last_name.is_empty()
             && !self.first_name.is_empty()
             && !self.email.is_empty()
@@ -111,7 +111,7 @@ impl UpdateProtagonist {
     }
 
     pub fn is_valid(&self) -> bool {
-        !self.protagonist_id >= 0
+        self.protagonist_id >= 0
             && !self.last_name.is_empty()
             && !self.first_name.is_empty()
             && !self.login_id.is_empty()
