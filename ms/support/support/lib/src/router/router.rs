@@ -11,6 +11,7 @@ use super::response::{
 use crate::domain::service::SupportService;
 use crate::driver::model;
 use axum::{
+    http,
     routing::{delete, get, post, put},
     {
         extract::{Path, State},
@@ -44,56 +45,64 @@ impl AppRouter {
     }
 
     async fn init_router(&self) -> Result<Router, anyhow::Error> {
-        let inner_router = Router::new()
-            .route("/health", get(Self::health_check))
+        let router = Router::new()
             .nest(
-                "/protagonist",
+                "/support/v1",
                 Router::new()
-                    .route("/:protagonist_id", get(Self::get_protagonist))
-                    .route("/", post(Self::create_protagonist))
-                    .route("/", put(Self::update_protagonist))
-                    .route("/:protagonist_id", delete(Self::delete_protagonist)),
-            )
-            .nest(
-                "/supporter",
-                Router::new()
-                    .route("/:supporter_id", get(Self::get_supporter))
-                    .route("/", post(Self::create_supporter))
-                    .route("/", put(Self::update_supporter))
-                    .route("/:supporter_id", delete(Self::delete_supporter)),
-            )
-            .nest(
-                "/protagonist_supporter",
-                Router::new()
-                    .route(
-                        "/:protagonist_supporter_id",
-                        get(Self::get_protagonist_supporter),
+                    .route("/health", get(Self::health_check))
+                    .nest(
+                        "/protagonist",
+                        Router::new()
+                            .route("/:protagonist_id", get(Self::get_protagonist))
+                            .route("/", post(Self::create_protagonist))
+                            .route("/", put(Self::update_protagonist))
+                            .route("/:protagonist_id", delete(Self::delete_protagonist)),
                     )
-                    .route("/", post(Self::create_protagonist_supporter))
-                    .route(
-                        "/:protagonist_supporter_id",
-                        delete(Self::delete_protagonist_supporter),
+                    .nest(
+                        "/supporter",
+                        Router::new()
+                            .route("/:supporter_id", get(Self::get_supporter))
+                            .route("/", post(Self::create_supporter))
+                            .route("/", put(Self::update_supporter))
+                            .route("/:supporter_id", delete(Self::delete_supporter)),
+                    )
+                    .nest(
+                        "/protagonist_supporter",
+                        Router::new()
+                            .route(
+                                "/:protagonist_supporter_id",
+                                get(Self::get_protagonist_supporter),
+                            )
+                            .route("/", post(Self::create_protagonist_supporter))
+                            .route(
+                                "/:protagonist_supporter_id",
+                                delete(Self::delete_protagonist_supporter),
+                            ),
                     ),
-            );
-
-            let router = Router::new()
-                .nest("/support/v1", inner_router)
-                .with_state(self.service.clone());
+            )
+            .with_state(self.service.clone());
 
         Ok(router)
     }
 
     async fn health_check(
         State(_): State<SupportService>,
-    ) -> Result<Json<HealthCheckResponse>, ()> {
+    ) -> Result<(http::StatusCode, Json<HealthCheckResponse>), ()> {
         info!("Health check");
-        Ok(Json(HealthCheckResponse { status: "ok" }))
+
+        Ok((
+            http::StatusCode::OK,
+            Json(HealthCheckResponse { status: "ok" }),
+        ))
     }
 
     async fn get_protagonist(
         State(service): State<SupportService>,
         Path(protagonist_id): Path<u64>,
-    ) -> Result<Json<GetProtagonistResponse>, Json<ErrorResponse>> {
+    ) -> Result<
+        (http::StatusCode, Json<GetProtagonistResponse>),
+        (http::StatusCode, Json<ErrorResponse>),
+    > {
         info!("Get protagonist");
 
         let protagonist = service
@@ -101,12 +110,25 @@ impl AppRouter {
             .await;
 
         match protagonist {
-            Ok(protagonist) => Ok(Json(protagonist)),
+            Ok(protagonist) => Ok((http::StatusCode::OK, Json(protagonist))),
             Err(err) => {
-                return Err(Json(ErrorResponse {
-                    error: err.to_string(),
-                    message: "Protagonist already exists".to_string(),
-                }));
+                if err.to_string().contains("not found") {
+                    Err((
+                        http::StatusCode::NOT_FOUND,
+                        Json(ErrorResponse {
+                            error: err.to_string(),
+                            message: "Protagonist not found".to_string(),
+                        }),
+                    ))
+                } else {
+                    Err((
+                        http::StatusCode::INTERNAL_SERVER_ERROR,
+                        Json(ErrorResponse {
+                            error: err.to_string(),
+                            message: "Internal Server Error".to_string(),
+                        }),
+                    ))
+                }
             }
         }
     }
@@ -114,15 +136,21 @@ impl AppRouter {
     async fn create_protagonist(
         State(service): State<SupportService>,
         Json(body): Json<CreateProtagonistRequest>,
-    ) -> Result<Json<CreateProtagonistResponse>, Json<ErrorResponse>> {
+    ) -> Result<
+        (http::StatusCode, Json<CreateProtagonistResponse>),
+        (http::StatusCode, Json<ErrorResponse>),
+    > {
         info!("Create protagonist");
 
         let valid = body.validate().await;
         if valid.is_err() {
-            return Err(Json(ErrorResponse {
-                error: "Bad Request".to_string(),
-                message: valid.err().unwrap().to_string(),
-            }));
+            return Err((
+                http::StatusCode::BAD_REQUEST,
+                Json(ErrorResponse {
+                    error: "Bad Request".to_string(),
+                    message: valid.err().unwrap().to_string(),
+                }),
+            ));
         }
 
         let protagonist = service
@@ -136,26 +164,35 @@ impl AppRouter {
             .await;
 
         match protagonist {
-            Ok(protagonist) => Ok(Json(protagonist)),
-            Err(err) => Err(Json(ErrorResponse {
-                error: err.to_string(),
-                message: "Protagonist already exists".to_string(),
-            })),
+            Ok(protagonist) => Ok((http::StatusCode::CREATED, Json(protagonist))),
+            Err(err) => Err((
+                http::StatusCode::CONFLICT,
+                Json(ErrorResponse {
+                    error: err.to_string(),
+                    message: "Protagonist already exists".to_string(),
+                }),
+            )),
         }
     }
 
     async fn update_protagonist(
         State(service): State<SupportService>,
         Json(body): Json<UpdateProtagonistRequest>,
-    ) -> Result<Json<UpdateProtagonistResponse>, Json<ErrorResponse>> {
+    ) -> Result<
+        (http::StatusCode, Json<UpdateProtagonistResponse>),
+        (http::StatusCode, Json<ErrorResponse>),
+    > {
         info!("Update protagonist");
 
         let valid = body.validate().await;
         if valid.is_err() {
-            return Err(Json(ErrorResponse {
-                error: "Bad Request".to_string(),
-                message: valid.err().unwrap().to_string(),
-            }));
+            return Err((
+                http::StatusCode::BAD_REQUEST,
+                Json(ErrorResponse {
+                    error: "Bad Request".to_string(),
+                    message: valid.err().unwrap().to_string(),
+                }),
+            ));
         }
 
         let protagonist = service
@@ -169,18 +206,24 @@ impl AppRouter {
             .await;
 
         match protagonist {
-            Ok(protagonist) => Ok(Json(protagonist)),
-            Err(err) => Err(Json(ErrorResponse {
-                error: err.to_string(),
-                message: "Protagonist already exists".to_string(),
-            })),
+            Ok(protagonist) => Ok((http::StatusCode::OK, Json(protagonist))),
+            Err(err) => Err((
+                http::StatusCode::NOT_FOUND,
+                Json(ErrorResponse {
+                    error: err.to_string(),
+                    message: "Protagonist not found".to_string(),
+                }),
+            )),
         }
     }
 
     async fn delete_protagonist(
         State(service): State<SupportService>,
         Path(protagonist_id): Path<u64>,
-    ) -> Result<Json<DeleteProtagonistResponse>, Json<ErrorResponse>> {
+    ) -> Result<
+        (http::StatusCode, Json<DeleteProtagonistResponse>),
+        (http::StatusCode, Json<ErrorResponse>),
+    > {
         info!("Delete protagonist");
 
         let result = service
@@ -188,20 +231,29 @@ impl AppRouter {
             .await;
 
         match result {
-            Ok(_) => Ok(Json(DeleteProtagonistResponse {
-                status: "The protagonist has been deleted".to_string(),
-            })),
-            Err(err) => Err(Json(ErrorResponse {
-                error: err.to_string(),
-                message: "Protagonist not found".to_string(),
-            })),
+            Ok(_) => Ok((
+                http::StatusCode::OK,
+                Json(DeleteProtagonistResponse {
+                    status: "The protagonist has been deleted".to_string(),
+                }),
+            )),
+            Err(err) => Err((
+                http::StatusCode::NOT_FOUND,
+                Json(ErrorResponse {
+                    error: err.to_string(),
+                    message: "Protagonist not found".to_string(),
+                }),
+            )),
         }
     }
 
     async fn get_supporter(
         State(service): State<SupportService>,
         Path(supporter_id): Path<u64>,
-    ) -> Result<Json<GetSupporterResponse>, Json<ErrorResponse>> {
+    ) -> Result<
+        (http::StatusCode, Json<GetSupporterResponse>),
+        (http::StatusCode, Json<ErrorResponse>),
+    > {
         info!("Get supporter");
 
         let supporter = service
@@ -209,26 +261,47 @@ impl AppRouter {
             .await;
 
         match supporter {
-            Ok(supporter) => Ok(Json(supporter)),
-            Err(err) => Err(Json(ErrorResponse {
-                error: err.to_string(),
-                message: "Supporter not found".to_string(),
-            })),
+            Ok(supporter) => Ok((http::StatusCode::OK, Json(supporter))),
+            Err(err) => {
+                if err.to_string().contains("not found") {
+                    Err((
+                        http::StatusCode::NOT_FOUND,
+                        Json(ErrorResponse {
+                            error: err.to_string(),
+                            message: "Supporter not found".to_string(),
+                        }),
+                    ))
+                } else {
+                    Err((
+                        http::StatusCode::INTERNAL_SERVER_ERROR,
+                        Json(ErrorResponse {
+                            error: err.to_string(),
+                            message: "Internal Server Error".to_string(),
+                        }),
+                    ))
+                }
+            }
         }
     }
 
     async fn create_supporter(
         State(service): State<SupportService>,
         Json(body): Json<CreateSupporterRequest>,
-    ) -> Result<Json<CreateSupporterResponse>, Json<ErrorResponse>> {
+    ) -> Result<
+        (http::StatusCode, Json<CreateSupporterResponse>),
+        (http::StatusCode, Json<ErrorResponse>),
+    > {
         info!("Create supporter");
 
         let valid = body.validate().await;
         if valid.is_err() {
-            return Err(Json(ErrorResponse {
-                error: "Bad Request".to_string(),
-                message: valid.err().unwrap().to_string(),
-            }));
+            return Err((
+                http::StatusCode::BAD_REQUEST,
+                Json(ErrorResponse {
+                    error: "Bad Request".to_string(),
+                    message: valid.err().unwrap().to_string(),
+                }),
+            ));
         }
 
         let supporter = service
@@ -242,26 +315,35 @@ impl AppRouter {
             .await;
 
         match supporter {
-            Ok(supporter) => Ok(Json(supporter)),
-            Err(err) => Err(Json(ErrorResponse {
-                error: err.to_string(),
-                message: "Supporter already exists".to_string(),
-            })),
+            Ok(supporter) => Ok((http::StatusCode::CREATED, Json(supporter))),
+            Err(err) => Err((
+                http::StatusCode::CONFLICT,
+                Json(ErrorResponse {
+                    error: err.to_string(),
+                    message: "Supporter already exists".to_string(),
+                }),
+            )),
         }
     }
 
     async fn update_supporter(
         State(service): State<SupportService>,
         Json(body): Json<UpdateSupporterRequest>,
-    ) -> Result<Json<UpdateSupporterResponse>, Json<ErrorResponse>> {
+    ) -> Result<
+        (http::StatusCode, Json<UpdateSupporterResponse>),
+        (http::StatusCode, Json<ErrorResponse>),
+    > {
         info!("Update supporter");
 
         let valid = body.validate().await;
         if valid.is_err() {
-            return Err(Json(ErrorResponse {
-                error: "Bad Request".to_string(),
-                message: valid.err().unwrap().to_string(),
-            }));
+            return Err((
+                http::StatusCode::BAD_REQUEST,
+                Json(ErrorResponse {
+                    error: "Bad Request".to_string(),
+                    message: valid.err().unwrap().to_string(),
+                }),
+            ));
         }
 
         let supporter = service
@@ -275,18 +357,24 @@ impl AppRouter {
             .await;
 
         match supporter {
-            Ok(supporter) => Ok(Json(supporter)),
-            Err(err) => Err(Json(ErrorResponse {
-                error: err.to_string(),
-                message: "Supporter already exists".to_string(),
-            })),
+            Ok(supporter) => Ok((http::StatusCode::OK, Json(supporter))),
+            Err(err) => Err((
+                http::StatusCode::NOT_FOUND,
+                Json(ErrorResponse {
+                    error: err.to_string(),
+                    message: "Supporter not found".to_string(),
+                }),
+            )),
         }
     }
 
     async fn delete_supporter(
         State(service): State<SupportService>,
         Path(supporter_id): Path<u64>,
-    ) -> Result<Json<DeleteSupporterResponse>, Json<ErrorResponse>> {
+    ) -> Result<
+        (http::StatusCode, Json<DeleteSupporterResponse>),
+        (http::StatusCode, Json<ErrorResponse>),
+    > {
         info!("Delete supporter");
 
         let result = service
@@ -294,20 +382,29 @@ impl AppRouter {
             .await;
 
         match result {
-            Ok(_) => Ok(Json(DeleteSupporterResponse {
-                status: "The supporter has been deleted".to_string(),
-            })),
-            Err(err) => Err(Json(ErrorResponse {
-                error: err.to_string(),
-                message: "Supporter not found".to_string(),
-            })),
+            Ok(_) => Ok((
+                http::StatusCode::OK,
+                Json(DeleteSupporterResponse {
+                    status: "The supporter has been deleted".to_string(),
+                }),
+            )),
+            Err(err) => Err((
+                http::StatusCode::NOT_FOUND,
+                Json(ErrorResponse {
+                    error: err.to_string(),
+                    message: "Supporter not found".to_string(),
+                }),
+            )),
         }
     }
 
     async fn get_protagonist_supporter(
         State(service): State<SupportService>,
         Path(protagonist_supporter_id): Path<u64>,
-    ) -> Result<Json<Vec<GetProtagonistSupporterResponse>>, Json<ErrorResponse>> {
+    ) -> Result<
+        (http::StatusCode, Json<Vec<GetProtagonistSupporterResponse>>),
+        (http::StatusCode, Json<ErrorResponse>),
+    > {
         info!("Get protagonist supporter");
 
         let protagonist_supporters = service
@@ -315,26 +412,50 @@ impl AppRouter {
             .await;
 
         match protagonist_supporters {
-            Ok(protagonist_supporters) => Ok(Json(protagonist_supporters)),
-            Err(err) => Err(Json(ErrorResponse {
-                error: err.to_string(),
-                message: "Protagonist supporter not found".to_string(),
-            })),
+            Ok(protagonist_supporters) => Ok((
+                http::StatusCode::OK,
+                Json(protagonist_supporters.into_iter().collect()),
+            )),
+            Err(err) => {
+                if err.to_string().contains("not found") {
+                    Err((
+                        http::StatusCode::NOT_FOUND,
+                        Json(ErrorResponse {
+                            error: err.to_string(),
+                            message: "Protagonist supporter not found".to_string(),
+                        }),
+                    ))
+                } else {
+                    Err((
+                        http::StatusCode::INTERNAL_SERVER_ERROR,
+                        Json(ErrorResponse {
+                            error: err.to_string(),
+                            message: "Internal Server Error".to_string(),
+                        }),
+                    ))
+                }
+            }
         }
     }
 
     async fn create_protagonist_supporter(
         State(service): State<SupportService>,
         Json(body): Json<CreateProtagonistSupporterRequest>,
-    ) -> Result<Json<CreateProtagonistSupporterResponse>, Json<ErrorResponse>> {
+    ) -> Result<
+        (http::StatusCode, Json<CreateProtagonistSupporterResponse>),
+        (http::StatusCode, Json<ErrorResponse>),
+    > {
         info!("Create protagonist supporter");
 
         let valid = body.validate().await;
         if valid.is_err() {
-            return Err(Json(ErrorResponse {
-                error: "Bad Request".to_string(),
-                message: valid.err().unwrap().to_string(),
-            }));
+            return Err((
+                http::StatusCode::BAD_REQUEST,
+                Json(ErrorResponse {
+                    error: "Bad Request".to_string(),
+                    message: valid.err().unwrap().to_string(),
+                }),
+            ));
         }
 
         let protagonist_supporter = service
@@ -346,18 +467,26 @@ impl AppRouter {
             .await;
 
         match protagonist_supporter {
-            Ok(protagonist_supporter) => Ok(Json(protagonist_supporter)),
-            Err(err) => Err(Json(ErrorResponse {
-                error: err.to_string(),
-                message: "Protagonist supporter already exists".to_string(),
-            })),
+            Ok(protagonist_supporter) => {
+                Ok((http::StatusCode::CREATED, Json(protagonist_supporter)))
+            }
+            Err(err) => Err((
+                http::StatusCode::CONFLICT,
+                Json(ErrorResponse {
+                    error: err.to_string(),
+                    message: "Protagonist supporter already exists".to_string(),
+                }),
+            )),
         }
     }
 
     async fn delete_protagonist_supporter(
         State(service): State<SupportService>,
         Path(protagonist_supporter_id): Path<u64>,
-    ) -> Result<Json<DeleteProtagonistSupporterResponse>, Json<ErrorResponse>> {
+    ) -> Result<
+        (http::StatusCode, Json<DeleteProtagonistSupporterResponse>),
+        (http::StatusCode, Json<ErrorResponse>),
+    > {
         info!("Delete protagonist supporter");
 
         let result = service
@@ -365,13 +494,19 @@ impl AppRouter {
             .await;
 
         match result {
-            Ok(_) => Ok(Json(DeleteProtagonistSupporterResponse {
-                status: "The protagonist supporter relation has been deleted".to_string(),
-            })),
-            Err(err) => Err(Json(ErrorResponse {
-                error: err.to_string(),
-                message: "Supporter not found".to_string(),
-            })),
+            Ok(_) => Ok((
+                http::StatusCode::OK,
+                Json(DeleteProtagonistSupporterResponse {
+                    status: "The protagonist supporter has been deleted".to_string(),
+                }),
+            )),
+            Err(err) => Err((
+                http::StatusCode::NOT_FOUND,
+                Json(ErrorResponse {
+                    error: err.to_string(),
+                    message: "Protagonist supporter not found".to_string(),
+                }),
+            )),
         }
     }
 }

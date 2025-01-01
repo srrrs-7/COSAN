@@ -16,7 +16,7 @@ impl SupportRepository {
     pub async fn get_protagonist(
         &self,
         protagonist_id: i64,
-    ) -> Result<entity::Protagonist, sqlx::Error> {
+    ) -> Result<Option<entity::Protagonist>, sqlx::Error> {
         let row = sqlx::query_as::<_, model::GetProtagonist>(
             r#"
             SELECT 
@@ -31,19 +31,19 @@ impl SupportRepository {
         .fetch_one(&self.db)
         .await?;
 
-        Ok(entity::Protagonist {
+        Ok(Some(entity::Protagonist {
             protagonist_id: row.protagonist_id,
             last_name: row.last_name,
             first_name: row.first_name,
             email: row.email,
             country: row.country,
-        })
+        }))
     }
 
     pub async fn create_protagonist(
         &self,
         protagonist: model::CreateProtagonist,
-    ) -> Result<entity::Protagonist, sqlx::Error> {
+    ) -> Result<Option<entity::Protagonist>, sqlx::Error> {
         let row = sqlx::query_as::<_, model::CreateProtagonist>(
             r#"
             INSERT INTO 
@@ -61,19 +61,19 @@ impl SupportRepository {
         .fetch_one(&self.db)
         .await?;
 
-        Ok(entity::Protagonist {
+        Ok(Some(entity::Protagonist {
             protagonist_id: row.protagonist_id,
             last_name: row.last_name,
             first_name: row.first_name,
             email: row.email,
             country: row.country,
-        })
+        }))
     }
 
     pub async fn update_protagonist(
         &self,
         protagonist: model::UpdateProtagonist,
-    ) -> Result<entity::Protagonist, sqlx::Error> {
+    ) -> Result<Option<entity::Protagonist>, sqlx::Error> {
         let row = sqlx::query_as::<_, model::UpdateProtagonist>(
             r#"
             UPDATE protagonists
@@ -92,16 +92,16 @@ impl SupportRepository {
         .fetch_one(&self.db)
         .await?;
 
-        Ok(entity::Protagonist {
+        Ok(Some(entity::Protagonist {
             protagonist_id: row.protagonist_id,
             last_name: row.last_name,
             first_name: row.first_name,
             email: row.email,
             country: row.country,
-        })
+        }))
     }
 
-    pub async fn delete_protagonist(&self, id: i64) -> Result<(), sqlx::Error> {
+    pub async fn delete_protagonist(&self, id: i64) -> Result<Option<()>, sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM 
@@ -114,10 +114,13 @@ impl SupportRepository {
         .execute(&self.db)
         .await?;
 
-        Ok(())
+        Ok(Some(()))
     }
 
-    pub async fn get_supporter(&self, supporter_id: i64) -> Result<entity::Supporter, sqlx::Error> {
+    pub async fn get_supporter(
+        &self,
+        supporter_id: i64,
+    ) -> Result<Option<entity::Supporter>, sqlx::Error> {
         let row = sqlx::query_as::<_, model::GetSupporter>(
             r#"
             SELECT 
@@ -132,19 +135,19 @@ impl SupportRepository {
         .fetch_one(&self.db)
         .await?;
 
-        Ok(entity::Supporter {
+        Ok(Some(entity::Supporter {
             supporter_id: row.supporter_id,
             last_name: row.last_name,
             first_name: row.first_name,
             email: row.email,
             country: row.country,
-        })
+        }))
     }
 
     pub async fn create_supporter(
         &self,
         supporter: model::CreateSupporter,
-    ) -> Result<entity::Supporter, sqlx::Error> {
+    ) -> Result<Option<entity::Supporter>, sqlx::Error> {
         let row = sqlx::query_as::<_, model::CreateSupporter>(
             r#"
             INSERT INTO 
@@ -162,19 +165,19 @@ impl SupportRepository {
         .fetch_one(&self.db)
         .await?;
 
-        Ok(entity::Supporter {
+        Ok(Some(entity::Supporter {
             supporter_id: row.supporter_id,
             last_name: row.last_name,
             first_name: row.first_name,
             email: row.email,
             country: row.country,
-        })
+        }))
     }
 
     pub async fn update_supporter(
         &self,
         supporter: model::UpdateSupporter,
-    ) -> Result<entity::Supporter, sqlx::Error> {
+    ) -> Result<Option<entity::Supporter>, sqlx::Error> {
         let row = sqlx::query_as::<_, model::UpdateSupporter>(
             r#"
             UPDATE supporters
@@ -193,16 +196,16 @@ impl SupportRepository {
         .fetch_one(&self.db)
         .await?;
 
-        Ok(entity::Supporter {
+        Ok(Some(entity::Supporter {
             supporter_id: row.supporter_id,
             last_name: row.last_name,
             first_name: row.first_name,
             email: row.email,
             country: row.country,
-        })
+        }))
     }
 
-    pub async fn delete_supporter(&self, id: i64) -> Result<(), sqlx::Error> {
+    pub async fn delete_supporter(&self, id: i64) -> Result<Option<()>, sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM 
@@ -215,13 +218,13 @@ impl SupportRepository {
         .execute(&self.db)
         .await?;
 
-        Ok(())
+        Ok(Some(()))
     }
 
     pub async fn get_protagonist_supporter(
         &self,
         id: i64,
-    ) -> Result<Vec<entity::ProtagonistSupporter>, sqlx::Error> {
+    ) -> Result<Option<Vec<entity::ProtagonistSupporter>>, sqlx::Error> {
         let rows = sqlx::query_as::<_, model::GetProtagonistSupporter>(
             r#"
             SELECT 
@@ -239,23 +242,23 @@ impl SupportRepository {
         .fetch_all(&self.db)
         .await?;
 
-        let mut protagonist_supporters = Vec::new();
-        for row in rows {
-            protagonist_supporters.push(entity::ProtagonistSupporter {
+        let protagonist_supporters = rows
+            .iter()
+            .map(|row| entity::ProtagonistSupporter {
                 supporter_id: row.supporter_id,
-                last_name: row.last_name,
-                first_name: row.first_name,
-                country: row.country,
-            });
-        }
+                last_name: row.last_name.clone(),
+                first_name: row.first_name.clone(),
+                country: row.country.clone(),
+            })
+            .collect();
 
-        Ok(protagonist_supporters)
+        Ok(Some(protagonist_supporters))
     }
 
     pub async fn create_protagonist_supporter(
         &self,
         protagonist_supporter: model::CreateProtagonistSupporter,
-    ) -> Result<entity::ProtagonistSupporterRelation, sqlx::Error> {
+    ) -> Result<Option<entity::ProtagonistSupporterRelation>, sqlx::Error> {
         let row = sqlx::query_as::<_, model::CreateProtagonistSupporter>(
             r#"
             INSERT INTO 
@@ -271,12 +274,12 @@ impl SupportRepository {
         .fetch_one(&self.db)
         .await?;
 
-        Ok(entity::ProtagonistSupporterRelation {
+        Ok(Some(entity::ProtagonistSupporterRelation {
             protagonist_supporter_id: row.protagonist_supporter_id,
-        })
+        }))
     }
 
-    pub async fn delete_protagonist_supporter(&self, id: i64) -> Result<(), sqlx::Error> {
+    pub async fn delete_protagonist_supporter(&self, id: i64) -> Result<Option<()>, sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM 
@@ -289,6 +292,6 @@ impl SupportRepository {
         .execute(&self.db)
         .await?;
 
-        Ok(())
+        Ok(Some(()))
     }
 }
