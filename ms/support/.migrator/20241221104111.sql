@@ -2,17 +2,22 @@ CREATE TABLE IF NOT EXISTS protagonists (
     protagonist_id BIGSERIAL,
     last_name VARCHAR(50) NOT NULL,
     first_name VARCHAR(50) NOT NULL,
+    login_id VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     country VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (protagonist_id),
+    UNIQUE (login_id),
     UNIQUE (email)
 );
 COMMENT ON TABLE protagonists IS 'protagonist is supported supporters';
 COMMENT ON COLUMN protagonists.protagonist_id IS 'protagonist id';
 COMMENT ON COLUMN protagonists.last_name IS 'protagonist last name';
 COMMENT ON COLUMN protagonists.first_name IS 'protagonist first name';
+COMMENT ON COLUMN protagonists.login_id IS 'protagonist login id';
+COMMENT ON COLUMN protagonists.password IS 'protagonist password';
 COMMENT ON COLUMN protagonists.email IS 'protagonist email';
 COMMENT ON COLUMN protagonists.country IS 'protagonist country';
 
@@ -20,17 +25,22 @@ CREATE TABLE IF NOT EXISTS supporters (
     supporter_id BIGSERIAL,
     last_name VARCHAR(50) NOT NULL,
     first_name VARCHAR(50) NOT NULL,
+    login_id VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     country VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (supporter_id),
+    UNIQUE (login_id)
     UNIQUE (email)
 );
 COMMENT ON TABLE supporters IS 'supporter support protagonists';
 COMMENT ON COLUMN supporters.supporter_id IS 'supporter id';
 COMMENT ON COLUMN supporters.last_name IS 'supporter last name';
 COMMENT ON COLUMN supporters.first_name IS 'supporter first name';
+COMMENT ON COLUMN supporters.login_id IS 'supporter login id';
+COMMENT ON COLUMN supporters.password IS 'supporter password';
 COMMENT ON COLUMN supporters.email IS 'supporter email';
 COMMENT ON COLUMN supporters.country IS 'supporter country';
 
