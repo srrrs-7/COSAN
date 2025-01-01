@@ -55,7 +55,7 @@ impl SupportRepository {
             VALUES 
                 ($1, $2, $3, $4, $5, $6)
             RETURNING 
-                protagonist_id, last_name, first_name, email, country;
+                protagonist_id, last_name, first_name, login_id, password, email, country;
             "#,
         )
         .bind(protagonist.last_name)
@@ -91,7 +91,7 @@ impl SupportRepository {
             WHERE 
                 protagonist_id = $7
             RETURNING 
-                protagonist_id, last_name, first_name, email, country;
+                protagonist_id, last_name, first_name, login_id, password, email, country;
             "#,
         )
         .bind(protagonist.last_name)
@@ -209,7 +209,7 @@ impl SupportRepository {
             VALUES 
                 ($1, $2, $3, $4, $5, $6)
             RETURNING 
-                supporter_id, last_name, first_name, email, country;
+                supporter_id, last_name, first_name, login_id, password, email, country;
             "#,
         )
         .bind(supporter.last_name)
@@ -245,7 +245,7 @@ impl SupportRepository {
             WHERE 
                 supporter_id = $7
             RETURNING 
-                supporter_id, last_name, first_name, email, country;
+                supporter_id, last_name, first_name, login_id, password, email, country;
             "#,
         )
         .bind(supporter.last_name)
