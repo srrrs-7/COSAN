@@ -31,13 +31,13 @@ impl SupportRepository {
         .fetch_one(&self.db)
         .await?;
 
-        Ok(Some(entity::Protagonist {
-            protagonist_id: row.protagonist_id,
-            last_name: row.last_name,
-            first_name: row.first_name,
-            email: row.email,
-            country: row.country,
-        }))
+        Ok(Some(entity::Protagonist::new(
+            row.protagonist_id,
+            row.last_name,
+            row.first_name,
+            row.email,
+            row.country,
+        )))
     }
 
     pub async fn create_protagonist(
@@ -61,13 +61,13 @@ impl SupportRepository {
         .fetch_one(&self.db)
         .await?;
 
-        Ok(Some(entity::Protagonist {
-            protagonist_id: row.protagonist_id,
-            last_name: row.last_name,
-            first_name: row.first_name,
-            email: row.email,
-            country: row.country,
-        }))
+        Ok(Some(entity::Protagonist::new(
+            row.protagonist_id,
+            row.last_name,
+            row.first_name,
+            row.email,
+            row.country,
+        )))
     }
 
     pub async fn update_protagonist(
@@ -92,13 +92,13 @@ impl SupportRepository {
         .fetch_one(&self.db)
         .await?;
 
-        Ok(Some(entity::Protagonist {
-            protagonist_id: row.protagonist_id,
-            last_name: row.last_name,
-            first_name: row.first_name,
-            email: row.email,
-            country: row.country,
-        }))
+        Ok(Some(entity::Protagonist::new(
+            row.protagonist_id,
+            row.last_name,
+            row.first_name,
+            row.email,
+            row.country,
+        )))
     }
 
     pub async fn delete_protagonist(&self, id: i64) -> Result<Option<()>, sqlx::Error> {
@@ -137,13 +137,13 @@ impl SupportRepository {
         .fetch_one(&self.db)
         .await?;
 
-        Ok(Some(entity::Protagonist {
-            protagonist_id: row.protagonist_id,
-            last_name: row.last_name,
-            first_name: row.first_name,
-            email: row.email,
-            country: row.country,
-        }))
+        Ok(Some(entity::Protagonist::new(
+            row.protagonist_id,
+            row.last_name,
+            row.first_name,
+            row.email,
+            row.country,
+        )))
     }
 
     pub async fn get_supporter(
@@ -164,13 +164,13 @@ impl SupportRepository {
         .fetch_one(&self.db)
         .await?;
 
-        Ok(Some(entity::Supporter {
-            supporter_id: row.supporter_id,
-            last_name: row.last_name,
-            first_name: row.first_name,
-            email: row.email,
-            country: row.country,
-        }))
+        Ok(Some(entity::Supporter::new(
+            row.supporter_id,
+            row.last_name,
+            row.first_name,
+            row.email,
+            row.country,
+        )))
     }
 
     pub async fn create_supporter(
@@ -194,13 +194,13 @@ impl SupportRepository {
         .fetch_one(&self.db)
         .await?;
 
-        Ok(Some(entity::Supporter {
-            supporter_id: row.supporter_id,
-            last_name: row.last_name,
-            first_name: row.first_name,
-            email: row.email,
-            country: row.country,
-        }))
+        Ok(Some(entity::Supporter::new(
+            row.supporter_id,
+            row.last_name,
+            row.first_name,
+            row.email,
+            row.country,
+        )))
     }
 
     pub async fn update_supporter(
@@ -225,13 +225,13 @@ impl SupportRepository {
         .fetch_one(&self.db)
         .await?;
 
-        Ok(Some(entity::Supporter {
-            supporter_id: row.supporter_id,
-            last_name: row.last_name,
-            first_name: row.first_name,
-            email: row.email,
-            country: row.country,
-        }))
+        Ok(Some(entity::Supporter::new(
+            row.supporter_id,
+            row.last_name,
+            row.first_name,
+            row.email,
+            row.country,
+        )))
     }
 
     pub async fn delete_supporter(&self, id: i64) -> Result<Option<()>, sqlx::Error> {
@@ -270,13 +270,13 @@ impl SupportRepository {
         .fetch_one(&self.db)
         .await?;
 
-        Ok(Some(entity::Supporter {
-            supporter_id: row.supporter_id,
-            last_name: row.last_name,
-            first_name: row.first_name,
-            email: row.email,
-            country: row.country,
-        }))
+        Ok(Some(entity::Supporter::new(
+            row.supporter_id,
+            row.last_name,
+            row.first_name,
+            row.email,
+            row.country,
+        )))
     }
 
     pub async fn get_protagonist_supporter(
@@ -301,12 +301,14 @@ impl SupportRepository {
         .await?;
 
         let protagonist_supporters = rows
-            .iter()
-            .map(|row| entity::ProtagonistSupporter {
-                supporter_id: row.supporter_id,
-                last_name: row.last_name.clone(),
-                first_name: row.first_name.clone(),
-                country: row.country.clone(),
+            .into_iter()
+            .map(|row| {
+                entity::ProtagonistSupporter::new(
+                    row.supporter_id,
+                    row.last_name,
+                    row.first_name,
+                    row.country,
+                )
             })
             .collect();
 
@@ -332,9 +334,9 @@ impl SupportRepository {
         .fetch_one(&self.db)
         .await?;
 
-        Ok(Some(entity::ProtagonistSupporterRelation {
-            protagonist_supporter_id: row.protagonist_supporter_id,
-        }))
+        Ok(Some(entity::ProtagonistSupporterRelation::new(
+            row.protagonist_supporter_id,
+        )))
     }
 
     pub async fn delete_protagonist_supporter(&self, id: i64) -> Result<Option<()>, sqlx::Error> {
