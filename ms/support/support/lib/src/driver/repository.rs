@@ -47,15 +47,17 @@ impl SupportRepository {
         let row = sqlx::query_as::<_, model::CreateProtagonist>(
             r#"
             INSERT INTO 
-                protagonists (last_name, first_name, email, country)
+                protagonists (last_name, first_name, login_id, password, email, country)
             VALUES 
-                ($1, $2, $3, $4)
+                ($1, $2, $3, $4 $5, $6)
             RETURNING 
                 protagonist_id, last_name, first_name, email, country;
             "#,
         )
         .bind(protagonist.last_name)
         .bind(protagonist.first_name)
+        .bind(protagonist.login_id)
+        .bind(protagonist.password)
         .bind(protagonist.email)
         .bind(protagonist.country)
         .fetch_one(&self.db)
@@ -77,15 +79,17 @@ impl SupportRepository {
         let row = sqlx::query_as::<_, model::UpdateProtagonist>(
             r#"
             UPDATE protagonists
-                SET last_name = $1, first_name = $2, email = $3, country = $4
+                SET last_name = $1, first_name = $2, login_id = $3, password = $4, email = $5, country = $6
             WHERE 
-                protagonist_id = $5
+                protagonist_id = $7
             RETURNING 
                 protagonist_id, last_name, first_name, email, country;
             "#,
         )
         .bind(protagonist.last_name)
         .bind(protagonist.first_name)
+        .bind(protagonist.login_id)
+        .bind(protagonist.password)
         .bind(protagonist.email)
         .bind(protagonist.country)
         .bind(protagonist.protagonist_id)
@@ -129,7 +133,8 @@ impl SupportRepository {
             FROM 
                 protagonists
             WHERE 
-                login_id = $1 AND password = $2;
+                login_id = $1 
+                AND password = $2;
             "#,
         )
         .bind(login_id)
@@ -180,15 +185,17 @@ impl SupportRepository {
         let row = sqlx::query_as::<_, model::CreateSupporter>(
             r#"
             INSERT INTO 
-                supporters (last_name, first_name, email, country)
+                supporters (last_name, first_name, login_id, password, email, country)
             VALUES 
-                ($1, $2, $3, $4)
+                ($1, $2, $3, $4 $5, $6)
             RETURNING 
                 supporter_id, last_name, first_name, email, country;
             "#,
         )
         .bind(supporter.last_name)
         .bind(supporter.first_name)
+        .bind(supporter.login_id)
+        .bind(supporter.password)
         .bind(supporter.email)
         .bind(supporter.country)
         .fetch_one(&self.db)
@@ -219,6 +226,8 @@ impl SupportRepository {
         )
         .bind(supporter.last_name)
         .bind(supporter.first_name)
+        .bind(supporter.login_id)
+        .bind(supporter.password)
         .bind(supporter.email)
         .bind(supporter.country)
         .bind(supporter.supporter_id)
@@ -262,7 +271,8 @@ impl SupportRepository {
             FROM 
                 supporters
             WHERE 
-                login_id = $1 AND password = $2;
+                login_id = $1 
+                AND password = $2;
             "#,
         )
         .bind(login_id)
