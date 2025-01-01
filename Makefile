@@ -1,7 +1,11 @@
-.PHONY: init ui ui-build ui-check auth support new-migrate sqlx-prepare
+.PHONY: init unittest ui ui-build ui-check auth support new-migrate sqlx-prepare
 
 init:
 	cp compose.override.yaml.sample compose.override.yaml
+
+unittest:
+	docker compose run --rm gopher /go/ms/dev/auth_test.sh ${MODE}
+	docker compose run --rm rustacean /ms/dev/support_test.sh
 
 ui:
 	docker compose up -d ui --build

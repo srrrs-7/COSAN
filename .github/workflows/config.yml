@@ -1,0 +1,16 @@
+name: CI/CD
+run-name: ${{ github.actor }} CI/CD
+on: [push]
+jobs:
+  auth-unittest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        go-version: ["1.23"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: cosan services init
+        run: make init
+      - name: cosan services unittest
+        run: make unittest MODE=ci

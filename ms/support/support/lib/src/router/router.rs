@@ -263,15 +263,14 @@ impl AppRouter {
 
     async fn get_protagonist_by_login_id_and_password(
         State(service): State<SupportService>,
-        Path(login_id): Path<String>,
-        Path(password): Path<String>,
+        Path(login_request): Path<GetProtagonistRequest>,
     ) -> Result<
         (http::StatusCode, Json<GetProtagonistResponse>),
         (http::StatusCode, Json<ErrorResponse>),
     > {
         info!("Get protagonist by login_id and password");
 
-        let request = GetProtagonistRequest::new(login_id, password)
+        let request = GetProtagonistRequest::new(login_request.login_id, login_request.password)
             .validate()
             .await;
         if request.is_err() {
@@ -470,15 +469,14 @@ impl AppRouter {
 
     async fn get_supporter_by_login_id_and_password(
         State(service): State<SupportService>,
-        Path(login_id): Path<String>,
-        Path(password): Path<String>,
+        Path(login_request): Path<GetSupporterRequest>,
     ) -> Result<
         (http::StatusCode, Json<GetSupporterResponse>),
         (http::StatusCode, Json<ErrorResponse>),
     > {
         info!("Get supporter by login_id and password");
 
-        let request = GetSupporterRequest::new(login_id, password)
+        let request = GetSupporterRequest::new(login_request.login_id, login_request.password)
             .validate()
             .await;
         if request.is_err() {

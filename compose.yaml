@@ -1,13 +1,15 @@
 services:
   gopher:
     image: golang:latest
+    working_dir: /go/ms/auth
     volumes:
-      - ./ms/auth:/go/auth
+      - ./ms:/go/ms
 
   rustacean:
     image: rust:latest
+    working_dir: /ms/support/support
     volumes:
-      - ./ms/support/support:/support
+      - ./ms:/ms
 
   ui:
     build:
