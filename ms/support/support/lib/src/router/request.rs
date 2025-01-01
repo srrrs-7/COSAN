@@ -3,6 +3,32 @@ use regex::Regex;
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
+pub struct GetProtagonistRequest {
+    pub login_id: String,
+    pub password: String,
+}
+
+impl GetProtagonistRequest {
+    pub fn new(login_id: String, password: String) -> Self {
+        Self { login_id, password }
+    }
+
+    pub async fn validate(self) -> Result<Self, anyhow::Error> {
+        let id_regex = Regex::new(r"^[a-zA-Z0-9]+$").unwrap();
+        if !id_regex.is_match(&self.login_id) {
+            return Err(anyhow!("Invalid login id format."));
+        }
+
+        let password_regex = Regex::new(r"^[a-zA-Z0-9]+$").unwrap();
+        if !password_regex.is_match(&self.password) {
+            return Err(anyhow!("Invalid password format."));
+        }
+
+        Ok(self)
+    }
+}
+
+#[derive(Deserialize, Debug)]
 pub struct CreateProtagonistRequest {
     pub last_name: String,
     pub first_name: String,
@@ -67,6 +93,32 @@ impl UpdateProtagonistRequest {
         }
 
         Ok(())
+    }
+}
+
+#[derive(Deserialize, Debug)]
+pub struct GetSupporterRequest {
+    pub login_id: String,
+    pub password: String,
+}
+
+impl GetSupporterRequest {
+    pub fn new(login_id: String, password: String) -> Self {
+        Self { login_id, password }
+    }
+
+    pub async fn validate(self) -> Result<Self, anyhow::Error> {
+        let id_regex = Regex::new(r"^[a-zA-Z0-9]+$").unwrap();
+        if !id_regex.is_match(&self.login_id) {
+            return Err(anyhow!("Invalid login id format."));
+        }
+
+        let password_regex = Regex::new(r"^[a-zA-Z0-9]+$").unwrap();
+        if !password_regex.is_match(&self.password) {
+            return Err(anyhow!("Invalid password format."));
+        }
+
+        Ok(self)
     }
 }
 

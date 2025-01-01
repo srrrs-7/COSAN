@@ -117,6 +117,35 @@ impl SupportRepository {
         Ok(Some(()))
     }
 
+    pub async fn get_protagonist_by_login_id_and_password(
+        &self,
+        login_id: String,
+        password: String,
+    ) -> Result<Option<entity::Protagonist>, sqlx::Error> {
+        let row = sqlx::query_as::<_, model::GetProtagonist>(
+            r#"
+            SELECT 
+                protagonist_id, last_name, first_name, email, country
+            FROM 
+                protagonists
+            WHERE 
+                login_id = $1 AND password = $2;
+            "#,
+        )
+        .bind(login_id)
+        .bind(password)
+        .fetch_one(&self.db)
+        .await?;
+
+        Ok(Some(entity::Protagonist {
+            protagonist_id: row.protagonist_id,
+            last_name: row.last_name,
+            first_name: row.first_name,
+            email: row.email,
+            country: row.country,
+        }))
+    }
+
     pub async fn get_supporter(
         &self,
         supporter_id: i64,
@@ -219,6 +248,35 @@ impl SupportRepository {
         .await?;
 
         Ok(Some(()))
+    }
+
+    pub async fn get_supporter_by_login_id_and_password(
+        &self,
+        login_id: String,
+        password: String,
+    ) -> Result<Option<entity::Supporter>, sqlx::Error> {
+        let row = sqlx::query_as::<_, model::GetSupporter>(
+            r#"
+            SELECT 
+                supporter_id, last_name, first_name, email, country
+            FROM 
+                supporters
+            WHERE 
+                login_id = $1 AND password = $2;
+            "#,
+        )
+        .bind(login_id)
+        .bind(password)
+        .fetch_one(&self.db)
+        .await?;
+
+        Ok(Some(entity::Supporter {
+            supporter_id: row.supporter_id,
+            last_name: row.last_name,
+            first_name: row.first_name,
+            email: row.email,
+            country: row.country,
+        }))
     }
 
     pub async fn get_protagonist_supporter(

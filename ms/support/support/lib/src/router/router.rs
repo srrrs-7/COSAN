@@ -1,6 +1,6 @@
 use super::request::{
     CreateProtagonistRequest, CreateProtagonistSupporterRequest, CreateSupporterRequest,
-    UpdateProtagonistRequest, UpdateSupporterRequest,
+    GetProtagonistRequest, UpdateProtagonistRequest, UpdateSupporterRequest,
 };
 use super::response::{
     CreateProtagonistResponse, CreateProtagonistSupporterResponse, CreateSupporterResponse,
@@ -10,6 +10,7 @@ use super::response::{
 };
 use crate::domain::service::SupportService;
 use crate::driver::model;
+use crate::router::request::GetSupporterRequest;
 use axum::{
     http,
     routing::{delete, get, post, put},
@@ -56,7 +57,11 @@ impl AppRouter {
                             .route("/:protagonist_id", get(Self::get_protagonist))
                             .route("/", post(Self::create_protagonist))
                             .route("/", put(Self::update_protagonist))
-                            .route("/:protagonist_id", delete(Self::delete_protagonist)),
+                            .route("/:protagonist_id", delete(Self::delete_protagonist))
+                            .route(
+                                "/login/:login_id/password/:password",
+                                get(Self::get_protagonist_by_login_id_and_password),
+                            ),
                     )
                     .nest(
                         "/supporter",
@@ -64,7 +69,11 @@ impl AppRouter {
                             .route("/:supporter_id", get(Self::get_supporter))
                             .route("/", post(Self::create_supporter))
                             .route("/", put(Self::update_supporter))
-                            .route("/:supporter_id", delete(Self::delete_supporter)),
+                            .route("/:supporter_id", delete(Self::delete_supporter))
+                            .route(
+                                "/login/:login_id/password/:password",
+                                get(Self::get_supporter_by_login_id_and_password),
+                            ),
                     )
                     .nest(
                         "/protagonist_supporter",
@@ -247,6 +256,57 @@ impl AppRouter {
         }
     }
 
+    async fn get_protagonist_by_login_id_and_password(
+        State(service): State<SupportService>,
+        Path(login_id): Path<String>,
+        Path(password): Path<String>,
+    ) -> Result<
+        (http::StatusCode, Json<GetProtagonistResponse>),
+        (http::StatusCode, Json<ErrorResponse>),
+    > {
+        info!("Get protagonist by login_id and password");
+
+        let request = GetProtagonistRequest::new(login_id, password)
+            .validate()
+            .await;
+        if request.is_err() {
+            return Err((
+                http::StatusCode::BAD_REQUEST,
+                Json(ErrorResponse {
+                    error: "Bad Request".to_string(),
+                    message: request.err().unwrap().to_string(),
+                }),
+            ));
+        }
+
+        let protagonist = service
+            .get_protagonist_by_login_id_and_password(request.unwrap())
+            .await;
+
+        match protagonist {
+            Ok(protagonist) => Ok((http::StatusCode::OK, Json(protagonist))),
+            Err(err) => {
+                if err.to_string().contains("not found") {
+                    Err((
+                        http::StatusCode::NOT_FOUND,
+                        Json(ErrorResponse {
+                            error: err.to_string(),
+                            message: "Protagonist not found".to_string(),
+                        }),
+                    ))
+                } else {
+                    Err((
+                        http::StatusCode::INTERNAL_SERVER_ERROR,
+                        Json(ErrorResponse {
+                            error: err.to_string(),
+                            message: "Internal Server Error".to_string(),
+                        }),
+                    ))
+                }
+            }
+        }
+    }
+
     async fn get_supporter(
         State(service): State<SupportService>,
         Path(supporter_id): Path<u64>,
@@ -395,6 +455,57 @@ impl AppRouter {
                     message: "Supporter not found".to_string(),
                 }),
             )),
+        }
+    }
+
+    async fn get_supporter_by_login_id_and_password(
+        State(service): State<SupportService>,
+        Path(login_id): Path<String>,
+        Path(password): Path<String>,
+    ) -> Result<
+        (http::StatusCode, Json<GetSupporterResponse>),
+        (http::StatusCode, Json<ErrorResponse>),
+    > {
+        info!("Get supporter by login_id and password");
+
+        let request = GetSupporterRequest::new(login_id, password)
+            .validate()
+            .await;
+        if request.is_err() {
+            return Err((
+                http::StatusCode::BAD_REQUEST,
+                Json(ErrorResponse {
+                    error: "Bad Request".to_string(),
+                    message: request.err().unwrap().to_string(),
+                }),
+            ));
+        }
+
+        let supporter = service
+            .get_supporter_by_login_id_and_password(request.unwrap())
+            .await;
+
+        match supporter {
+            Ok(supporter) => Ok((http::StatusCode::OK, Json(supporter))),
+            Err(err) => {
+                if err.to_string().contains("not found") {
+                    Err((
+                        http::StatusCode::NOT_FOUND,
+                        Json(ErrorResponse {
+                            error: err.to_string(),
+                            message: "Supporter not found".to_string(),
+                        }),
+                    ))
+                } else {
+                    Err((
+                        http::StatusCode::INTERNAL_SERVER_ERROR,
+                        Json(ErrorResponse {
+                            error: err.to_string(),
+                            message: "Internal Server Error".to_string(),
+                        }),
+                    ))
+                }
+            }
         }
     }
 

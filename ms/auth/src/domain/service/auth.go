@@ -4,6 +4,7 @@ import (
 	"auth/driver/model"
 	"auth/router/response"
 	"context"
+	"fmt"
 	"net/url"
 	"utils/utilhttp"
 )
@@ -11,13 +12,15 @@ import (
 type AuthService struct {
 	AuthRepo  Autheticator
 	CacheRepo Cacher
+	BaseUrl   string
 	SecretKey string
 }
 
-func NewAuth(a Autheticator, c Cacher, sk string) AuthService {
+func NewAuth(a Autheticator, c Cacher, u string, sk string) AuthService {
 	return AuthService{
 		AuthRepo:  a,
 		CacheRepo: c,
+		BaseUrl:   u,
 		SecretKey: sk,
 	}
 }
@@ -25,7 +28,7 @@ func NewAuth(a Autheticator, c Cacher, sk string) AuthService {
 // login service
 func (a AuthService) Login(ctx context.Context, lid string, psswd string) (*response.Login, error) {
 	// get http params
-	baseUrl, params, err := a.requestParams(lid, psswd)
+	baseUrl, params, err := a.requestParams(a.BaseUrl, lid, psswd)
 	if err != nil {
 		return nil, err
 	}
@@ -65,10 +68,16 @@ func (a AuthService) Refresh(ctx context.Context, aToken string) error {
 	return nil
 }
 
-func (a AuthService) requestParams(sid string, psswd string) (*url.URL, url.Values, error) {
+func (a AuthService) requestParams(baseUrl, sid, psswd string) (*url.URL, url.Values, error) {
 	params := url.Values{}
 	params.Add("login_id", sid)
 	params.Add("password", psswd)
 
-	return nil, nil, nil
+	u, err := url.Parse(fmt.Sprintf("%s/protagonist/login/%s/password/%s", baseUrl, sid, psswd))
+	if err != nil {
+		return nil, nil, err
+	}
+	u.RawQuery = params.Encode()
+
+	return u, params, nil
 }

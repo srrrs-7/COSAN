@@ -1,6 +1,6 @@
 use crate::{
     driver::{model, repository},
-    router::response,
+    router::{request, response},
 };
 
 #[derive(Clone)]
@@ -76,6 +76,30 @@ impl SupportService {
         }
     }
 
+    pub async fn get_protagonist_by_login_id_and_password(
+        &self,
+        get_protagonist_request: request::GetProtagonistRequest,
+    ) -> Result<response::GetProtagonistResponse, anyhow::Error> {
+        let protagonist = self
+            .repository
+            .get_protagonist_by_login_id_and_password(
+                get_protagonist_request.login_id,
+                get_protagonist_request.password,
+            )
+            .await?;
+
+        match protagonist {
+            Some(protagonist) => Ok(response::GetProtagonistResponse {
+                protagonist_id: u64::try_from(protagonist.protagonist_id).unwrap(),
+                protagonist_last_name: protagonist.last_name,
+                protagonist_first_name: protagonist.first_name,
+                protagonist_email: protagonist.email,
+                protagonist_country: protagonist.country,
+            }),
+            None => Err(anyhow::anyhow!("Protagonist not found")),
+        }
+    }
+
     pub async fn get_supporter(
         &self,
         id: i64,
@@ -136,6 +160,30 @@ impl SupportService {
         match result {
             Some(_) => Ok(()),
             None => Err(anyhow::anyhow!("Supporter not deleted")),
+        }
+    }
+
+    pub async fn get_supporter_by_login_id_and_password(
+        &self,
+        get_supporter_request: request::GetSupporterRequest,
+    ) -> Result<response::GetSupporterResponse, anyhow::Error> {
+        let supporter = self
+            .repository
+            .get_supporter_by_login_id_and_password(
+                get_supporter_request.login_id,
+                get_supporter_request.password,
+            )
+            .await?;
+
+        match supporter {
+            Some(supporter) => Ok(response::GetSupporterResponse {
+                supporter_id: u64::try_from(supporter.supporter_id).unwrap(),
+                supporter_last_name: supporter.last_name,
+                supporter_first_name: supporter.first_name,
+                supporter_email: supporter.email,
+                supporter_country: supporter.country,
+            }),
+            None => Err(anyhow::anyhow!("Supporter not found")),
         }
     }
 
