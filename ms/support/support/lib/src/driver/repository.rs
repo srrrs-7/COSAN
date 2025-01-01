@@ -335,7 +335,9 @@ impl SupportRepository {
                 supporters AS s 
                     ON p.supporter_id = s.supporter_id
             WHERE 
-                p.protagonist_id = $1;
+                p.protagonist_id = $1
+            ORDER BY
+                created_at DESC;
             "#,
         )
         .bind(i64::try_from(id).unwrap())
