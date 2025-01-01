@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS supporters (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (supporter_id),
-    UNIQUE (login_id)
+    UNIQUE (login_id),
     UNIQUE (email)
 );
 COMMENT ON TABLE supporters IS 'supporter support protagonists';
