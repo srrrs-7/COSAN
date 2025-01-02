@@ -232,14 +232,12 @@ impl AppRouter {
 
     async fn create_protagonist(
         State(service): State<SupportService>,
-        Extension(token): Extension<Arc<util::auth::Token>>,
         Json(body): Json<CreateProtagonistRequest>,
     ) -> Result<
         (http::StatusCode, Json<CreateProtagonistResponse>),
         (http::StatusCode, Json<ErrorResponse>),
     > {
         info!("Create protagonist");
-        info!(token = ?token);
 
         let valid = body.validate().await;
         if valid.is_err() {
@@ -425,14 +423,12 @@ impl AppRouter {
 
     async fn create_supporter(
         State(service): State<SupportService>,
-        Extension(token): Extension<Arc<util::auth::Token>>,
         Json(body): Json<CreateSupporterRequest>,
     ) -> Result<
         (http::StatusCode, Json<CreateSupporterResponse>),
         (http::StatusCode, Json<ErrorResponse>),
     > {
         info!("Create supporter");
-        info!(token = ?token);
 
         let valid = body.validate().await;
         if valid.is_err() {
