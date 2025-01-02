@@ -36,7 +36,7 @@ where
 {
     let token_data = decode::<T>(
         token_string,
-        &DecodingKey::from_secret(secret_key.as_ref()),
+        &DecodingKey::from_secret(secret_key.as_bytes()),
         &Validation::default(),
     )?;
 
