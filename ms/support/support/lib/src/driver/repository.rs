@@ -20,7 +20,7 @@ impl SupportRepository {
         let row = sqlx::query_as::<_, model::GetProtagonist>(
             r#"
             SELECT 
-                protagonist_id, last_name, first_name, email, country
+                protagonist_id, last_name, first_name, login_id, password, email, country
             FROM 
                 protagonists
             WHERE 
@@ -147,7 +147,7 @@ impl SupportRepository {
         let row = sqlx::query_as::<_, model::GetProtagonist>(
             r#"
             SELECT 
-                protagonist_id, last_name, first_name, email, country
+                protagonist_id, last_name, first_name, login_id, password, email, country
             FROM 
                 protagonists
             WHERE 
@@ -182,7 +182,7 @@ impl SupportRepository {
         let row = sqlx::query_as::<_, model::GetSupporter>(
             r#"
             SELECT 
-                supporter_id, last_name, first_name, email, country
+                supporter_id, last_name, first_name, login_id, password, email, country
             FROM 
                 supporters
             WHERE 
@@ -309,7 +309,7 @@ impl SupportRepository {
         let row = sqlx::query_as::<_, model::GetSupporter>(
             r#"
             SELECT 
-                supporter_id, last_name, login_id, password, first_name, email, country
+                supporter_id, last_name, first_name, login_id, password, email, country
             FROM 
                 supporters
             WHERE 
