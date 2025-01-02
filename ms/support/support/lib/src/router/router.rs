@@ -65,13 +65,16 @@ impl AppRouter {
                             .route("/:protagonist_id", get(Self::get_protagonist))
                             .route("/", put(Self::update_protagonist))
                             .route("/:protagonist_id", delete(Self::delete_protagonist))
-                            .layer(axum::middleware::from_fn(Self::verify_token_middleware))
+                            .layer(
+                                ServiceBuilder::new()
+                                    .layer(axum::middleware::from_fn(Self::verify_token_middleware))
+                                    .layer(Extension(Arc::new(self.secret_key.clone()))),
+                            )
                             .route("/", post(Self::create_protagonist))
                             .route(
                                 "/login/:login_id/password/:password",
                                 get(Self::get_protagonist_by_login_id_and_password),
-                            )
-                            .layer(axum::middleware::from_fn(Self::request_log_middleware)),
+                            ),
                     )
                     .nest(
                         "/supporter",
@@ -79,13 +82,16 @@ impl AppRouter {
                             .route("/:supporter_id", get(Self::get_supporter))
                             .route("/", put(Self::update_supporter))
                             .route("/:supporter_id", delete(Self::delete_supporter))
-                            .layer(axum::middleware::from_fn(Self::verify_token_middleware))
+                            .layer(
+                                ServiceBuilder::new()
+                                    .layer(axum::middleware::from_fn(Self::verify_token_middleware))
+                                    .layer(Extension(Arc::new(self.secret_key.clone()))),
+                            )
                             .route("/", post(Self::create_supporter))
                             .route(
                                 "/login/:login_id/password/:password",
                                 get(Self::get_supporter_by_login_id_and_password),
-                            )
-                            .layer(axum::middleware::from_fn(Self::request_log_middleware)),
+                            ),
                     )
                     .nest(
                         "/protagonist_supporter",
@@ -103,8 +109,7 @@ impl AppRouter {
                                 ServiceBuilder::new()
                                     .layer(axum::middleware::from_fn(Self::verify_token_middleware))
                                     .layer(Extension(Arc::new(self.secret_key.clone()))),
-                            )
-                            .layer(axum::middleware::from_fn(Self::request_log_middleware)),
+                            ),
                     )
                     .layer(axum::middleware::from_fn(Self::request_log_middleware)),
             )
