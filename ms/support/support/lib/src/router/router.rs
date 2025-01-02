@@ -67,7 +67,7 @@ impl AppRouter {
                             .route("/:protagonist_id", get(Self::get_protagonist))
                             .route("/", put(Self::update_protagonist))
                             .route("/:protagonist_id", delete(Self::delete_protagonist))
-                            .layer(middleware::from_fn_with_state(
+                            .route_layer(middleware::from_fn_with_state(
                                 arc_secret_key.clone(),
                                 Self::verify_token_middleware,
                             ))
@@ -83,7 +83,7 @@ impl AppRouter {
                             .route("/:supporter_id", get(Self::get_supporter))
                             .route("/", put(Self::update_supporter))
                             .route("/:supporter_id", delete(Self::delete_supporter))
-                            .layer(middleware::from_fn_with_state(
+                            .route_layer(middleware::from_fn_with_state(
                                 arc_secret_key.clone(),
                                 Self::verify_token_middleware,
                             ))
@@ -105,7 +105,7 @@ impl AppRouter {
                                 "/:protagonist_supporter_id",
                                 delete(Self::delete_protagonist_supporter),
                             )
-                            .layer(middleware::from_fn_with_state(
+                            .route_layer(middleware::from_fn_with_state(
                                 arc_secret_key.clone(),
                                 Self::verify_token_middleware,
                             )),
@@ -118,7 +118,7 @@ impl AppRouter {
     }
 
     async fn verify_token_middleware<B>(
-        Extension(secret_key): Extension<Arc<String>>,
+        State(secret_key): State<Arc<String>>,
         mut req: http::Request<B>,
         next: Next<B>,
     ) -> Result<Response, http::StatusCode> {
