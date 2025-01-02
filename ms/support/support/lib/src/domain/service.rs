@@ -18,7 +18,6 @@ impl SupportService {
         id: i64,
     ) -> Result<response::GetProtagonistResponse, anyhow::Error> {
         let protagonist = self.repository.get_protagonist(id).await?;
-
         match protagonist {
             Some(protagonist) => Ok(response::GetProtagonistResponse {
                 protagonist_id: u64::try_from(protagonist.protagonist_id).unwrap(),
@@ -33,9 +32,25 @@ impl SupportService {
 
     pub async fn create_protagonist(
         &self,
-        protagonist: model::CreateProtagonist,
+        protagonist: request::CreateProtagonistRequest,
     ) -> Result<response::CreateProtagonistResponse, anyhow::Error> {
-        let result = self.repository.create_protagonist(protagonist).await?;
+        // protagonist_id is set to -1 because it is auto-incremented in the database
+        let result = self
+            .repository
+            .create_protagonist(
+                model::CreateProtagonist::new(
+                    -1,
+                    protagonist.last_name,
+                    protagonist.first_name,
+                    protagonist.login_id,
+                    protagonist.password,
+                    protagonist.email,
+                    protagonist.country,
+                )
+                .convert_hash_password()
+                .await?,
+            )
+            .await?;
 
         match result {
             Some(protagonist) => Ok(response::CreateProtagonistResponse {
@@ -51,9 +66,24 @@ impl SupportService {
 
     pub async fn update_protagonist(
         &self,
-        protagonist: model::UpdateProtagonist,
+        protagonist: request::UpdateProtagonistRequest,
     ) -> Result<response::UpdateProtagonistResponse, anyhow::Error> {
-        let protagonist = self.repository.update_protagonist(protagonist).await?;
+        let protagonist = self
+            .repository
+            .update_protagonist(
+                model::UpdateProtagonist::new(
+                    protagonist.protagonist_id,
+                    protagonist.last_name,
+                    protagonist.first_name,
+                    protagonist.login_id,
+                    protagonist.password,
+                    protagonist.email,
+                    protagonist.country,
+                )
+                .convert_hash_password()
+                .await?,
+            )
+            .await?;
 
         match protagonist {
             Some(protagonist) => Ok(response::UpdateProtagonistResponse {
@@ -69,7 +99,6 @@ impl SupportService {
 
     pub async fn delete_protagonist(&self, id: i64) -> Result<(), anyhow::Error> {
         let result = self.repository.delete_protagonist(id).await?;
-
         match result {
             Some(_) => Ok(()),
             None => Err(anyhow::anyhow!("Protagonist not deleted")),
@@ -78,20 +107,20 @@ impl SupportService {
 
     pub async fn get_protagonist_by_login_id_and_password(
         &self,
-        get_protagonist_request: request::GetProtagonistRequest,
+        login_request: request::GetProtagonistRequest,
     ) -> Result<response::GetProtagonistResponse, anyhow::Error> {
         let protagonist = self
             .repository
             .get_protagonist_by_login_id_and_password(
-                get_protagonist_request.login_id.as_str(),
-                get_protagonist_request.password.as_str(),
+                login_request.login_id.as_str(),
+                login_request.password.as_str(),
             )
             .await?;
 
         match protagonist {
             Some(protagonist) => {
                 let valid = protagonist
-                    .verify_password(get_protagonist_request.password.as_str())
+                    .verify_password(login_request.password.as_str())
                     .await?;
                 if !valid {
                     return Err(anyhow::anyhow!("Invalid password"));
@@ -114,7 +143,6 @@ impl SupportService {
         id: i64,
     ) -> Result<response::GetSupporterResponse, anyhow::Error> {
         let supporter = self.repository.get_supporter(id).await?;
-
         match supporter {
             Some(supporter) => Ok(response::GetSupporterResponse {
                 supporter_id: u64::try_from(supporter.supporter_id).unwrap(),
@@ -129,9 +157,25 @@ impl SupportService {
 
     pub async fn create_supporter(
         &self,
-        supporter: model::CreateSupporter,
+        supporter: request::CreateSupporterRequest,
     ) -> Result<response::CreateSupporterResponse, anyhow::Error> {
-        let supporter = self.repository.create_supporter(supporter).await?;
+        // support_id is set to -1 because it is auto-incremented in the database
+        let supporter = self
+            .repository
+            .create_supporter(
+                model::CreateSupporter::new(
+                    -1,
+                    supporter.last_name,
+                    supporter.first_name,
+                    supporter.login_id,
+                    supporter.password,
+                    supporter.email,
+                    supporter.country,
+                )
+                .convert_hash_password()
+                .await?,
+            )
+            .await?;
 
         match supporter {
             Some(supporter) => Ok(response::CreateSupporterResponse {
@@ -147,9 +191,24 @@ impl SupportService {
 
     pub async fn update_supporter(
         &self,
-        supporter: model::UpdateSupporter,
+        supporter: request::UpdateSupporterRequest,
     ) -> Result<response::UpdateSupporterResponse, anyhow::Error> {
-        let supporter = self.repository.update_supporter(supporter).await?;
+        let supporter = self
+            .repository
+            .update_supporter(
+                model::UpdateSupporter::new(
+                    supporter.supporter_id,
+                    supporter.last_name,
+                    supporter.first_name,
+                    supporter.login_id,
+                    supporter.password,
+                    supporter.email,
+                    supporter.country,
+                )
+                .convert_hash_password()
+                .await?,
+            )
+            .await?;
 
         match supporter {
             Some(supporter) => Ok(response::UpdateSupporterResponse {
@@ -165,7 +224,6 @@ impl SupportService {
 
     pub async fn delete_supporter(&self, id: i64) -> Result<(), anyhow::Error> {
         let result = self.repository.delete_supporter(id).await?;
-
         match result {
             Some(_) => Ok(()),
             None => Err(anyhow::anyhow!("Supporter not deleted")),
@@ -210,7 +268,6 @@ impl SupportService {
         id: i64,
     ) -> Result<Vec<response::GetProtagonistSupporterResponse>, anyhow::Error> {
         let protagonist_supporters = self.repository.get_protagonist_supporter(id).await?;
-
         match protagonist_supporters {
             Some(protagonist_supporters) => Ok(protagonist_supporters
                 .into_iter()
@@ -229,11 +286,15 @@ impl SupportService {
 
     pub async fn create_protagonist_supporter(
         &self,
-        protagonist_supporter: model::CreateProtagonistSupporter,
+        protagonist_supporter_request: request::CreateProtagonistSupporterRequest,
     ) -> Result<response::CreateProtagonistSupporterResponse, anyhow::Error> {
         let protagonist_supporter = self
             .repository
-            .create_protagonist_supporter(protagonist_supporter)
+            .create_protagonist_supporter(model::CreateProtagonistSupporter::new(
+                -1,
+                i64::try_from(protagonist_supporter_request.protagonist_id).unwrap(),
+                i64::try_from(protagonist_supporter_request.supporter_id).unwrap(),
+            ))
             .await?;
 
         match protagonist_supporter {
@@ -249,7 +310,6 @@ impl SupportService {
 
     pub async fn delete_protagonist_supporter(&self, id: i64) -> Result<(), anyhow::Error> {
         let result = self.repository.delete_protagonist_supporter(id).await?;
-
         match result {
             Some(_) => Ok(()),
             None => Err(anyhow::anyhow!("Protagonist supporter not deleted")),

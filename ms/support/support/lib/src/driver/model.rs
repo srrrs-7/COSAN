@@ -1,3 +1,4 @@
+use crate::util;
 use sqlx::FromRow;
 
 #[derive(Debug, FromRow)]
@@ -40,6 +41,14 @@ impl GetProtagonist {
             && !self.password.is_empty()
             && !self.email.is_empty()
             && !self.country.is_empty()
+    }
+
+    pub async fn convert_hash_password(self) -> Result<Self, bcrypt::BcryptError> {
+        let hashed_password = util::crypt::hash_password(&self.password).await?;
+        Ok(Self {
+            password: hashed_password,
+            ..self
+        })
     }
 }
 
@@ -84,6 +93,14 @@ impl CreateProtagonist {
             && !self.email.is_empty()
             && !self.country.is_empty()
     }
+
+    pub async fn convert_hash_password(self) -> Result<Self, bcrypt::BcryptError> {
+        let hashed_password = util::crypt::hash_password(&self.password).await?;
+        Ok(Self {
+            password: hashed_password,
+            ..self
+        })
+    }
 }
 
 #[derive(Debug, FromRow)]
@@ -126,6 +143,14 @@ impl UpdateProtagonist {
             && !self.password.is_empty()
             && !self.email.is_empty()
             && !self.country.is_empty()
+    }
+
+    pub async fn convert_hash_password(self) -> Result<Self, bcrypt::BcryptError> {
+        let hashed_password = util::crypt::hash_password(&self.password).await?;
+        Ok(Self {
+            password: hashed_password,
+            ..self
+        })
     }
 }
 
@@ -170,6 +195,14 @@ impl GetSupporter {
             && !self.email.is_empty()
             && !self.country.is_empty()
     }
+
+    pub async fn convert_hash_password(self) -> Result<Self, bcrypt::BcryptError> {
+        let hashed_password = util::crypt::hash_password(&self.password).await?;
+        Ok(Self {
+            password: hashed_password,
+            ..self
+        })
+    }
 }
 
 #[derive(Debug, FromRow)]
@@ -213,6 +246,14 @@ impl CreateSupporter {
             && !self.email.is_empty()
             && !self.country.is_empty()
     }
+
+    pub async fn convert_hash_password(self) -> Result<Self, bcrypt::BcryptError> {
+        let hashed_password = util::crypt::hash_password(&self.password).await?;
+        Ok(Self {
+            password: hashed_password,
+            ..self
+        })
+    }
 }
 
 #[derive(Debug, FromRow)]
@@ -255,6 +296,14 @@ impl UpdateSupporter {
             && !self.password.is_empty()
             && !self.email.is_empty()
             && !self.country.is_empty()
+    }
+
+    pub async fn convert_hash_password(self) -> Result<Self, bcrypt::BcryptError> {
+        let hashed_password = util::crypt::hash_password(&self.password).await?;
+        Ok(Self {
+            password: hashed_password,
+            ..self
+        })
     }
 }
 

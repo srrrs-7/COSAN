@@ -9,9 +9,7 @@ use super::response::{
     HealthCheckResponse, UpdateProtagonistResponse, UpdateSupporterResponse,
 };
 use crate::domain::service::SupportService;
-use crate::driver::model;
 use crate::router::request::GetSupporterRequest;
-use crate::util;
 use axum::{
     http,
     routing::{delete, get, post, put},
@@ -163,19 +161,7 @@ impl AppRouter {
             ));
         }
 
-        // protagonist_id is set to -1 because it is auto-incremented in the database
-        let protagonist = service
-            .create_protagonist(model::CreateProtagonist::new(
-                -1,
-                body.last_name,
-                body.first_name,
-                body.login_id,
-                util::crypt::hash_password(&body.password).await.unwrap(),
-                body.email,
-                body.country,
-            ))
-            .await;
-
+        let protagonist = service.create_protagonist(body).await;
         match protagonist {
             Ok(protagonist) => Ok((http::StatusCode::CREATED, Json(protagonist))),
             Err(err) => Err((
@@ -208,18 +194,7 @@ impl AppRouter {
             ));
         }
 
-        let protagonist = service
-            .update_protagonist(model::UpdateProtagonist::new(
-                body.protagonist_id,
-                body.last_name,
-                body.first_name,
-                body.login_id,
-                util::crypt::hash_password(&body.password).await.unwrap(),
-                body.email,
-                body.country,
-            ))
-            .await;
-
+        let protagonist = service.update_protagonist(body).await;
         match protagonist {
             Ok(protagonist) => Ok((http::StatusCode::OK, Json(protagonist))),
             Err(err) => Err((
@@ -285,7 +260,9 @@ impl AppRouter {
         }
 
         let protagonist = service
-            .get_protagonist_by_login_id_and_password(request.unwrap())
+            .get_protagonist_by_login_id_and_password(
+                request.unwrap().convert_hash_password().await.unwrap(),
+            )
             .await;
 
         match protagonist {
@@ -369,19 +346,7 @@ impl AppRouter {
             ));
         }
 
-        // support_id is set to -1 because it is auto-incremented in the database
-        let supporter = service
-            .create_supporter(model::CreateSupporter::new(
-                -1,
-                body.last_name,
-                body.first_name,
-                body.login_id,
-                util::crypt::hash_password(&body.password).await.unwrap(),
-                body.email,
-                body.country,
-            ))
-            .await;
-
+        let supporter = service.create_supporter(body).await;
         match supporter {
             Ok(supporter) => Ok((http::StatusCode::CREATED, Json(supporter))),
             Err(err) => Err((
@@ -414,18 +379,7 @@ impl AppRouter {
             ));
         }
 
-        let supporter = service
-            .update_supporter(model::UpdateSupporter::new(
-                body.supporter_id,
-                body.last_name,
-                body.first_name,
-                body.login_id,
-                util::crypt::hash_password(&body.password).await.unwrap(),
-                body.email,
-                body.country,
-            ))
-            .await;
-
+        let supporter = service.update_supporter(body).await;
         match supporter {
             Ok(supporter) => Ok((http::StatusCode::OK, Json(supporter))),
             Err(err) => Err((
@@ -491,7 +445,9 @@ impl AppRouter {
         }
 
         let supporter = service
-            .get_supporter_by_login_id_and_password(request.unwrap())
+            .get_supporter_by_login_id_and_password(
+                request.unwrap().convert_hash_password().await.unwrap(),
+            )
             .await;
 
         match supporter {
@@ -578,14 +534,7 @@ impl AppRouter {
             ));
         }
 
-        let protagonist_supporter = service
-            .create_protagonist_supporter(model::CreateProtagonistSupporter {
-                protagonist_supporter_id: -1,
-                protagonist_id: i64::try_from(body.protagonist_id).unwrap(),
-                supporter_id: i64::try_from(body.supporter_id).unwrap(),
-            })
-            .await;
-
+        let protagonist_supporter = service.create_protagonist_supporter(body).await;
         match protagonist_supporter {
             Ok(protagonist_supporter) => {
                 Ok((http::StatusCode::CREATED, Json(protagonist_supporter)))
