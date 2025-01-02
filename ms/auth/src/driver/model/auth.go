@@ -19,9 +19,9 @@ type Supporter struct {
 }
 
 type UserRole struct {
-	UserRoleId int64 `gorm:"column:user_role_id"`
-	UserId     int64 `gorm:"column:user_id"`
-	UserRole   int8  `gorm:"column:user_role"`
+	UserRoleId int64  `gorm:"column:user_role_id"`
+	UserId     int64  `gorm:"column:user_id"`
+	UserRole   string `gorm:"column:user_role"`
 }
 
 type UserScope struct {

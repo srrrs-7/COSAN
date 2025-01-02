@@ -25,12 +25,12 @@ type Claims struct {
 	Issued  time.Time `json:"issued"`
 	Expired int64     `json:"expired"`
 	Scopes  []string  `json:"scopes"`
-	Role    int8      `json:"role"`
+	Role    string    `json:"role"`
 	jwt.StandardClaims
 }
 
 // NewToken は、新しいアクセストークンとリフレッシュトークンを生成します。
-func NewToken(uid int64, role int8, scopes []string, secretKey string) *Token {
+func NewToken(uid int64, role string, scopes []string, secretKey string) *Token {
 	now := time.Now()
 	accessTokenClaims := Claims{
 		Uid:     uid,
