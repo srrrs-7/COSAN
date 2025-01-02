@@ -171,6 +171,8 @@ impl AppRouter {
             ));
         }
 
+        info!(token);
+
         let token = util::auth::validate_token(token, secret_key.as_str()).map_err(|_| {
             error!("verify_token_middleware: Token is invalid");
             (
