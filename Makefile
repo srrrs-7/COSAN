@@ -24,7 +24,7 @@ ui-check:
 	docker compose run --rm ui deno task check
 
 auth:
-	docker compose up -d auth-db auth-redis --build
+	docker compose up -d auth-db --build
 	sleep 3
 	docker compose run --rm migrator migrate hash --dir file:///go/auth/migrator
 	docker compose run --rm migrator migrate apply --url postgres://root:root@auth-db:5432/auth?sslmode=disable --dir file:///go/auth/migrator

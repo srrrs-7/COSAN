@@ -1,45 +1,44 @@
-CREATE TABLE IF NOT EXISTS staff_roles (
-    staff_role_id BIGSERIAL,
-    company_id            BIGINT,
-    staff_id              BIGINT,
-    staff_role            SMALLINT NOT NULL,
-    created_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (company_id, staff_id),
-    UNIQUE (staff_role_id)
+CREATE TYPE USER_ROLE AS ENUM ('protagonist', 'supporter');
+CREATE TABLE IF NOT EXISTS user_roles (
+    user_role_id BIGSERIAL,
+    user_id      BIGINT NOT NULL,
+    user_role    USER_ROLE NOT NULL DEFAULT 'supporter',
+    created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_role_id),
+    UNIQUE (user_id)
 );
-COMMENT ON TABLE staff_roles IS 'staff authentication information';
-COMMENT ON COLUMN staff_roles.company_id IS 'company id';
-COMMENT ON COLUMN staff_roles.staff_id IS 'staff id';
-COMMENT ON COLUMN staff_roles.staff_role IS 'staff role 4:staff, 2:manager, 1:admin';
+COMMENT ON TABLE user_roles IS 'user authentication information';
+COMMENT ON COLUMN user_roles.user_id IS 'user id';
+COMMENT ON COLUMN user_roles.user_role IS 'user role';
 
+CREATE TYPE DOMAIN_NAME AS ENUM ('support');
 CREATE TABLE IF NOT EXISTS certificate_domains (
     certificate_domain_id BIGSERIAL,
-    name                  VARCHAR(50) NOT NULL,
+    domain_name           DOMAIN_NAME NOT NULL DEFAULT 'support',
     created_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (certificate_domain_id)
 );
 COMMENT ON TABLE certificate_domains IS 'service domain information';
-COMMENT ON COLUMN certificate_domains.name IS 'service domain name';
+COMMENT ON COLUMN certificate_domains.domain_name IS 'service domain name';
 
-
-CREATE TABLE IF NOT EXISTS staff_certificate_scopes (
-    staff_certificate_scope_id  BIGSERIAL,
-    company_id            BIGINT,
-    staff_id              BIGINT,
-    certificate_domain_id BIGINT,
-    created_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (company_id, staff_id, certificate_domain_id),
-    UNIQUE (staff_certificate_scope_id),
+CREATE TYPE AUTHORITY AS ENUM ('read', 'write');
+CREATE TABLE IF NOT EXISTS user_certificate_scopes (
+    user_certificate_scope_id  BIGSERIAL,
+    user_id                    BIGINT NOT NULL,
+    certificate_domain_id      BIGINT NOT NULL,
+    authority                  AUTHORITY NOT NULL DEFAULT 'read',
+    created_at                 TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at                 TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_certificate_scope_id),
+    UNIQUE (user_id, certificate_domain_id),
     FOREIGN KEY (certificate_domain_id) REFERENCES certificate_domains(certificate_domain_id)
 );
-COMMENT ON TABLE staff_certificate_scopes IS 'available service domain information';
-COMMENT ON COLUMN staff_certificate_scopes.company_id IS 'company id';
-COMMENT ON COLUMN staff_certificate_scopes.staff_id IS 'staff id';
-COMMENT ON COLUMN staff_certificate_scopes.certificate_domain_id IS 'available domain id';
+COMMENT ON TABLE user_certificate_scopes IS 'available service domain information';
+COMMENT ON COLUMN user_certificate_scopes.user_id IS 'user id';
+COMMENT ON COLUMN user_certificate_scopes.certificate_domain_id IS 'available domain id';
+COMMENT ON COLUMN user_certificate_scopes.authority IS 'available authority';
 
-
-INSERT INTO certificate_domains (name)
-VALUES ('audit'), ('stamp'), ('holiday'), ('master'), ('shift'), ('summary');
+INSERT INTO certificate_domains (domain_name)
+VALUES ('support');

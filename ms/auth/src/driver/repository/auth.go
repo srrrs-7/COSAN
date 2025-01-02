@@ -21,12 +21,12 @@ func NewAuthRepo(db *gorm.DB, q query.AuthQuery) AuthRepo {
 	}
 }
 
-func (r AuthRepo) Login(ctx context.Context, cid, sid int64, secretKey string) (*entity.Token, error) {
-	var auth model.Auth
-	var scopes []model.Scope
+func (r AuthRepo) Login(ctx context.Context, uid int64, secretKey string) (*entity.Token, error) {
+	var role model.UserRole
+	var scopes []model.UserScope
 	if err := r.Db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		authSql, scopeSql := r.Query.LoginQuery(tx, cid, sid)
-		res := authSql.Scan(&auth)
+		authSql, scopeSql := r.Query.LoginQuery(tx, uid)
+		res := authSql.Scan(&role)
 		if res.Error != nil {
 			return res.Error
 		}
@@ -40,5 +40,5 @@ func (r AuthRepo) Login(ctx context.Context, cid, sid int64, secretKey string) (
 		return nil, err
 	}
 
-	return model.TokenEntity(auth, scopes, secretKey), nil
+	return model.TokenEntity(role, scopes, secretKey), nil
 }

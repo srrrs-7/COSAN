@@ -6,7 +6,7 @@ import (
 )
 
 type Autheticator interface {
-	Login(ctx context.Context, cid, sid int64, secretKey string) (*entity.Token, error)
+	Login(ctx context.Context, uid int64, secretKey string) (*entity.Token, error)
 }
 
 type Cacher interface {

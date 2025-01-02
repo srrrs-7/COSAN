@@ -19,35 +19,31 @@ type Token struct {
 }
 
 type AccessToken struct {
-	Cid     int64
-	Sid     int64
+	Uid     int64
 	Expired time.Duration
 	Issued  time.Time
-	Scopes  []int8
+	Scopes  []string
 	Role    int8
 }
 
 type RefreshToken struct {
-	Cid     int64
-	Sid     int64
+	Uid     int64
 	Expired time.Duration
 	Issued  time.Time
-	Scopes  []int8
+	Scopes  []string
 	Role    int8
 }
 
-func NewToken(cid, sid int64, role int8, scope []int8, secretKey string) *Token {
+func NewToken(uid int64, role int8, scope []string, secretKey string) *Token {
 	at := AccessToken{
-		Cid:     cid,
-		Sid:     sid,
+		Uid:     uid,
 		Expired: ACCESSS_TOKEN_EXPIRED_AT,
 		Issued:  time.Now(),
 		Role:    role,
 		Scopes:  scope,
 	}
 	rt := RefreshToken{
-		Cid:     cid,
-		Sid:     sid,
+		Uid:     uid,
 		Expired: REFRESH_TOKEN_EXPIRED_AT,
 		Issued:  time.Now(),
 		Role:    role,
@@ -64,25 +60,25 @@ func NewToken(cid, sid int64, role int8, scope []int8, secretKey string) *Token 
 
 func (t AccessToken) JWT(secretKey string) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"Cid":     t.Cid,
-		"Sid":     t.Sid,
+		"Uid":     t.Uid,
 		"Expired": t.Expired,
 		"Issued":  t.Issued,
 		"Scopes":  t.Scopes,
 		"Role":    t.Role,
 	})
+
 	return generateJWT(secretKey, token)
 }
 
 func (t RefreshToken) JWT(secretKey string) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"Cid":     t.Cid,
-		"Sid":     t.Sid,
+		"Uid":     t.Uid,
 		"Expired": t.Expired,
 		"Issued":  t.Issued,
 		"Scopes":  t.Scopes,
 		"Role":    t.Role,
 	})
+
 	return generateJWT(secretKey, token)
 }
 
@@ -91,5 +87,6 @@ func generateJWT(secretKey string, token *jwt.Token) string {
 	if err != nil {
 		panic(err)
 	}
+
 	return signedToken
 }

@@ -12,7 +12,6 @@ services:
     environment:
       MODE: debug # debug or release
       AUTH_PG_URL: postgres://root:root@auth-db:5432/auth?sslmode=disable
-      REDIS_URL: auth-redis:6379
       SUPPORT_URL: http://support:8080/support/v1
       SECRET_KEY: secret-key # copy part of /ms/utils/key/private_key.pem key
   auth-db:

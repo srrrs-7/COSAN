@@ -38,10 +38,6 @@ services:
       - 5432:5432
     volumes:
       - ./ms/auth/migrator/data:/var/lib/postgresql/data
-  auth-redis:
-    image: redis:latest
-    ports:
-      - 6378:6379
 
   support:
     build:

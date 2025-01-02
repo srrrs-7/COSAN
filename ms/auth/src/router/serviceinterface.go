@@ -6,7 +6,8 @@ import (
 )
 
 type Autheticator interface {
-	Login(ctx context.Context, lid string, psswd string) (*response.Login, error)
+	ProtagonistLogin(ctx context.Context, lid, psswd string) (*response.Login, error)
+	SupporterLogin(ctx context.Context, lid, psswd string) (*response.Login, error)
 	Logout(ctx context.Context, aToken string) error
 	Refresh(ctx context.Context, aToken string) error
 }

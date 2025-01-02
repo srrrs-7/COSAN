@@ -31,7 +31,8 @@ func (rt Router) Serve() *chi.Mux {
 		rt.middlewares()
 		// auth
 		r.Route("/auth", func(r chi.Router) {
-			r.Post("/login", rt.login)
+			r.Post("/protagonist/login", rt.protagonistLogin)
+			r.Post("/supporter/login", rt.supporterLogin)
 			r.Get("/logout", rt.logout)
 			r.Put("/refresh", rt.refresh)
 		})

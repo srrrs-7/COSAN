@@ -8,35 +8,34 @@ func NewAuthQuery() AuthQuery {
 	return AuthQuery{}
 }
 
-func (q AuthQuery) LoginQuery(db *gorm.DB, cid, sid int64) (authSql, scopeSql *gorm.DB) {
+func (q AuthQuery) LoginQuery(db *gorm.DB, uid int64) (authSql, scopeSql *gorm.DB) {
 	authSql = db.Raw(`
 		SELECT
-			staff_role_id,
-			company_id,
-			staff_id,
-			staff_role
+			user_role_id,
+			user_id,
+			user_role
 		FROM 
-			staff_roles
+			user_roles
 		WHERE 
-			company_id = ?
-			AND staff_id = ?
+			user_id = ?
 		;
-	`, cid, sid,
+	`, uid,
 	)
 
 	scopeSql = db.Raw(`
 		SELECT
-			domain.certificate_domain_id
+			domain.certificate_domain_id,
+			domain.domain_name,
+			scope.authority
 		FROM 
-			staff_certificate_scopes AS scope
+			user_certificate_scopes AS scope
 		INNER JOIN 
 			certificate_domains AS domain
-			ON scope.certificate_domain_id = domain.certificate_domain_id
+				ON scope.certificate_domain_id = domain.certificate_domain_id
 		WHERE
-			scope.company_id = ?
-			AND scope.staff_id = ?
+			scope.user_id = ?
 		;
-	`, cid, sid,
+	`, uid,
 	)
 
 	return authSql, scopeSql

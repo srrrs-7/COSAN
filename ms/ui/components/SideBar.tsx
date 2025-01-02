@@ -18,7 +18,7 @@ interface Props {
           display: "block",
         }}
       >
-        <div style={{ padding: "1rem", marginTop: "3rem" }}>
+        <div style={{ padding: "1rem", marginTop: "4rem" }}>
           <h2 style={{ fontSize: "1.25rem", fontWeight: "bold" }}>
             Menu
           </h2>
