@@ -23,16 +23,21 @@ use axum::{
 };
 use std::net::SocketAddr;
 use std::sync::Arc;
+use tower::ServiceBuilder;
 use tracing::{error, info};
 
 #[derive(Clone)]
 pub struct AppRouter {
     service: SupportService,
+    secret_key: String,
 }
 
 impl AppRouter {
-    pub fn new(service: SupportService) -> Self {
-        Self { service }
+    pub fn new(service: SupportService, secret_key: String) -> Self {
+        Self {
+            service,
+            secret_key,
+        }
     }
 
     pub async fn serve(&self) -> Result<(), anyhow::Error> {
@@ -94,7 +99,11 @@ impl AppRouter {
                                 "/:protagonist_supporter_id",
                                 delete(Self::delete_protagonist_supporter),
                             )
-                            .layer(axum::middleware::from_fn(Self::verify_token_middleware))
+                            .layer(
+                                ServiceBuilder::new()
+                                    .layer(axum::middleware::from_fn(Self::verify_token_middleware))
+                                    .layer(Extension(Arc::new(self.secret_key.clone()))),
+                            )
                             .layer(axum::middleware::from_fn(Self::request_log_middleware)),
                     )
                     .layer(axum::middleware::from_fn(Self::request_log_middleware)),
@@ -105,6 +114,7 @@ impl AppRouter {
     }
 
     async fn verify_token_middleware<B>(
+        Extension(secret_key): Extension<Arc<String>>,
         mut req: http::Request<B>,
         next: Next<B>,
     ) -> Result<Response, (http::StatusCode, Json<ErrorResponse>)> {
@@ -150,7 +160,7 @@ impl AppRouter {
             ));
         }
 
-        let token = util::auth::validate_token(token).map_err(|_| {
+        let token = util::auth::validate_token(token, secret_key.as_str()).map_err(|_| {
             error!("verify_token_middleware: Token is invalid");
             (
                 http::StatusCode::UNAUTHORIZED,

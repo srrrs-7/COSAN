@@ -11,8 +11,11 @@ pub struct Token {
     pub role: i8,
 }
 
-pub fn validate_token(token_string: &str) -> Result<Token, Box<dyn std::error::Error>> {
-    let claims = get_claims_from_token::<Token>(token_string)?;
+pub fn validate_token(
+    token_string: &str,
+    secret_key: &str,
+) -> Result<Token, Box<dyn std::error::Error>> {
+    let claims = get_claims_from_token::<Token>(token_string, secret_key)?;
 
     if expired_token(claims.expired) {
         return Err("access token expired".into());
@@ -21,13 +24,16 @@ pub fn validate_token(token_string: &str) -> Result<Token, Box<dyn std::error::E
     Ok(claims)
 }
 
-fn get_claims_from_token<T>(token_string: &str) -> Result<T, Box<dyn std::error::Error>>
+fn get_claims_from_token<T>(
+    token_string: &str,
+    secret_key: &str,
+) -> Result<T, Box<dyn std::error::Error>>
 where
     T: for<'de> Deserialize<'de>,
 {
     let token_data = decode::<T>(
         token_string,
-        &DecodingKey::from_secret("secret".as_ref()),
+        &DecodingKey::from_secret(secret_key.as_ref()),
         &Validation::default(),
     )?;
 
