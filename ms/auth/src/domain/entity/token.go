@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	ACCESSS_TOKEN_EXPIRED_AT = 15 * time.Minute
+	ACCESS_TOKEN_EXPIRED_AT  = 15 * time.Minute
 	REFRESH_TOKEN_EXPIRED_AT = 30 * 24 * time.Hour
 )
 
@@ -37,7 +37,7 @@ type RefreshToken struct {
 func NewToken(uid int64, role int8, scope []string, secretKey string) *Token {
 	at := AccessToken{
 		Uid:     uid,
-		Expired: ACCESSS_TOKEN_EXPIRED_AT,
+		Expired: ACCESS_TOKEN_EXPIRED_AT,
 		Issued:  time.Now(),
 		Role:    role,
 		Scopes:  scope,
@@ -54,7 +54,7 @@ func NewToken(uid int64, role int8, scope []string, secretKey string) *Token {
 		AccessToken:  at.JWT(secretKey),
 		RefreshToken: rt.JWT(secretKey),
 		IssuedAt:     time.Now(),
-		ExpiredAt:    time.Now().Add(ACCESSS_TOKEN_EXPIRED_AT),
+		ExpiredAt:    time.Now().Add(ACCESS_TOKEN_EXPIRED_AT),
 	}
 }
 

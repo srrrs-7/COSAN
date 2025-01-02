@@ -40,5 +40,5 @@ func (r AuthRepo) Login(ctx context.Context, uid int64, secretKey string) (*enti
 		return nil, err
 	}
 
-	return model.TokenEntity(role, scopes, secretKey), nil
+	return model.TokenEntity(uid, role, scopes, secretKey), nil
 }
