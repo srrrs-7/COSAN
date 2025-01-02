@@ -353,9 +353,7 @@ impl AppRouter {
         }
 
         let protagonist = service
-            .get_protagonist_by_login_id_and_password(
-                request.unwrap().convert_hash_password().await.unwrap(),
-            )
+            .get_protagonist_by_login_id_and_password(request.unwrap())
             .await;
 
         match protagonist {
@@ -544,9 +542,7 @@ impl AppRouter {
         }
 
         let supporter = service
-            .get_supporter_by_login_id_and_password(
-                request.unwrap().convert_hash_password().await.unwrap(),
-            )
+            .get_supporter_by_login_id_and_password(request.unwrap())
             .await;
 
         match supporter {

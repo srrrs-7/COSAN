@@ -118,7 +118,8 @@ impl SupportService {
             Some(protagonist) => {
                 let valid = protagonist
                     .verify_password(login_request.password.as_str())
-                    .await?;
+                    .await
+                    .map_err(|e| anyhow::anyhow!("Error verifying password: {}", e.to_string()))?;
                 if !valid {
                     return Err(anyhow::anyhow!("Invalid password"));
                 }
@@ -240,7 +241,8 @@ impl SupportService {
             Some(supporter) => {
                 let valid = supporter
                     .verify_password(login_request.password.as_str())
-                    .await?;
+                    .await
+                    .map_err(|e| anyhow::anyhow!("Error verifying password: {}", e.to_string()))?; // This is a bug, the error should be returned instead of being ignored
                 if !valid {
                     return Err(anyhow::anyhow!("Invalid password"));
                 }

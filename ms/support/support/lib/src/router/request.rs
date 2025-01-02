@@ -1,4 +1,3 @@
-use crate::util;
 use anyhow::{anyhow, Ok, Result};
 use regex::Regex;
 use serde::Deserialize;
@@ -24,14 +23,6 @@ impl GetProtagonistRequest {
         }
 
         Ok(self)
-    }
-
-    pub async fn convert_hash_password(self) -> Result<Self, anyhow::Error> {
-        let hashed_password = util::crypt::hash_password(&self.password).await?;
-        Ok(Self {
-            password: hashed_password,
-            ..self
-        })
     }
 }
 
@@ -146,14 +137,6 @@ impl GetSupporterRequest {
         }
 
         Ok(self)
-    }
-
-    pub async fn convert_hash_password(self) -> Result<Self, anyhow::Error> {
-        let hashed_password = util::crypt::hash_password(&self.password).await?;
-        Ok(Self {
-            password: hashed_password,
-            ..self
-        })
     }
 }
 
