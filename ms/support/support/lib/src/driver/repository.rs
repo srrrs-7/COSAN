@@ -1,6 +1,5 @@
 use crate::domain::entity;
 use crate::driver::model;
-
 use sqlx;
 
 #[derive(Clone)]
