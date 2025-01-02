@@ -22,8 +22,8 @@ type Token struct {
 // Claims は、JWTのペイロードに含めるクレームです。
 type Claims struct {
 	Uid     int64     `json:"uid"`
-	Issued  time.Time `json:"issued"`
-	Expired int64     `json:"expired"`
+	Expired int64     `json:"exp"`
+	Issued  time.Time `json:"iat"`
 	Scopes  []string  `json:"scopes"`
 	Role    string    `json:"role"`
 	jwt.StandardClaims
@@ -34,15 +34,15 @@ func NewToken(uid int64, role string, scopes []string, secretKey string) *Token 
 	now := time.Now()
 	accessTokenClaims := Claims{
 		Uid:     uid,
-		Issued:  now,
 		Expired: now.Add(accessTokenExpiration).Unix(),
+		Issued:  now,
 		Scopes:  scopes,
 		Role:    role,
 	}
 	refreshTokenClaims := Claims{
 		Uid:     uid,
-		Issued:  now,
 		Expired: now.Add(refreshTokenExpiration).Unix(),
+		Issued:  now,
 		Scopes:  scopes,
 		Role:    role,
 	}
