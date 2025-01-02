@@ -153,8 +153,6 @@ impl AppRouter {
             return Err(http::StatusCode::BAD_REQUEST);
         }
 
-        info!(token);
-
         let token = util::auth::validate_token(token, &secret_key).map_err(|e| {
             error!("verify_token_middleware: {}", e);
             return http::StatusCode::UNAUTHORIZED;
