@@ -148,6 +148,9 @@ impl AppRouter {
             error!("verify_token_middleware: {}", e);
             return http::StatusCode::UNAUTHORIZED;
         });
+        if token.is_err() {
+            return Err(http::StatusCode::UNAUTHORIZED);
+        }
 
         // token info add to request context
         req.extensions_mut().insert(Arc::new(token.unwrap()));
