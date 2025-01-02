@@ -128,7 +128,7 @@ impl AppRouter {
         Extension(secret_key): Extension<Arc<String>>,
         mut req: http::Request<B>,
         next: Next<B>,
-    ) -> Result<Response, http::StatusCode> {
+    ) -> Result<Response, (http::StatusCode, Json<ErrorResponse>)> {
         let auth_header = req
             .headers()
             .get(http::header::AUTHORIZATION)
@@ -138,24 +138,48 @@ impl AppRouter {
             auth_header
         } else {
             error!("verify_token_middleware: Authorization header not found");
-            return Err(http::StatusCode::BAD_REQUEST);
+            return Err((
+                http::StatusCode::UNAUTHORIZED,
+                Json(ErrorResponse {
+                    error: format!("Unauthorized"),
+                    message: format!("Authorization header not found"),
+                }),
+            ));
         };
 
         let bearer = auth_header.split_whitespace().nth(0).unwrap_or_default();
         if bearer != "Bearer" {
             error!("verify_token_middleware: Authorization header is not Bearer");
-            return Err(http::StatusCode::BAD_REQUEST);
+            return Err((
+                http::StatusCode::UNAUTHORIZED,
+                Json(ErrorResponse {
+                    error: format!("Unauthorized"),
+                    message: format!("Authorization header is not Bearer"),
+                }),
+            ));
         }
 
         let token = auth_header.split_whitespace().nth(1).unwrap_or_default();
         if token.is_empty() {
             error!("verify_token_middleware: Token is empty");
-            return Err(http::StatusCode::BAD_REQUEST);
+            return Err((
+                http::StatusCode::UNAUTHORIZED,
+                Json(ErrorResponse {
+                    error: format!("Unauthorized"),
+                    message: format!("Token is empty"),
+                }),
+            ));
         }
 
         let token = util::auth::validate_token(token, &secret_key).map_err(|e| {
             error!("verify_token_middleware: {}", e);
-            return http::StatusCode::UNAUTHORIZED;
+            (
+                http::StatusCode::UNAUTHORIZED,
+                Json(ErrorResponse {
+                    error: format!("Unauthorized"),
+                    message: format!("{}", e),
+                }),
+            )
         });
 
         // token info add to request context
