@@ -164,7 +164,7 @@ impl IntoResponse for DeleteProtagonistSupporterResponse {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 pub struct ErrorResponse {
     pub error: String,
     pub message: String,

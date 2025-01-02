@@ -120,8 +120,8 @@ impl AppRouter {
             return Err((
                 http::StatusCode::BAD_REQUEST,
                 Json(ErrorResponse {
-                    error: "Bad Request".to_string(),
-                    message: "Authorization header not found".to_string(),
+                    error: format!("Bad Request: Authorization header not found"),
+                    message: format!("Authorization header not found"),
                 }),
             ));
         };
@@ -132,8 +132,8 @@ impl AppRouter {
             return Err((
                 http::StatusCode::BAD_REQUEST,
                 Json(ErrorResponse {
-                    error: "Bad Request".to_string(),
-                    message: "Authorization header is not Bearer".to_string(),
+                    error: format!("Bad Request: {}", bearer),
+                    message: format!("Authorization header is not Bearer: {}", bearer),
                 }),
             ));
         }
@@ -144,8 +144,8 @@ impl AppRouter {
             return Err((
                 http::StatusCode::BAD_REQUEST,
                 Json(ErrorResponse {
-                    error: "Bad Request".to_string(),
-                    message: "Token is empty".to_string(),
+                    error: format!("Bad Request: Token is empty"),
+                    message: format!("Token is empty"),
                 }),
             ));
         }
@@ -155,14 +155,14 @@ impl AppRouter {
             (
                 http::StatusCode::UNAUTHORIZED,
                 Json(ErrorResponse {
-                    error: "Unauthorized".to_string(),
-                    message: "Token is invalid".to_string(),
+                    error: format!("Unauthorized: Token is invalid"),
+                    message: format!("Token is invalid"),
                 }),
             )
         });
 
         // token info add to request context
-        req.extensions_mut().insert(Arc::new(token));
+        req.extensions_mut().insert(Arc::new(token.unwrap()));
 
         Ok(next.run(req).await)
     }
