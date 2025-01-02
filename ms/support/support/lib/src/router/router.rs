@@ -56,11 +56,11 @@ impl AppRouter {
                     .layer(axum::middleware::from_fn(Self::request_log_middleware))
                     .route("/health", get(Self::health_check))
                     .route(
-                        "/login/:login_id/password/:password",
+                        "/protagonist/login/:login_id/password/:password",
                         get(Self::get_protagonist_by_login_id_and_password),
                     )
                     .route(
-                        "/login/:login_id/password/:password",
+                        "/supporter/login/:login_id/password/:password",
                         get(Self::get_supporter_by_login_id_and_password),
                     )
                     .nest(
