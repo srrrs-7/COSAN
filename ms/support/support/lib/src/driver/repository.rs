@@ -141,7 +141,6 @@ impl SupportRepository {
     pub async fn get_protagonist_by_login_id_and_password(
         &self,
         login_id: &str,
-        password: &str,
     ) -> Result<Option<entity::Protagonist>, sqlx::Error> {
         let row = sqlx::query_as::<_, model::GetProtagonist>(
             r#"
@@ -151,11 +150,9 @@ impl SupportRepository {
                 protagonists
             WHERE 
                 login_id = $1 
-                AND password = $2;
             "#,
         )
         .bind(login_id)
-        .bind(password)
         .fetch_one(&self.db)
         .await?;
 
@@ -303,7 +300,6 @@ impl SupportRepository {
     pub async fn get_supporter_by_login_id_and_password(
         &self,
         login_id: &str,
-        password: &str,
     ) -> Result<Option<entity::Supporter>, sqlx::Error> {
         let row = sqlx::query_as::<_, model::GetSupporter>(
             r#"
@@ -313,11 +309,9 @@ impl SupportRepository {
                 supporters
             WHERE 
                 login_id = $1 
-                AND password = $2;
             "#,
         )
         .bind(login_id)
-        .bind(password)
         .fetch_one(&self.db)
         .await?;
 
