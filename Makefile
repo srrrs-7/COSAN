@@ -1,4 +1,4 @@
-.PHONY: init unittest ui ui-build ui-check auth support new-migrate sqlx-prepare
+.PHONY: init unittest cosan ui auth support new-migrate sqlx-prepare
 
 init:
 	cp compose.override.yaml.sample compose.override.yaml
@@ -13,15 +13,12 @@ fmt:
 	docker compose run --rm rustacean /ms/dev/fmt.sh rustacean
 	docker compose run --rm deno /ms/dev/fmt.sh deno
 
+cosan: ui auth support
+
 ui:
 	docker compose up -d ui --build
 	sleep 5
 	open http://localhost:8000/www
-ui-build:
-	docker compose run --rm ui deno task build
-	docker compose run --rm ui deno task preview
-ui-check:
-	docker compose run --rm ui deno task check
 
 auth:
 	docker compose up -d auth-db --build
