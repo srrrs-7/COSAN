@@ -10,16 +10,20 @@ use super::response::{
 };
 use crate::domain::service::SupportService;
 use crate::router::request::GetSupporterRequest;
+use crate::util;
 use axum::{
     http,
+    middleware::Next,
+    response::Response,
     routing::{delete, get, post, put},
     {
-        extract::{Path, State},
+        extract::{Extension, Path, State},
         Json, Router, Server,
     },
 };
 use std::net::SocketAddr;
-use tracing::info;
+use std::sync::Arc;
+use tracing::{error, info};
 
 #[derive(Clone)]
 pub struct AppRouter {
@@ -49,34 +53,41 @@ impl AppRouter {
             .nest(
                 "/support/v1",
                 Router::new()
+                    .layer(axum::middleware::from_fn(Self::request_log_middleware))
                     .route("/health", get(Self::health_check))
+                    .route(
+                        "/login/:login_id/password/:password",
+                        get(Self::get_protagonist_by_login_id_and_password),
+                    )
+                    .route(
+                        "/login/:login_id/password/:password",
+                        get(Self::get_supporter_by_login_id_and_password),
+                    )
                     .nest(
                         "/protagonist",
                         Router::new()
+                            .layer(axum::middleware::from_fn(Self::verify_token_middleware))
+                            .layer(axum::middleware::from_fn(Self::request_log_middleware))
                             .route("/:protagonist_id", get(Self::get_protagonist))
                             .route("/", post(Self::create_protagonist))
                             .route("/", put(Self::update_protagonist))
-                            .route("/:protagonist_id", delete(Self::delete_protagonist))
-                            .route(
-                                "/login/:login_id/password/:password",
-                                get(Self::get_protagonist_by_login_id_and_password),
-                            ),
+                            .route("/:protagonist_id", delete(Self::delete_protagonist)),
                     )
                     .nest(
                         "/supporter",
                         Router::new()
+                            .layer(axum::middleware::from_fn(Self::verify_token_middleware))
+                            .layer(axum::middleware::from_fn(Self::request_log_middleware))
                             .route("/:supporter_id", get(Self::get_supporter))
                             .route("/", post(Self::create_supporter))
                             .route("/", put(Self::update_supporter))
-                            .route("/:supporter_id", delete(Self::delete_supporter))
-                            .route(
-                                "/login/:login_id/password/:password",
-                                get(Self::get_supporter_by_login_id_and_password),
-                            ),
+                            .route("/:supporter_id", delete(Self::delete_supporter)),
                     )
                     .nest(
                         "/protagonist_supporter",
                         Router::new()
+                            .layer(axum::middleware::from_fn(Self::verify_token_middleware))
+                            .layer(axum::middleware::from_fn(Self::request_log_middleware))
                             .route(
                                 "/:protagonist_supporter_id",
                                 get(Self::get_protagonist_supporter),
@@ -93,6 +104,82 @@ impl AppRouter {
         Ok(router)
     }
 
+    async fn verify_token_middleware<B>(
+        mut req: http::Request<B>,
+        next: Next<B>,
+    ) -> Result<Response, (http::StatusCode, Json<ErrorResponse>)> {
+        let auth_header = req
+            .headers()
+            .get(http::header::AUTHORIZATION)
+            .and_then(|header| header.to_str().ok());
+
+        let auth_header = if let Some(auth_header) = auth_header {
+            auth_header
+        } else {
+            error!("verify_token_middleware: Authorization header not found");
+            return Err((
+                http::StatusCode::BAD_REQUEST,
+                Json(ErrorResponse {
+                    error: "Bad Request".to_string(),
+                    message: "Authorization header not found".to_string(),
+                }),
+            ));
+        };
+
+        let bearer = auth_header.split_whitespace().nth(0).unwrap_or_default();
+        if bearer != "Bearer" {
+            error!("verify_token_middleware: Authorization header is not Bearer");
+            return Err((
+                http::StatusCode::BAD_REQUEST,
+                Json(ErrorResponse {
+                    error: "Bad Request".to_string(),
+                    message: "Authorization header is not Bearer".to_string(),
+                }),
+            ));
+        }
+
+        let token = auth_header.split_whitespace().nth(1).unwrap_or_default();
+        if token.is_empty() {
+            error!("verify_token_middleware: Token is empty");
+            return Err((
+                http::StatusCode::BAD_REQUEST,
+                Json(ErrorResponse {
+                    error: "Bad Request".to_string(),
+                    message: "Token is empty".to_string(),
+                }),
+            ));
+        }
+
+        let token = util::auth::validate_token(token).map_err(|_| {
+            error!("verify_token_middleware: Token is invalid");
+            (
+                http::StatusCode::UNAUTHORIZED,
+                Json(ErrorResponse {
+                    error: "Unauthorized".to_string(),
+                    message: "Token is invalid".to_string(),
+                }),
+            )
+        });
+
+        // token info add to request context
+        req.extensions_mut().insert(token);
+
+        Ok(next.run(req).await)
+    }
+
+    async fn request_log_middleware<B>(
+        req: http::Request<B>,
+        next: Next<B>,
+    ) -> Result<Response, http::StatusCode> {
+        info!("Request: {} {}", req.method(), req.uri());
+
+        let res = next.run(req).await;
+
+        info!("Response: {:?}", res.status());
+
+        Ok(res)
+    }
+
     async fn health_check(
         State(_): State<SupportService>,
     ) -> Result<(http::StatusCode, Json<HealthCheckResponse>), ()> {
@@ -105,6 +192,7 @@ impl AppRouter {
     }
 
     async fn get_protagonist(
+        Extension(token): Extension<Arc<util::auth::Token>>,
         State(service): State<SupportService>,
         Path(protagonist_id): Path<u64>,
     ) -> Result<
@@ -112,6 +200,7 @@ impl AppRouter {
         (http::StatusCode, Json<ErrorResponse>),
     > {
         info!("Get protagonist");
+        info!(token = ?token);
 
         let protagonist = service
             .get_protagonist(i64::try_from(protagonist_id).unwrap())
@@ -143,12 +232,14 @@ impl AppRouter {
 
     async fn create_protagonist(
         State(service): State<SupportService>,
+        Extension(token): Extension<Arc<util::auth::Token>>,
         Json(body): Json<CreateProtagonistRequest>,
     ) -> Result<
         (http::StatusCode, Json<CreateProtagonistResponse>),
         (http::StatusCode, Json<ErrorResponse>),
     > {
         info!("Create protagonist");
+        info!(token = ?token);
 
         let valid = body.validate().await;
         if valid.is_err() {
@@ -176,12 +267,14 @@ impl AppRouter {
 
     async fn update_protagonist(
         State(service): State<SupportService>,
+        Extension(token): Extension<Arc<util::auth::Token>>,
         Json(body): Json<UpdateProtagonistRequest>,
     ) -> Result<
         (http::StatusCode, Json<UpdateProtagonistResponse>),
         (http::StatusCode, Json<ErrorResponse>),
     > {
         info!("Update protagonist");
+        info!(token = ?token);
 
         let valid = body.validate().await;
         if valid.is_err() {
@@ -209,12 +302,14 @@ impl AppRouter {
 
     async fn delete_protagonist(
         State(service): State<SupportService>,
+        Extension(token): Extension<Arc<util::auth::Token>>,
         Path(protagonist_id): Path<u64>,
     ) -> Result<
         (http::StatusCode, Json<DeleteProtagonistResponse>),
         (http::StatusCode, Json<ErrorResponse>),
     > {
         info!("Delete protagonist");
+        info!(token = ?token);
 
         let result = service
             .delete_protagonist(i64::try_from(protagonist_id).unwrap())
@@ -239,12 +334,14 @@ impl AppRouter {
 
     async fn get_protagonist_by_login_id_and_password(
         State(service): State<SupportService>,
+        Extension(token): Extension<Arc<util::auth::Token>>,
         Path(login_request): Path<GetProtagonistRequest>,
     ) -> Result<
         (http::StatusCode, Json<GetProtagonistResponse>),
         (http::StatusCode, Json<ErrorResponse>),
     > {
         info!("Get protagonist by login_id and password");
+        info!(token = ?token);
 
         let request = GetProtagonistRequest::new(login_request.login_id, login_request.password)
             .validate()
@@ -291,12 +388,14 @@ impl AppRouter {
 
     async fn get_supporter(
         State(service): State<SupportService>,
+        Extension(token): Extension<Arc<util::auth::Token>>,
         Path(supporter_id): Path<u64>,
     ) -> Result<
         (http::StatusCode, Json<GetSupporterResponse>),
         (http::StatusCode, Json<ErrorResponse>),
     > {
         info!("Get supporter");
+        info!(token = ?token);
 
         let supporter = service
             .get_supporter(i64::try_from(supporter_id).unwrap())
@@ -328,12 +427,14 @@ impl AppRouter {
 
     async fn create_supporter(
         State(service): State<SupportService>,
+        Extension(token): Extension<Arc<util::auth::Token>>,
         Json(body): Json<CreateSupporterRequest>,
     ) -> Result<
         (http::StatusCode, Json<CreateSupporterResponse>),
         (http::StatusCode, Json<ErrorResponse>),
     > {
         info!("Create supporter");
+        info!(token = ?token);
 
         let valid = body.validate().await;
         if valid.is_err() {
@@ -361,12 +462,14 @@ impl AppRouter {
 
     async fn update_supporter(
         State(service): State<SupportService>,
+        Extension(token): Extension<Arc<util::auth::Token>>,
         Json(body): Json<UpdateSupporterRequest>,
     ) -> Result<
         (http::StatusCode, Json<UpdateSupporterResponse>),
         (http::StatusCode, Json<ErrorResponse>),
     > {
         info!("Update supporter");
+        info!(token = ?token);
 
         let valid = body.validate().await;
         if valid.is_err() {
@@ -394,12 +497,14 @@ impl AppRouter {
 
     async fn delete_supporter(
         State(service): State<SupportService>,
+        Extension(token): Extension<Arc<util::auth::Token>>,
         Path(supporter_id): Path<u64>,
     ) -> Result<
         (http::StatusCode, Json<DeleteSupporterResponse>),
         (http::StatusCode, Json<ErrorResponse>),
     > {
         info!("Delete supporter");
+        info!(token = ?token);
 
         let result = service
             .delete_supporter(i64::try_from(supporter_id).unwrap())
@@ -424,12 +529,14 @@ impl AppRouter {
 
     async fn get_supporter_by_login_id_and_password(
         State(service): State<SupportService>,
+        Extension(token): Extension<Arc<util::auth::Token>>,
         Path(login_request): Path<GetSupporterRequest>,
     ) -> Result<
         (http::StatusCode, Json<GetSupporterResponse>),
         (http::StatusCode, Json<ErrorResponse>),
     > {
         info!("Get supporter by login_id and password");
+        info!(token = ?token);
 
         let request = GetSupporterRequest::new(login_request.login_id, login_request.password)
             .validate()
@@ -476,12 +583,14 @@ impl AppRouter {
 
     async fn get_protagonist_supporter(
         State(service): State<SupportService>,
+        Extension(token): Extension<Arc<util::auth::Token>>,
         Path(protagonist_supporter_id): Path<u64>,
     ) -> Result<
         (http::StatusCode, Json<Vec<GetProtagonistSupporterResponse>>),
         (http::StatusCode, Json<ErrorResponse>),
     > {
         info!("Get protagonist supporter");
+        info!(token = ?token);
 
         let protagonist_supporters = service
             .get_protagonist_supporter(i64::try_from(protagonist_supporter_id).unwrap())
@@ -516,12 +625,14 @@ impl AppRouter {
 
     async fn create_protagonist_supporter(
         State(service): State<SupportService>,
+        Extension(token): Extension<Arc<util::auth::Token>>,
         Json(body): Json<CreateProtagonistSupporterRequest>,
     ) -> Result<
         (http::StatusCode, Json<CreateProtagonistSupporterResponse>),
         (http::StatusCode, Json<ErrorResponse>),
     > {
         info!("Create protagonist supporter");
+        info!(token = ?token);
 
         let valid = body.validate().await;
         if valid.is_err() {
@@ -551,12 +662,14 @@ impl AppRouter {
 
     async fn delete_protagonist_supporter(
         State(service): State<SupportService>,
+        Extension(token): Extension<Arc<util::auth::Token>>,
         Path(protagonist_supporter_id): Path<u64>,
     ) -> Result<
         (http::StatusCode, Json<DeleteProtagonistSupporterResponse>),
         (http::StatusCode, Json<ErrorResponse>),
     > {
         info!("Delete protagonist supporter");
+        info!(token = ?token);
 
         let result = service
             .delete_protagonist_supporter(i64::try_from(protagonist_supporter_id).unwrap())

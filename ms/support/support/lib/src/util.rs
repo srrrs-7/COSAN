@@ -1,3 +1,3 @@
 pub mod crypt;
 pub mod slog;
-pub mod verificator;
+pub mod auth;
