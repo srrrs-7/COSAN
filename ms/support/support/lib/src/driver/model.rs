@@ -148,7 +148,7 @@ impl GetSupporter {
     }
 
     pub fn is_valid(&self) -> bool {
-        !self.supporter_id >= 0
+        self.supporter_id >= 0
             && !self.last_name.is_empty()
             && !self.first_name.is_empty()
             && !self.email.is_empty()
@@ -189,7 +189,7 @@ impl CreateSupporter {
     }
 
     pub fn is_valid(&self) -> bool {
-        !self.supporter_id >= 0
+        self.supporter_id >= 0
             && !self.last_name.is_empty()
             && !self.first_name.is_empty()
             && !self.login_id.is_empty()
@@ -232,7 +232,7 @@ impl UpdateSupporter {
     }
 
     pub fn is_valid(&self) -> bool {
-        !self.supporter_id >= 0
+        self.supporter_id >= 0
             && !self.last_name.is_empty()
             && !self.first_name.is_empty()
             && !self.login_id.is_empty()
@@ -261,7 +261,7 @@ impl GetProtagonistSupporter {
     }
 
     pub fn is_valid(&self) -> bool {
-        !self.supporter_id >= 0
+        self.supporter_id >= 0
             && !self.last_name.is_empty()
             && !self.first_name.is_empty()
             && !self.country.is_empty()
