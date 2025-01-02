@@ -1,14 +1,14 @@
-use chrono::{Local, NaiveDateTime, TimeZone, Utc};
+use chrono::{DateTime, Utc};
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Token {
-    pub uid: Option<i64>,
-    pub issued: Option<NaiveDateTime>,
-    pub expired: Option<i64>,
-    pub scopes: Option<Vec<String>>,
-    pub role: Option<String>,
+    pub uid: i64,
+    pub issued: DateTime<Utc>,
+    pub expired: i64,
+    pub scopes: Vec<String>,
+    pub role: String,
 }
 
 pub fn validate_token(
@@ -17,11 +17,8 @@ pub fn validate_token(
 ) -> Result<Token, Box<dyn std::error::Error>> {
     let claims = get_claims_from_token::<Token>(token_string, secret_key)?;
 
-    if let Some(exp) = claims.expired {
-        let expired_datetime = Utc.timestamp_opt(exp, 0).unwrap();
-        if Local::now() > expired_datetime {
-            return Err("access token expired".into());
-        }
+    if claims.expired < Utc::now().timestamp() {
+        return Err("Token has expired".into());
     }
 
     Ok(claims)
