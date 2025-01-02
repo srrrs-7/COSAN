@@ -7,86 +7,63 @@ import (
 )
 
 const (
-	ACCESS_TOKEN_EXPIRED_AT  = 15 * time.Minute
-	REFRESH_TOKEN_EXPIRED_AT = 30 * 24 * time.Hour
+	accessTokenExpiration  = 15 * time.Minute
+	refreshTokenExpiration = 30 * 24 * time.Hour
 )
 
+// Token は、アクセストークンとリフレッシュトークンを保持する構造体です。
 type Token struct {
-	AccessToken  string
-	RefreshToken string
-	IssuedAt     time.Time
-	ExpiredAt    time.Time
+	AccessToken  string    `json:"access_token"`
+	RefreshToken string    `json:"refresh_token"`
+	IssuedAt     time.Time `json:"issued_at"`
+	ExpiredAt    time.Time `json:"expired_at"`
 }
 
-type AccessToken struct {
-	Uid     int64
-	Expired time.Duration
-	Issued  time.Time
-	Scopes  []string
-	Role    int8
+// Claims は、JWTのペイロードに含めるクレームです。
+type Claims struct {
+	Uid     int64     `json:"uid"`
+	Issued  time.Time `json:"issued"`
+	Expired int64     `json:"expired"`
+	Scopes  []string  `json:"scopes"`
+	Role    int8      `json:"role"`
+	jwt.StandardClaims
 }
 
-type RefreshToken struct {
-	Uid     int64
-	Expired time.Duration
-	Issued  time.Time
-	Scopes  []string
-	Role    int8
-}
-
-func NewToken(uid int64, role int8, scope []string, secretKey string) *Token {
-	at := AccessToken{
+// NewToken は、新しいアクセストークンとリフレッシュトークンを生成します。
+func NewToken(uid int64, role int8, scopes []string, secretKey string) *Token {
+	now := time.Now()
+	accessTokenClaims := Claims{
 		Uid:     uid,
-		Expired: ACCESS_TOKEN_EXPIRED_AT,
-		Issued:  time.Now(),
+		Issued:  now,
+		Expired: now.Add(accessTokenExpiration).Unix(),
+		Scopes:  scopes,
 		Role:    role,
-		Scopes:  scope,
 	}
-	rt := RefreshToken{
+	refreshTokenClaims := Claims{
 		Uid:     uid,
-		Expired: REFRESH_TOKEN_EXPIRED_AT,
-		Issued:  time.Now(),
+		Issued:  now,
+		Expired: now.Add(refreshTokenExpiration).Unix(),
+		Scopes:  scopes,
 		Role:    role,
-		Scopes:  scope,
 	}
+
+	accessToken := generateJWT(accessTokenClaims, secretKey)
+	refreshToken := generateJWT(refreshTokenClaims, secretKey)
 
 	return &Token{
-		AccessToken:  at.JWT(secretKey),
-		RefreshToken: rt.JWT(secretKey),
-		IssuedAt:     time.Now(),
-		ExpiredAt:    time.Now().Add(ACCESS_TOKEN_EXPIRED_AT),
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		IssuedAt:     now,
+		ExpiredAt:    now.Add(accessTokenExpiration),
 	}
 }
 
-func (t AccessToken) JWT(secretKey string) string {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"Uid":     t.Uid,
-		"Expired": t.Expired,
-		"Issued":  t.Issued,
-		"Scopes":  t.Scopes,
-		"Role":    t.Role,
-	})
-
-	return generateJWT(secretKey, token)
-}
-
-func (t RefreshToken) JWT(secretKey string) string {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"Uid":     t.Uid,
-		"Expired": t.Expired,
-		"Issued":  t.Issued,
-		"Scopes":  t.Scopes,
-		"Role":    t.Role,
-	})
-
-	return generateJWT(secretKey, token)
-}
-
-func generateJWT(secretKey string, token *jwt.Token) string {
+// generateJWT は、JWTを生成します。
+func generateJWT(claims Claims, secretKey string) string {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signedToken, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		panic(err)
 	}
-
 	return signedToken
 }

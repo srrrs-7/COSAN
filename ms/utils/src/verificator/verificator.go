@@ -3,78 +3,30 @@ package verificator
 import (
 	"auth/domain/entity"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt"
 )
 
-func ValidateAccessToken(tokenString string) (*entity.AccessToken, error) {
-	claims, err := getClaimsFromToken(tokenString)
-	if err != nil {
-		return nil, err
-	}
-
-	at := &entity.AccessToken{
-		Uid:     int64(claims["Uid"].(float64)),
-		Issued:  time.Unix(int64(claims["Issued"].(float64)), 0),
-		Expired: time.Duration(int64(claims["Expired"].(float64))) * time.Second,
-		Scopes:  convertScopes(claims["Scopes"].([]interface{})),
-		Role:    int8(claims["Role"].(float64)),
-	}
-
-	if expiredToken(at.Expired) {
-		return nil, errors.New("refresh token expired")
-	}
-
-	return at, nil
-}
-
-func ValidateRefreshToken(tokenString string) (*entity.RefreshToken, error) {
-	claims, err := getClaimsFromToken(tokenString)
-	if err != nil {
-		return nil, err
-	}
-
-	rt := &entity.RefreshToken{
-		Uid:     int64(claims["Uid"].(float64)),
-		Issued:  time.Unix(int64(claims["Issued"].(float64)), 0),
-		Expired: time.Duration(int64(claims["Expired"].(float64))) * time.Second,
-		Scopes:  convertScopes(claims["Scopes"].([]interface{})),
-		Role:    int8(claims["Role"].(float64)),
-	}
-
-	if expiredToken(rt.Expired) {
-		return nil, errors.New("refresh token expired")
-	}
-
-	return rt, nil
-}
-
-func getClaimsFromToken(tokenString string) (jwt.MapClaims, error) {
-	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
-		return []byte("secret"), nil
+// ValidateToken は、JWTを検証し、クレームを返します。
+func ValidateToken(tokenString, secretKey string) (*entity.Claims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &entity.Claims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return secretKey, nil
 	})
-	if err != nil || !token.Valid {
+	if err != nil {
 		return nil, err
 	}
 
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return nil, errors.New("invalid token claims")
+	if claims, ok := token.Claims.(*entity.Claims); ok && token.Valid {
+		if claims.Expired < time.Now().Unix() {
+			return nil, errors.New("token expired")
+		}
+		return claims, nil
 	}
 
-	return claims, nil
-}
-
-func convertScopes(scopesInterface []interface{}) []string {
-	scopes := make([]string, len(scopesInterface))
-	for i, v := range scopesInterface {
-		scopes[i] = v.(string)
-	}
-
-	return scopes
-}
-
-func expiredToken(expired time.Duration) bool {
-	return time.Now().After(time.Now().Add(expired))
+	return nil, errors.New("invalid token")
 }
