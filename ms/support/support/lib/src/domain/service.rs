@@ -109,18 +109,20 @@ impl SupportService {
         &self,
         login_request: request::GetProtagonistRequest,
     ) -> Result<response::GetProtagonistResponse, anyhow::Error> {
+        let original_password = login_request.password.clone();
+        let convert_request = login_request.convert_hash_password().await?;
         let protagonist = self
             .repository
             .get_protagonist_by_login_id_and_password(
-                login_request.login_id.as_str(),
-                login_request.password.as_str(),
+                convert_request.login_id.as_str(),
+                convert_request.password.as_str(),
             )
             .await?;
 
         match protagonist {
             Some(protagonist) => {
                 let valid = protagonist
-                    .verify_password(login_request.password.as_str())
+                    .verify_password(original_password.as_str())
                     .await?;
                 if !valid {
                     return Err(anyhow::anyhow!("Invalid password"));
@@ -232,20 +234,22 @@ impl SupportService {
 
     pub async fn get_supporter_by_login_id_and_password(
         &self,
-        get_supporter_request: request::GetSupporterRequest,
+        login_request: request::GetSupporterRequest,
     ) -> Result<response::GetSupporterResponse, anyhow::Error> {
+        let original_password = login_request.password.clone();
+        let convert_request = login_request.convert_hash_password().await?;
         let supporter = self
             .repository
             .get_supporter_by_login_id_and_password(
-                get_supporter_request.login_id.as_str(),
-                get_supporter_request.password.as_str(),
+                convert_request.login_id.as_str(),
+                convert_request.password.as_str(),
             )
             .await?;
 
         match supporter {
             Some(supporter) => {
                 let valid = supporter
-                    .verify_password(get_supporter_request.password.as_str())
+                    .verify_password(original_password.as_str())
                     .await?;
                 if !valid {
                     return Err(anyhow::anyhow!("Invalid password"));
