@@ -154,8 +154,11 @@ impl AppRouter {
         }
 
         info!(token);
+        // secret key info
+        let secret_key = secret_key.as_str();
+        info!(secret_key);
 
-        let token = util::auth::validate_token(token, secret_key.as_str()).map_err(|e| {
+        let token = util::auth::validate_token(token, secret_key).map_err(|e| {
             error!("verify_token_middleware: {}", e);
             return http::StatusCode::UNAUTHORIZED;
         });
