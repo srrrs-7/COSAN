@@ -53,7 +53,6 @@ impl AppRouter {
             .nest(
                 "/support/v1",
                 Router::new()
-                    .layer(axum::middleware::from_fn(Self::request_log_middleware))
                     .route("/health", get(Self::health_check))
                     .route(
                         "/protagonist/login/:login_id/password/:password",
@@ -66,28 +65,26 @@ impl AppRouter {
                     .nest(
                         "/protagonist",
                         Router::new()
-                            .layer(axum::middleware::from_fn(Self::verify_token_middleware))
-                            .layer(axum::middleware::from_fn(Self::request_log_middleware))
                             .route("/:protagonist_id", get(Self::get_protagonist))
                             .route("/", post(Self::create_protagonist))
                             .route("/", put(Self::update_protagonist))
-                            .route("/:protagonist_id", delete(Self::delete_protagonist)),
+                            .route("/:protagonist_id", delete(Self::delete_protagonist))
+                            .layer(axum::middleware::from_fn(Self::verify_token_middleware))
+                            .layer(axum::middleware::from_fn(Self::request_log_middleware)),
                     )
                     .nest(
                         "/supporter",
                         Router::new()
-                            .layer(axum::middleware::from_fn(Self::verify_token_middleware))
-                            .layer(axum::middleware::from_fn(Self::request_log_middleware))
                             .route("/:supporter_id", get(Self::get_supporter))
                             .route("/", post(Self::create_supporter))
                             .route("/", put(Self::update_supporter))
-                            .route("/:supporter_id", delete(Self::delete_supporter)),
+                            .route("/:supporter_id", delete(Self::delete_supporter))
+                            .layer(axum::middleware::from_fn(Self::verify_token_middleware))
+                            .layer(axum::middleware::from_fn(Self::request_log_middleware)),
                     )
                     .nest(
                         "/protagonist_supporter",
                         Router::new()
-                            .layer(axum::middleware::from_fn(Self::verify_token_middleware))
-                            .layer(axum::middleware::from_fn(Self::request_log_middleware))
                             .route(
                                 "/:protagonist_supporter_id",
                                 get(Self::get_protagonist_supporter),
@@ -96,8 +93,11 @@ impl AppRouter {
                             .route(
                                 "/:protagonist_supporter_id",
                                 delete(Self::delete_protagonist_supporter),
-                            ),
-                    ),
+                            )
+                            .layer(axum::middleware::from_fn(Self::verify_token_middleware))
+                            .layer(axum::middleware::from_fn(Self::request_log_middleware)),
+                    )
+                    .layer(axum::middleware::from_fn(Self::request_log_middleware)),
             )
             .with_state(self.service.clone());
 
