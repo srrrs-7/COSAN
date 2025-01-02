@@ -1,4 +1,4 @@
-use chrono::{DateTime, Duration, Local, NaiveDateTime, TimeZone, Utc};
+use chrono::{Local, NaiveDateTime, TimeZone, Utc};
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
 
