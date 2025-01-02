@@ -128,7 +128,7 @@ impl AppRouter {
         Extension(secret_key): Extension<Arc<String>>,
         mut req: http::Request<B>,
         next: Next<B>,
-    ) -> Result<Response, (http::StatusCode, Json<ErrorResponse>)> {
+    ) -> Result<Response, http::StatusCode> {
         let auth_header = req
             .headers()
             .get(http::header::AUTHORIZATION)
@@ -138,50 +138,26 @@ impl AppRouter {
             auth_header
         } else {
             error!("verify_token_middleware: Authorization header not found");
-            return Err((
-                http::StatusCode::BAD_REQUEST,
-                Json(ErrorResponse {
-                    error: format!("Bad Request: Authorization header not found"),
-                    message: format!("Authorization header not found"),
-                }),
-            ));
+            return Err(http::StatusCode::BAD_REQUEST);
         };
 
         let bearer = auth_header.split_whitespace().nth(0).unwrap_or_default();
         if bearer != "Bearer" {
             error!("verify_token_middleware: Authorization header is not Bearer");
-            return Err((
-                http::StatusCode::BAD_REQUEST,
-                Json(ErrorResponse {
-                    error: format!("Bad Request: {}", bearer),
-                    message: format!("Authorization header is not Bearer: {}", bearer),
-                }),
-            ));
+            return Err(http::StatusCode::BAD_REQUEST);
         }
 
         let token = auth_header.split_whitespace().nth(1).unwrap_or_default();
         if token.is_empty() {
             error!("verify_token_middleware: Token is empty");
-            return Err((
-                http::StatusCode::BAD_REQUEST,
-                Json(ErrorResponse {
-                    error: format!("Bad Request: Token is empty"),
-                    message: format!("Token is empty"),
-                }),
-            ));
+            return Err(http::StatusCode::BAD_REQUEST);
         }
 
         info!(token);
 
-        let token = util::auth::validate_token(token, secret_key.as_str()).map_err(|_| {
-            error!("verify_token_middleware: Token is invalid");
-            (
-                http::StatusCode::UNAUTHORIZED,
-                Json(ErrorResponse {
-                    error: format!("Unauthorized: Token is invalid"),
-                    message: format!("Token is invalid"),
-                }),
-            )
+        let token = util::auth::validate_token(token, secret_key.as_str()).map_err(|e| {
+            error!("verify_token_middleware: {}", e);
+            http::StatusCode::UNAUTHORIZED
         });
 
         // token info add to request context
