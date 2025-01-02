@@ -5,8 +5,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Token {
     pub uid: Option<i64>,
-    pub issued: Option<DateTime<Utc>>,
-    pub expired: Option<i64>,
+    pub exp: Option<i64>,
+    pub iat: Option<DateTime<Utc>>,
     pub scopes: Option<Vec<String>>,
     pub role: Option<String>,
 }
@@ -17,7 +17,7 @@ pub fn validate_token(
 ) -> Result<Token, Box<dyn std::error::Error>> {
     let claims = get_claims_from_token::<Token>(token_string, secret_key)?;
 
-    if let Some(exp) = claims.expired {
+    if let Some(exp) = claims.exp {
         let expired_datetime = Utc.timestamp_opt(exp, 0).unwrap();
         if Local::now() > expired_datetime {
             return Err("access token expired".into());
