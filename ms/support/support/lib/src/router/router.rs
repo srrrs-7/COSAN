@@ -11,6 +11,7 @@ use super::response::{
 use crate::domain::service::SupportService;
 use crate::router::request::GetSupporterRequest;
 use crate::util;
+use axum::middleware;
 use axum::{
     http,
     middleware::Next,
@@ -23,7 +24,6 @@ use axum::{
 };
 use std::net::SocketAddr;
 use std::sync::Arc;
-use tower::ServiceBuilder;
 use tracing::{error, info};
 
 #[derive(Clone)]
@@ -65,13 +65,10 @@ impl AppRouter {
                             .route("/:protagonist_id", get(Self::get_protagonist))
                             .route("/", put(Self::update_protagonist))
                             .route("/:protagonist_id", delete(Self::delete_protagonist))
-                            .layer(
-                                ServiceBuilder::new()
-                                    .layer(Extension(Arc::new(self.secret_key.clone())))
-                                    .layer(axum::middleware::from_fn(
-                                        Self::verify_token_middleware,
-                                    )),
-                            )
+                            .layer(middleware::from_fn_with_state(
+                                Arc::new(self.secret_key.clone()),
+                                Self::verify_token_middleware,
+                            ))
                             .route("/", post(Self::create_protagonist))
                             .route(
                                 "/login/:login_id/password/:password",
@@ -84,13 +81,10 @@ impl AppRouter {
                             .route("/:supporter_id", get(Self::get_supporter))
                             .route("/", put(Self::update_supporter))
                             .route("/:supporter_id", delete(Self::delete_supporter))
-                            .layer(
-                                ServiceBuilder::new()
-                                    .layer(Extension(Arc::new(self.secret_key.clone())))
-                                    .layer(axum::middleware::from_fn(
-                                        Self::verify_token_middleware,
-                                    )),
-                            )
+                            .layer(middleware::from_fn_with_state(
+                                Arc::new(self.secret_key.clone()),
+                                Self::verify_token_middleware,
+                            ))
                             .route("/", post(Self::create_supporter))
                             .route(
                                 "/login/:login_id/password/:password",
@@ -109,13 +103,10 @@ impl AppRouter {
                                 "/:protagonist_supporter_id",
                                 delete(Self::delete_protagonist_supporter),
                             )
-                            .layer(
-                                ServiceBuilder::new()
-                                    .layer(Extension(Arc::new(self.secret_key.clone())))
-                                    .layer(axum::middleware::from_fn(
-                                        Self::verify_token_middleware,
-                                    )),
-                            ),
+                            .layer(middleware::from_fn_with_state(
+                                Arc::new(self.secret_key.clone()),
+                                Self::verify_token_middleware,
+                            )),
                     )
                     .layer(axum::middleware::from_fn(Self::request_log_middleware)),
             )
@@ -169,10 +160,8 @@ impl AppRouter {
         next: Next<B>,
     ) -> Result<Response, http::StatusCode> {
         info!("Request: {} {}", req.method(), req.uri());
-
         let res = next.run(req).await;
-
-        info!("Response: {:?}", res.status());
+        info!("Response: {}", res.status());
 
         Ok(res)
     }
