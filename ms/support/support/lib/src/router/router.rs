@@ -162,7 +162,7 @@ impl AppRouter {
         });
 
         // token info add to request context
-        req.extensions_mut().insert(token);
+        req.extensions_mut().insert(Arc::new(token));
 
         Ok(next.run(req).await)
     }
