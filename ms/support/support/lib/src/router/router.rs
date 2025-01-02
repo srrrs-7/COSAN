@@ -54,6 +54,8 @@ impl AppRouter {
     }
 
     async fn init_router(&self) -> Result<Router, anyhow::Error> {
+        let arc_secret_key = Arc::new(self.secret_key.clone());
+
         let router = Router::new()
             .nest(
                 "/support/v1",
@@ -66,7 +68,7 @@ impl AppRouter {
                             .route("/", put(Self::update_protagonist))
                             .route("/:protagonist_id", delete(Self::delete_protagonist))
                             .layer(middleware::from_fn_with_state(
-                                Arc::new(self.secret_key.clone()),
+                                arc_secret_key.clone(),
                                 Self::verify_token_middleware,
                             ))
                             .route("/", post(Self::create_protagonist))
@@ -82,7 +84,7 @@ impl AppRouter {
                             .route("/", put(Self::update_supporter))
                             .route("/:supporter_id", delete(Self::delete_supporter))
                             .layer(middleware::from_fn_with_state(
-                                Arc::new(self.secret_key.clone()),
+                                arc_secret_key.clone(),
                                 Self::verify_token_middleware,
                             ))
                             .route("/", post(Self::create_supporter))
@@ -104,7 +106,7 @@ impl AppRouter {
                                 delete(Self::delete_protagonist_supporter),
                             )
                             .layer(middleware::from_fn_with_state(
-                                Arc::new(self.secret_key.clone()),
+                                arc_secret_key.clone(),
                                 Self::verify_token_middleware,
                             )),
                     )
