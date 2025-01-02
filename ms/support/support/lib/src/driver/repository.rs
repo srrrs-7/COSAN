@@ -39,6 +39,8 @@ impl SupportRepository {
             row.protagonist_id,
             row.last_name,
             row.first_name,
+            row.login_id,
+            row.password,
             row.email,
             row.country,
         )))
@@ -75,6 +77,8 @@ impl SupportRepository {
             row.protagonist_id,
             row.last_name,
             row.first_name,
+            row.login_id,
+            row.password,
             row.email,
             row.country,
         )))
@@ -112,6 +116,8 @@ impl SupportRepository {
             row.protagonist_id,
             row.last_name,
             row.first_name,
+            row.login_id,
+            row.password,
             row.email,
             row.country,
         )))
@@ -135,8 +141,8 @@ impl SupportRepository {
 
     pub async fn get_protagonist_by_login_id_and_password(
         &self,
-        login_id: String,
-        password: String,
+        login_id: &str,
+        password: &str,
     ) -> Result<Option<entity::Protagonist>, sqlx::Error> {
         let row = sqlx::query_as::<_, model::GetProtagonist>(
             r#"
@@ -162,6 +168,8 @@ impl SupportRepository {
             row.protagonist_id,
             row.last_name,
             row.first_name,
+            row.login_id,
+            row.password,
             row.email,
             row.country,
         )))
@@ -193,6 +201,8 @@ impl SupportRepository {
             row.supporter_id,
             row.last_name,
             row.first_name,
+            row.login_id,
+            row.password,
             row.email,
             row.country,
         )))
@@ -229,6 +239,8 @@ impl SupportRepository {
             row.supporter_id,
             row.last_name,
             row.first_name,
+            row.login_id,
+            row.password,
             row.email,
             row.country,
         )))
@@ -266,6 +278,8 @@ impl SupportRepository {
             row.supporter_id,
             row.last_name,
             row.first_name,
+            row.login_id,
+            row.password,
             row.email,
             row.country,
         )))
@@ -289,13 +303,13 @@ impl SupportRepository {
 
     pub async fn get_supporter_by_login_id_and_password(
         &self,
-        login_id: String,
-        password: String,
+        login_id: &str,
+        password: &str,
     ) -> Result<Option<entity::Supporter>, sqlx::Error> {
         let row = sqlx::query_as::<_, model::GetSupporter>(
             r#"
             SELECT 
-                supporter_id, last_name, first_name, email, country
+                supporter_id, last_name, login_id, password, first_name, email, country
             FROM 
                 supporters
             WHERE 
@@ -316,6 +330,8 @@ impl SupportRepository {
             row.supporter_id,
             row.last_name,
             row.first_name,
+            row.login_id,
+            row.password,
             row.email,
             row.country,
         )))

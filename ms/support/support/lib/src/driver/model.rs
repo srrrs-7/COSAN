@@ -5,6 +5,8 @@ pub struct GetProtagonist {
     pub protagonist_id: i64,
     pub last_name: String,
     pub first_name: String,
+    pub login_id: String,
+    pub password: String,
     pub email: String,
     pub country: String,
 }
@@ -14,6 +16,8 @@ impl GetProtagonist {
         protagonist_id: i64,
         last_name: String,
         first_name: String,
+        login_id: String,
+        password: String,
         email: String,
         country: String,
     ) -> Self {
@@ -21,6 +25,8 @@ impl GetProtagonist {
             protagonist_id,
             last_name,
             first_name,
+            login_id,
+            password,
             email,
             country,
         }
@@ -30,6 +36,8 @@ impl GetProtagonist {
         self.protagonist_id >= 0
             && !self.last_name.is_empty()
             && !self.first_name.is_empty()
+            && !self.login_id.is_empty()
+            && !self.password.is_empty()
             && !self.email.is_empty()
             && !self.country.is_empty()
     }
@@ -126,6 +134,8 @@ pub struct GetSupporter {
     pub supporter_id: i64,
     pub last_name: String,
     pub first_name: String,
+    pub login_id: String,
+    pub password: String,
     pub email: String,
     pub country: String,
 }
@@ -135,6 +145,8 @@ impl GetSupporter {
         supporter_id: i64,
         last_name: String,
         first_name: String,
+        login_id: String,
+        password: String,
         email: String,
         country: String,
     ) -> Self {
@@ -142,6 +154,8 @@ impl GetSupporter {
             supporter_id,
             last_name,
             first_name,
+            login_id,
+            password,
             email,
             country,
         }
@@ -151,6 +165,8 @@ impl GetSupporter {
         self.supporter_id >= 0
             && !self.last_name.is_empty()
             && !self.first_name.is_empty()
+            && !self.login_id.is_empty()
+            && !self.password.is_empty()
             && !self.email.is_empty()
             && !self.country.is_empty()
     }

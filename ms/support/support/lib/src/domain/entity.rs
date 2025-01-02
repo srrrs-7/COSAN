@@ -1,7 +1,11 @@
+use crate::util;
+
 pub struct Protagonist {
     pub protagonist_id: i64,
     pub last_name: String,
     pub first_name: String,
+    pub login_id: String,
+    pub password: String,
     pub email: String,
     pub country: String,
 }
@@ -11,6 +15,8 @@ impl Protagonist {
         protagonist_id: i64,
         last_name: String,
         first_name: String,
+        login_id: String,
+        password: String,
         email: String,
         country: String,
     ) -> Self {
@@ -18,9 +24,15 @@ impl Protagonist {
             protagonist_id,
             last_name,
             first_name,
+            login_id,
+            password,
             email,
             country,
         }
+    }
+
+    pub async fn verify_password(&self, password: &str) -> Result<bool, bcrypt::BcryptError> {
+        util::crypt::verify_password(password, &self.password).await
     }
 }
 
@@ -28,6 +40,8 @@ pub struct Supporter {
     pub supporter_id: i64,
     pub last_name: String,
     pub first_name: String,
+    pub login_id: String,
+    pub password: String,
     pub email: String,
     pub country: String,
 }
@@ -37,6 +51,8 @@ impl Supporter {
         supporter_id: i64,
         last_name: String,
         first_name: String,
+        login_id: String,
+        password: String,
         email: String,
         country: String,
     ) -> Self {
@@ -44,9 +60,15 @@ impl Supporter {
             supporter_id,
             last_name,
             first_name,
+            login_id,
+            password,
             email,
             country,
         }
+    }
+
+    pub async fn verify_password(&self, password: &str) -> Result<bool, bcrypt::BcryptError> {
+        util::crypt::verify_password(password, &self.password).await
     }
 }
 

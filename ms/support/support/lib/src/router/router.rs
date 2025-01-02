@@ -11,6 +11,7 @@ use super::response::{
 use crate::domain::service::SupportService;
 use crate::driver::model;
 use crate::router::request::GetSupporterRequest;
+use crate::util;
 use axum::{
     http,
     routing::{delete, get, post, put},
@@ -169,7 +170,7 @@ impl AppRouter {
                 body.last_name,
                 body.first_name,
                 body.login_id,
-                body.password,
+                util::crypt::hash_password(&body.password).await.unwrap(),
                 body.email,
                 body.country,
             ))
@@ -213,7 +214,7 @@ impl AppRouter {
                 body.last_name,
                 body.first_name,
                 body.login_id,
-                body.password,
+                util::crypt::hash_password(&body.password).await.unwrap(),
                 body.email,
                 body.country,
             ))
@@ -375,7 +376,7 @@ impl AppRouter {
                 body.last_name,
                 body.first_name,
                 body.login_id,
-                body.password,
+                util::crypt::hash_password(&body.password).await.unwrap(),
                 body.email,
                 body.country,
             ))
@@ -419,7 +420,7 @@ impl AppRouter {
                 body.last_name,
                 body.first_name,
                 body.login_id,
-                body.password,
+                util::crypt::hash_password(&body.password).await.unwrap(),
                 body.email,
                 body.country,
             ))

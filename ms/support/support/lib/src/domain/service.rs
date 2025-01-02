@@ -83,19 +83,28 @@ impl SupportService {
         let protagonist = self
             .repository
             .get_protagonist_by_login_id_and_password(
-                get_protagonist_request.login_id,
-                get_protagonist_request.password,
+                get_protagonist_request.login_id.as_str(),
+                get_protagonist_request.password.as_str(),
             )
             .await?;
 
         match protagonist {
-            Some(protagonist) => Ok(response::GetProtagonistResponse {
-                protagonist_id: u64::try_from(protagonist.protagonist_id).unwrap(),
-                protagonist_last_name: protagonist.last_name,
-                protagonist_first_name: protagonist.first_name,
-                protagonist_email: protagonist.email,
-                protagonist_country: protagonist.country,
-            }),
+            Some(protagonist) => {
+                let valid = protagonist
+                    .verify_password(get_protagonist_request.password.as_str())
+                    .await?;
+                if !valid {
+                    return Err(anyhow::anyhow!("Invalid password"));
+                }
+
+                Ok(response::GetProtagonistResponse {
+                    protagonist_id: u64::try_from(protagonist.protagonist_id).unwrap(),
+                    protagonist_last_name: protagonist.last_name,
+                    protagonist_first_name: protagonist.first_name,
+                    protagonist_email: protagonist.email,
+                    protagonist_country: protagonist.country,
+                })
+            }
             None => Err(anyhow::anyhow!("Protagonist not found")),
         }
     }
@@ -170,19 +179,28 @@ impl SupportService {
         let supporter = self
             .repository
             .get_supporter_by_login_id_and_password(
-                get_supporter_request.login_id,
-                get_supporter_request.password,
+                get_supporter_request.login_id.as_str(),
+                get_supporter_request.password.as_str(),
             )
             .await?;
 
         match supporter {
-            Some(supporter) => Ok(response::GetSupporterResponse {
-                supporter_id: u64::try_from(supporter.supporter_id).unwrap(),
-                supporter_last_name: supporter.last_name,
-                supporter_first_name: supporter.first_name,
-                supporter_email: supporter.email,
-                supporter_country: supporter.country,
-            }),
+            Some(supporter) => {
+                let valid = supporter
+                    .verify_password(get_supporter_request.password.as_str())
+                    .await?;
+                if !valid {
+                    return Err(anyhow::anyhow!("Invalid password"));
+                }
+
+                Ok(response::GetSupporterResponse {
+                    supporter_id: u64::try_from(supporter.supporter_id).unwrap(),
+                    supporter_last_name: supporter.last_name,
+                    supporter_first_name: supporter.first_name,
+                    supporter_email: supporter.email,
+                    supporter_country: supporter.country,
+                })
+            }
             None => Err(anyhow::anyhow!("Supporter not found")),
         }
     }
