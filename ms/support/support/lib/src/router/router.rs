@@ -67,8 +67,10 @@ impl AppRouter {
                             .route("/:protagonist_id", delete(Self::delete_protagonist))
                             .layer(
                                 ServiceBuilder::new()
-                                    .layer(axum::middleware::from_fn(Self::verify_token_middleware))
-                                    .layer(Extension(Arc::new(self.secret_key.clone()))),
+                                    .layer(Extension(Arc::new(self.secret_key.clone())))
+                                    .layer(axum::middleware::from_fn(
+                                        Self::verify_token_middleware,
+                                    )),
                             )
                             .route("/", post(Self::create_protagonist))
                             .route(
@@ -84,8 +86,10 @@ impl AppRouter {
                             .route("/:supporter_id", delete(Self::delete_supporter))
                             .layer(
                                 ServiceBuilder::new()
-                                    .layer(axum::middleware::from_fn(Self::verify_token_middleware))
-                                    .layer(Extension(Arc::new(self.secret_key.clone()))),
+                                    .layer(Extension(Arc::new(self.secret_key.clone())))
+                                    .layer(axum::middleware::from_fn(
+                                        Self::verify_token_middleware,
+                                    )),
                             )
                             .route("/", post(Self::create_supporter))
                             .route(
@@ -107,8 +111,10 @@ impl AppRouter {
                             )
                             .layer(
                                 ServiceBuilder::new()
-                                    .layer(axum::middleware::from_fn(Self::verify_token_middleware))
-                                    .layer(Extension(Arc::new(self.secret_key.clone()))),
+                                    .layer(Extension(Arc::new(self.secret_key.clone())))
+                                    .layer(axum::middleware::from_fn(
+                                        Self::verify_token_middleware,
+                                    )),
                             ),
                     )
                     .layer(axum::middleware::from_fn(Self::request_log_middleware)),
