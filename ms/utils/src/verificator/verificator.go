@@ -15,8 +15,7 @@ func ValidateAccessToken(tokenString string) (*entity.AccessToken, error) {
 	}
 
 	at := &entity.AccessToken{
-		Cid:     int64(claims["Cid"].(float64)),
-		Sid:     int64(claims["Sid"].(float64)),
+		Uid:     int64(claims["Uid"].(float64)),
 		Issued:  time.Unix(int64(claims["Issued"].(float64)), 0),
 		Expired: time.Duration(int64(claims["Expired"].(float64))) * time.Second,
 		Scopes:  convertScopes(claims["Scopes"].([]interface{})),
@@ -37,8 +36,7 @@ func ValidateRefreshToken(tokenString string) (*entity.RefreshToken, error) {
 	}
 
 	rt := &entity.RefreshToken{
-		Cid:     int64(claims["Cid"].(float64)),
-		Sid:     int64(claims["Sid"].(float64)),
+		Uid:     int64(claims["Uid"].(float64)),
 		Issued:  time.Unix(int64(claims["Issued"].(float64)), 0),
 		Expired: time.Duration(int64(claims["Expired"].(float64))) * time.Second,
 		Scopes:  convertScopes(claims["Scopes"].([]interface{})),
@@ -68,11 +66,12 @@ func getClaimsFromToken(tokenString string) (jwt.MapClaims, error) {
 	return claims, nil
 }
 
-func convertScopes(scopesInterface []interface{}) []int8 {
-	scopes := make([]int8, len(scopesInterface))
+func convertScopes(scopesInterface []interface{}) []string {
+	scopes := make([]string, len(scopesInterface))
 	for i, v := range scopesInterface {
-		scopes[i] = int8(v.(float64))
+		scopes[i] = v.(string)
 	}
+
 	return scopes
 }
 
