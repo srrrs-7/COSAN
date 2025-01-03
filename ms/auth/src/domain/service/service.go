@@ -13,4 +13,6 @@ type Autheticator interface {
 	Refresh(ctx context.Context, rToken, secretKey string) (*response.Login, error)
 }
 
-type Certificator interface{}
+type Certificator interface {
+	
+}
