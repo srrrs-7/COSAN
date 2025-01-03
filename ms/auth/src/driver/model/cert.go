@@ -4,7 +4,7 @@ import "auth/domain/entity"
 
 type GetScope struct {
 	Uid  int64  `gorm:"column:user_id"`
-	Cid  int64  `gorm:"column:certificate_domain_id"`
+	Cid  string `gorm:"column:certificate_domain_id"`
 	Auth string `gorm:"column:authority"`
 }
 
