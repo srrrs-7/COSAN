@@ -5,6 +5,7 @@ import (
 	"context"
 	"net/http"
 	"strings"
+	"utils/utilhttp"
 	"utils/verificator"
 
 	"github.com/go-chi/chi"
@@ -78,13 +79,13 @@ func (rt Router) middlewares(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-			http.Error(w, "Authorization header required", http.StatusUnauthorized)
+			utilhttp.ResponseUnauthorized(w, response.Err{Error: "Bearer token not found"})
 			return
 		}
 
 		claim, err := verificator.ValidateToken(strings.TrimPrefix(authHeader, "Bearer "), rt.SecretKey)
 		if err != nil {
-			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			utilhttp.ResponseUnauthorized(w, response.Err{Error: err.Error()})
 			return
 		}
 

@@ -30,6 +30,10 @@ func ResponseNotFound[T any](w http.ResponseWriter, msg T) {
 	writeResponse(w, http.StatusNotFound, msg) // Corrected status code
 }
 
+func ResponseUnauthorized[T any](w http.ResponseWriter, msg T) {
+	writeResponse(w, http.StatusUnauthorized, msg)
+}
+
 // writeResponse is a helper function to write the response with the given status code and message.
 func writeResponse[T any](w http.ResponseWriter, statusCode int, msg T) {
 	res, err := json.Marshal(msg)
