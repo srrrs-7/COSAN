@@ -14,5 +14,4 @@ type Autheticator interface {
 }
 
 type Certificator interface {
-	
 }

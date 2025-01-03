@@ -31,12 +31,17 @@ func (r CreateScopeRequest) Validate() error {
 }
 
 type GetScopeRequest struct {
-	Uid int64 `json:"user_id"`
+	Uid int64  `json:"user_id"`
+	Cid string `json:"certificate_domain_id"`
 }
 
 func (r GetScopeRequest) Validate() error {
 	if r.Uid < 0 {
 		return fmt.Errorf("staff id is less than 0")
+	}
+
+	if r.Cid != "" {
+		return fmt.Errorf("certificate domain id is less than 0")
 	}
 
 	return nil
@@ -68,15 +73,15 @@ func (r UpdateScopeRequest) Validate() error {
 }
 
 type DeleteScopeRequest struct {
-	Uid int64 `json:"user_id"`
-	Cid int64 `json:"certificate_domain_id"`
+	Uid int64  `json:"user_id"`
+	Cid string `json:"certificate_domain_id"`
 }
 
 func (r DeleteScopeRequest) Validate() error {
 	if r.Uid < 0 {
 		return fmt.Errorf("staff id is less than 0")
 	}
-	if r.Cid < 0 {
+	if r.Cid == "" {
 		return fmt.Errorf("certificate domain id is less than 0")
 	}
 
@@ -85,7 +90,7 @@ func (r DeleteScopeRequest) Validate() error {
 
 type CreateRoleRequest struct {
 	Uid  int64  `json:"user_id"`
-	Role string `json:"role"`
+	Role string `json:"user_role"`
 }
 
 func (r CreateRoleRequest) Validate() error {
@@ -106,7 +111,8 @@ func (r CreateRoleRequest) Validate() error {
 }
 
 type GetRoleRequest struct {
-	Uid int64 `json:"user_id"`
+	Uid  int64  `json:"user_id"`
+	Role string `json:"user_role"`
 }
 
 func (r GetRoleRequest) Validate() error {
@@ -119,7 +125,7 @@ func (r GetRoleRequest) Validate() error {
 
 type UpdateRoleRequest struct {
 	Uid  int64  `json:"user_id"`
-	Role string `json:"role"`
+	Role string `json:"user_role"`
 }
 
 func (r UpdateRoleRequest) Validate() error {

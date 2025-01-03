@@ -61,7 +61,7 @@ func (q CertQuery) DeleteRoleQuery(db *gorm.DB, uid int64, role string) *gorm.DB
 	return sql
 }
 
-func (q CertQuery) InsertScopeQuery(db *gorm.DB, uid, cid int64, auth string) *gorm.DB {
+func (q CertQuery) InsertScopeQuery(db *gorm.DB, uid int64, cid, auth string) *gorm.DB {
 	sql := db.Exec(`
 		INSERT INTO
 			user_certificate_scopes (user_id, certificate_domain_id, authority)
@@ -73,7 +73,7 @@ func (q CertQuery) InsertScopeQuery(db *gorm.DB, uid, cid int64, auth string) *g
 	return sql
 }
 
-func (q CertQuery) SelectScopeQuery(db *gorm.DB, uid int64, cid int64) *gorm.DB {
+func (q CertQuery) SelectScopeQuery(db *gorm.DB, uid int64, cid string) *gorm.DB {
 	sql := db.Raw(`
 		SELECT
 			user_id,
@@ -90,7 +90,7 @@ func (q CertQuery) SelectScopeQuery(db *gorm.DB, uid int64, cid int64) *gorm.DB 
 	return sql
 }
 
-func (q CertQuery) UpdateScopeQuery(db *gorm.DB, uid int64, cid int64, auth string) *gorm.DB {
+func (q CertQuery) UpdateScopeQuery(db *gorm.DB, uid int64, cid, auth string) *gorm.DB {
 	sql := db.Exec(`
 		UPDATE user_certificate_scopes
 			SET authority = ?
@@ -103,7 +103,7 @@ func (q CertQuery) UpdateScopeQuery(db *gorm.DB, uid int64, cid int64, auth stri
 	return sql
 }
 
-func (q CertQuery) DeleteScopeQuery(db *gorm.DB, uid int64, cid int64) *gorm.DB {
+func (q CertQuery) DeleteScopeQuery(db *gorm.DB, uid int64, cid string) *gorm.DB {
 	sql := db.Exec(`
 		DELETE 
 			FROM user_certificate_scopes
