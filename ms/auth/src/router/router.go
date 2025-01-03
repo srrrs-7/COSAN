@@ -43,25 +43,31 @@ func (rt Router) Serve() *chi.Mux {
 
 	// auth domain path
 	router.Route("/auth/v1", func(r chi.Router) {
-		router.Use(rt.middlewares)
 		// auth
 		r.Route("/auth", func(r chi.Router) {
 			r.Post("/protagonist/login", rt.protagonistLogin)
 			r.Post("/supporter/login", rt.supporterLogin)
-			r.Get("/logout", rt.logout)
-			r.Put("/refresh", rt.refresh)
+			r.Group(func(r chi.Router) {
+				r.Use(rt.middlewares)
+				r.Get("/logout", rt.logout)
+				r.Put("/refresh", rt.refresh)
+			})
 		})
 		// cert
 		r.Route("/cert", func(r chi.Router) {
 			r.Post("/scope", rt.createScope)
-			r.Get("/scope", rt.getScope)
-			r.Put("/scope", rt.updateScope)
-			r.Delete("/scope", rt.deleteScope)
-
 			r.Post("/role", rt.createRole)
-			r.Get("/role", rt.getRole)
-			r.Put("/role", rt.updateRole)
-			r.Delete("/role", rt.deleteRole)
+			r.Group(func(r chi.Router) {
+				r.Use(rt.middlewares)
+				// scope
+				r.Get("/scope", rt.getScope)
+				r.Put("/scope", rt.updateScope)
+				r.Delete("/scope", rt.deleteScope)
+				// role
+				r.Get("/role", rt.getRole)
+				r.Put("/role", rt.updateRole)
+				r.Delete("/role", rt.deleteRole)
+			})
 		})
 	})
 
