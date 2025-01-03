@@ -1,30 +1,29 @@
-use super::request::{
-    CreateProtagonistRequest, CreateProtagonistSupporterRequest, CreateSupporterRequest,
-    GetProtagonistRequest, UpdateProtagonistRequest, UpdateSupporterRequest,
+use super::{
+    middleware,
+    request::{
+        CreateProtagonistRequest, CreateProtagonistSupporterRequest, CreateSupporterRequest,
+        GetProtagonistRequest, GetSupporterRequest, UpdateProtagonistRequest,
+        UpdateSupporterRequest,
+    },
+    response::{
+        CreateProtagonistResponse, CreateProtagonistSupporterResponse, CreateSupporterResponse,
+        DeleteProtagonistResponse, DeleteProtagonistSupporterResponse, DeleteSupporterResponse,
+        ErrorResponse, GetProtagonistResponse, GetProtagonistSupporterResponse,
+        GetSupporterResponse, HealthCheckResponse, UpdateProtagonistResponse,
+        UpdateSupporterResponse,
+    },
 };
-use super::response::{
-    CreateProtagonistResponse, CreateProtagonistSupporterResponse, CreateSupporterResponse,
-    DeleteProtagonistResponse, DeleteProtagonistSupporterResponse, DeleteSupporterResponse,
-    ErrorResponse, GetProtagonistResponse, GetProtagonistSupporterResponse, GetSupporterResponse,
-    HealthCheckResponse, UpdateProtagonistResponse, UpdateSupporterResponse,
-};
-use crate::domain::service::SupportService;
-use crate::router::request::GetSupporterRequest;
-use crate::util;
-use axum::middleware;
+use crate::{domain::service::SupportService, util};
 use axum::{
     http,
-    middleware::Next,
-    response::Response,
     routing::{delete, get, post, put},
     {
         extract::{Extension, Path, State},
         Json, Router, Server,
     },
 };
-use std::net::SocketAddr;
-use std::sync::Arc;
-use tracing::{error, info};
+use std::{net::SocketAddr, sync::Arc};
+use tracing::info;
 
 #[derive(Clone)]
 pub struct AppRouter {
@@ -67,9 +66,9 @@ impl AppRouter {
                             .route("/:protagonist_id", get(Self::get_protagonist))
                             .route("/", put(Self::update_protagonist))
                             .route("/:protagonist_id", delete(Self::delete_protagonist))
-                            .route_layer(middleware::from_fn_with_state(
+                            .route_layer(axum::middleware::from_fn_with_state(
                                 arc_secret_key.clone(),
-                                Self::verify_token_middleware,
+                                middleware::verify_token_middleware,
                             ))
                             .route("/", post(Self::create_protagonist))
                             .route(
@@ -83,9 +82,9 @@ impl AppRouter {
                             .route("/:supporter_id", get(Self::get_supporter))
                             .route("/", put(Self::update_supporter))
                             .route("/:supporter_id", delete(Self::delete_supporter))
-                            .route_layer(middleware::from_fn_with_state(
+                            .route_layer(axum::middleware::from_fn_with_state(
                                 arc_secret_key.clone(),
-                                Self::verify_token_middleware,
+                                middleware::verify_token_middleware,
                             ))
                             .route("/", post(Self::create_supporter))
                             .route(
@@ -105,70 +104,18 @@ impl AppRouter {
                                 "/:protagonist_supporter_id",
                                 delete(Self::delete_protagonist_supporter),
                             )
-                            .route_layer(middleware::from_fn_with_state(
+                            .route_layer(axum::middleware::from_fn_with_state(
                                 arc_secret_key.clone(),
-                                Self::verify_token_middleware,
+                                middleware::verify_token_middleware,
                             )),
                     )
-                    .layer(axum::middleware::from_fn(Self::request_log_middleware)),
+                    .layer(axum::middleware::from_fn(
+                        middleware::request_log_middleware,
+                    )),
             )
             .with_state(self.service.clone());
 
         Ok(router)
-    }
-
-    async fn verify_token_middleware<B>(
-        State(secret_key): State<Arc<String>>,
-        mut req: http::Request<B>,
-        next: Next<B>,
-    ) -> Result<Response, http::StatusCode> {
-        let auth_header = req
-            .headers()
-            .get(http::header::AUTHORIZATION)
-            .and_then(|header| header.to_str().ok());
-
-        let auth_header = if let Some(auth_header) = auth_header {
-            auth_header
-        } else {
-            error!("verify_token_middleware: Authorization header not found");
-            return Err(http::StatusCode::UNAUTHORIZED);
-        };
-
-        let bearer = auth_header.split_whitespace().nth(0).unwrap_or_default();
-        if bearer != "Bearer" {
-            error!("verify_token_middleware: Authorization header is not Bearer");
-            return Err(http::StatusCode::UNAUTHORIZED);
-        }
-
-        let token = auth_header.split_whitespace().nth(1).unwrap_or_default();
-        if token.is_empty() {
-            error!("verify_token_middleware: Token is empty");
-            return Err(http::StatusCode::UNAUTHORIZED);
-        }
-
-        let token = util::auth::validate_token(token, &secret_key).map_err(|e| {
-            error!("verify_token_middleware: {}", e);
-            return http::StatusCode::UNAUTHORIZED;
-        });
-        if token.is_err() {
-            return Err(http::StatusCode::UNAUTHORIZED);
-        }
-
-        // token info add to request context
-        req.extensions_mut().insert(Arc::new(token.unwrap()));
-
-        Ok(next.run(req).await)
-    }
-
-    async fn request_log_middleware<B>(
-        req: http::Request<B>,
-        next: Next<B>,
-    ) -> Result<Response, http::StatusCode> {
-        info!("Request: {} {}", req.method(), req.uri());
-        let res = next.run(req).await;
-        info!("Response: {}", res.status());
-
-        Ok(res)
     }
 
     async fn health_check(
