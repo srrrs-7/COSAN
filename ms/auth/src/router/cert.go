@@ -22,7 +22,7 @@ func (rt Router) getScope(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	cid, err := utilhttp.RequestUrlParam[string](req, "certificate_id")
+	cid, err := utilhttp.RequestUrlParam[int64](req, "certificate_id")
 	if err != nil {
 		utillog.ApiErrorLog(req, traceId, http.StatusBadRequest, err)
 		utilhttp.ResponseBadRequest(w, response.Err{Error: err.Error()})
@@ -118,7 +118,7 @@ func (rt Router) deleteScope(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	cid, err := utilhttp.RequestUrlParam[string](req, "certificate_id")
+	cid, err := utilhttp.RequestUrlParam[int64](req, "certificate_id")
 	if err != nil {
 		utillog.ApiErrorLog(req, traceId, http.StatusBadRequest, err)
 		utilhttp.ResponseBadRequest(w, response.Err{Error: err.Error()})

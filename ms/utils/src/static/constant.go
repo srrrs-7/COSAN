@@ -2,7 +2,7 @@ package static
 
 const (
 	// domain id
-	SUPPORT_DOMAIN = "support"
+	SUPPORT_DOMAIN = 1
 
 	// role
 	PROTAGONIST = "protagonist"

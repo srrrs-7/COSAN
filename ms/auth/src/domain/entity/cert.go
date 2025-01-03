@@ -2,7 +2,7 @@ package entity
 
 type Scope struct {
 	Uid  int64
-	Cid  string
+	Cid  int64
 	Auth string
 }
 

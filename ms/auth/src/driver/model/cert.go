@@ -4,13 +4,13 @@ import "auth/domain/entity"
 
 type InsertScope struct {
 	Uid  int64  `gorm:"column:user_id"`
-	Cid  string `gorm:"column:certificate_domain_id"`
+	Cid  int64  `gorm:"column:certificate_domain_id"`
 	Auth string `gorm:"column:authority"`
 }
 
 type SelectScope struct {
 	Uid  int64  `gorm:"column:user_id"`
-	Cid  string `gorm:"column:certificate_domain_id"`
+	Cid  int64  `gorm:"column:certificate_domain_id"`
 	Auth string `gorm:"column:authority"`
 }
 
@@ -24,13 +24,13 @@ func (s SelectScope) Entity() *entity.Scope {
 
 type UpdateScope struct {
 	Uid  int64  `gorm:"column:user_id"`
-	Cid  string `gorm:"column:certificate_domain_id"`
+	Cid  int64  `gorm:"column:certificate_domain_id"`
 	Auth string `gorm:"column:authority"`
 }
 
 type DeleteScope struct {
-	Uid int64  `gorm:"column:user_id"`
-	Cid string `gorm:"column:certificate_domain_id"`
+	Uid int64 `gorm:"column:user_id"`
+	Cid int64 `gorm:"column:certificate_domain_id"`
 }
 
 type InsertRole struct {

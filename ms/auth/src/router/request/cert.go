@@ -7,7 +7,7 @@ import (
 
 type CreateScopeRequest struct {
 	Uid  int64  `json:"user_id"`
-	Cid  string `json:"certificate_domain_id"`
+	Cid  int64  `json:"certificate_domain_id"`
 	Auth string `json:"authority"`
 }
 
@@ -26,13 +26,13 @@ func (r CreateScopeRequest) Validate() error {
 	case static.SUPPORT_DOMAIN:
 		return nil
 	default:
-		return fmt.Errorf("scope %s is invalid ", r.Cid)
+		return fmt.Errorf("scope %d is invalid ", r.Cid)
 	}
 }
 
 type GetScopeRequest struct {
-	Uid int64  `json:"user_id"`
-	Cid string `json:"certificate_domain_id"`
+	Uid int64 `json:"user_id"`
+	Cid int64 `json:"certificate_domain_id"`
 }
 
 func (r GetScopeRequest) Validate() error {
@@ -40,7 +40,7 @@ func (r GetScopeRequest) Validate() error {
 		return fmt.Errorf("staff id is less than 0")
 	}
 
-	if r.Cid != "" {
+	if r.Cid < 0 {
 		return fmt.Errorf("certificate domain id is less than 0")
 	}
 
@@ -49,7 +49,7 @@ func (r GetScopeRequest) Validate() error {
 
 type UpdateScopeRequest struct {
 	Uid  int64  `json:"user_id"`
-	Cid  string `json:"certificate_domain_id"`
+	Cid  int64  `json:"certificate_domain_id"`
 	Auth string `json:"authority"`
 }
 
@@ -68,20 +68,20 @@ func (r UpdateScopeRequest) Validate() error {
 	case static.SUPPORT_DOMAIN:
 		return nil
 	default:
-		return fmt.Errorf("scope %s is invalid ", r.Cid)
+		return fmt.Errorf("scope %d is invalid ", r.Cid)
 	}
 }
 
 type DeleteScopeRequest struct {
-	Uid int64  `json:"user_id"`
-	Cid string `json:"certificate_domain_id"`
+	Uid int64 `json:"user_id"`
+	Cid int64 `json:"certificate_domain_id"`
 }
 
 func (r DeleteScopeRequest) Validate() error {
 	if r.Uid < 0 {
 		return fmt.Errorf("staff id is less than 0")
 	}
-	if r.Cid == "" {
+	if r.Cid < 0 {
 		return fmt.Errorf("certificate domain id is less than 0")
 	}
 
