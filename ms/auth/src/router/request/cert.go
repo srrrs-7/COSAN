@@ -120,6 +120,12 @@ func (r GetRoleRequest) Validate() error {
 		return fmt.Errorf("staff id is less than 0")
 	}
 
+	switch r.Role {
+	case static.PROTAGONIST, static.SUPPORTER:
+	default:
+		return fmt.Errorf("role %s is invalid", r.Role)
+	}
+
 	return nil
 }
 
@@ -143,12 +149,19 @@ func (r UpdateRoleRequest) Validate() error {
 }
 
 type DeleteRoleRequest struct {
-	Uid int64 `json:"user_id"`
+	Uid  int64  `json:"user_id"`
+	Role string `json:"user_role"`
 }
 
 func (r DeleteRoleRequest) Validate() error {
 	if r.Uid < 0 {
 		return fmt.Errorf("staff id is less than 0")
+	}
+
+	switch r.Role {
+	case static.PROTAGONIST, static.SUPPORTER:
+	default:
+		return fmt.Errorf("role %s is invalid", r.Role)
 	}
 
 	return nil

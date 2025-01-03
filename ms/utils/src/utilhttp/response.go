@@ -18,6 +18,14 @@ func ResponseOk[T any](w http.ResponseWriter, msg T) {
 	writeResponse(w, http.StatusOK, msg)
 }
 
+func ResponseCreated[T any](w http.ResponseWriter, msg T) {
+	writeResponse(w, http.StatusCreated, msg)
+}
+
+func ResponseAccepted[T any](w http.ResponseWriter, msg T) {
+	writeResponse(w, http.StatusAccepted, msg)
+}
+
 func ResponseInternalServerError[T any](w http.ResponseWriter, msg T) {
 	writeResponse(w, http.StatusInternalServerError, msg)
 }

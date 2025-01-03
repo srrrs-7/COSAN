@@ -62,7 +62,7 @@ func (c CertService) CreateRole(ctx context.Context, req request.CreateRoleReque
 }
 
 func (c CertService) GetRole(ctx context.Context, req request.GetRoleRequest) (*response.GetRoleResponse, error) {
-	role, err := c.certRepo.GetRole(ctx, req.Uid, "")
+	role, err := c.certRepo.GetRole(ctx, req.Uid, req.Role)
 	if err != nil {
 		return nil, err
 	}
@@ -73,9 +73,17 @@ func (c CertService) GetRole(ctx context.Context, req request.GetRoleRequest) (*
 }
 
 func (c CertService) UpdateRole(ctx context.Context, req request.UpdateRoleRequest) error {
+	if err := c.certRepo.UpdateRole(ctx, req.Uid, req.Role); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (c CertService) DeleteRole(ctx context.Context, req request.DeleteRoleRequest) error {
+	if err := c.certRepo.DeleteRole(ctx, req.Uid, req.Role); err != nil {
+		return err
+	}
+
 	return nil
 }
