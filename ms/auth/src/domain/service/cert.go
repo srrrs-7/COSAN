@@ -1,22 +1,32 @@
 package service
 
+import (
+	"auth/driver/repository"
+	"context"
+)
+
 type CertService struct {
-	certRepo Certificater
+	certRepo repository.Certificater
 }
 
-func NewCert(c Certificater) CertService {
+func NewCert(c repository.Certificater) CertService {
 	return CertService{
 		certRepo: c,
 	}
 }
 
-func (c CertService) Certificate() {
-	// check cache by token uuid
-	// cache exist -> return true response and token
+func (c CertService) CreateScope(ctx context.Context) {}
 
-	// check refresh token
-	// refresh token not exist -> return false response and redirect
-	// refresh token exist -> reissue token and update refresh token -> return true and new token
+func (c CertService) GetScope(ctx context.Context) {}
 
-	// return false response and redirect
-}
+func (c CertService) UpdateScope(ctx context.Context) {}
+
+func (c CertService) DeleteScope(ctx context.Context) {}
+
+func (c CertService) CreateRole(ctx context.Context) {}
+
+func (c CertService) GetRole(ctx context.Context) {}
+
+func (c CertService) UpdateRole(ctx context.Context) {}
+
+func (c CertService) DeleteRole(ctx context.Context) {}

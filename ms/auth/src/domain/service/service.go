@@ -1,19 +1,16 @@
 package service
 
 import (
-	"auth/domain/entity"
+	"auth/router/response"
 	"context"
+	"net/http"
 )
 
 type Autheticator interface {
-	Login(ctx context.Context, uid int64, secretKey string) (*entity.Token, error)
+	ProtagonistLogin(ctx context.Context, lid, psswd, secretKey string) (*response.Login, error)
+	SupporterLogin(ctx context.Context, lid, psswd, secretKey string) (*response.Login, error)
+	Logout(ctx context.Context, w http.ResponseWriter) error
+	Refresh(ctx context.Context, rToken, secretKey string) (*response.Login, error)
 }
 
-type Cacher interface {
-	SetAccessToken(ctx context.Context, key string, token entity.Token) error
-	SetRefreshToken(ctx context.Context, key string, token entity.Token) error
-	Get(ctx context.Context, key string) (*entity.Token, error)
-	Delete(ctx context.Context, key string) error
-}
-
-type Certificater interface{}
+type Certificator interface{}

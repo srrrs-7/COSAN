@@ -2,7 +2,7 @@ package request
 
 import (
 	"fmt"
-	"strings"
+	"regexp"
 )
 
 type LoginRequest struct {
@@ -12,24 +12,16 @@ type LoginRequest struct {
 
 func (r LoginRequest) Validate() error {
 	if r.LoginId == "" || r.Password == "" {
-		return fmt.Errorf("staff_id or password is empty")
+		return fmt.Errorf("login_id or password is empty")
 	}
-	if strings.ContainsAny(r.LoginId, "!@#$%^&*()") {
-		return fmt.Errorf("staff_id contains invalid characters")
+
+	invalidChars := regexp.MustCompile(`[^a-zA-Z0-9]`)
+	if invalidChars.MatchString(r.LoginId) {
+		return fmt.Errorf("login_id contains invalid characters")
 	}
-	if strings.ContainsAny(r.Password, "!@#$%^&*()") {
+	if invalidChars.MatchString(r.Password) {
 		return fmt.Errorf("password contains invalid characters")
 	}
-	return nil
-}
 
-type RefreshRequest struct {
-	RefreshToken string `json:"refresh_token"`
-}
-
-func (r RefreshRequest) Validate() error {
-	if r.RefreshToken == "" {
-		return fmt.Errorf("refresh token is empty")
-	}
 	return nil
 }

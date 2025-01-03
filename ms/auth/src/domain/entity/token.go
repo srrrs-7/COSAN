@@ -20,7 +20,7 @@ type Token struct {
 }
 
 // Claims は、JWTのペイロードに含めるクレームです。
-type Claims struct {
+type Claim struct {
 	Uid     int64     `json:"uid"`
 	Expired int64     `json:"exp"`
 	Issued  time.Time `json:"iat"`
@@ -32,14 +32,14 @@ type Claims struct {
 // NewToken は、新しいアクセストークンとリフレッシュトークンを生成します。
 func NewToken(uid int64, role string, scopes []string, secretKey string) *Token {
 	now := time.Now()
-	accessTokenClaims := Claims{
+	accessTokenClaims := Claim{
 		Uid:     uid,
 		Expired: now.Add(accessTokenExpiration).Unix(),
 		Issued:  now,
 		Scopes:  scopes,
 		Role:    role,
 	}
-	refreshTokenClaims := Claims{
+	refreshTokenClaims := Claim{
 		Uid:     uid,
 		Expired: now.Add(refreshTokenExpiration).Unix(),
 		Issued:  now,
@@ -59,7 +59,7 @@ func NewToken(uid int64, role string, scopes []string, secretKey string) *Token 
 }
 
 // generateJWT は、JWTを生成します。
-func generateJWT(claims Claims, secretKey string) string {
+func generateJWT(claims Claim, secretKey string) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signedToken, err := token.SignedString([]byte(secretKey))
 	if err != nil {

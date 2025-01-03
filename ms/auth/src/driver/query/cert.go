@@ -1,68 +1,117 @@
 package query
 
+import "gorm.io/gorm"
+
 type CertQuery struct{}
 
 func NewCertQuery() CertQuery {
 	return CertQuery{}
 }
 
-func (q CertQuery) InsertScopeQuery() string {
-	sql := `
-		INSERT INTO staff_roles 
-			(company_id, staff_id, staff_role)
-		VALUES 
-			(?, ?, ?)
-	`
-	return sql
-}
-
-func (q CertQuery) UpdateScopeQuery() string {
-	sql := `
-		UPDATE staff_roles
-			SET staff_role = ?
-		WHERE company_id = ?
-			AND staff_id = ?
-	`
-	return sql
-}
-
-func (q CertQuery) InsertRoleQuery() string {
-	sql := `
-		INSERT INTO certificate_scopes 
-			(company_id, staff_id, certificate_domain_id)
-		VALUES 
-			(?, ?, ?)
-	`
-	return sql
-}
-
-func (q CertQuery) UpdateRoleQuery() string {
-	sql := `
-		UPDATE certificate_scopes
-			SET certificate_domain_id = ?
-		WHERE company_id = ?
-			AND staff_id = ?
-			AND certificate_domain_id = ?
-	`
-	return sql
-}
-
-func (q CertQuery) InsertCertDomainQuery() string {
-	sql := `
-		INSERT INTO certificate_domains 
-			(company_id, certificate_domain_name)
+func (q CertQuery) InsertRoleQuery(db *gorm.DB, uid int64, role string) *gorm.DB {
+	sql := db.Raw(`
+		INSERT INTO 
+			user_roles (user_id, user_role)
 		VALUES 
 			(?, ?)
-	`
+	`, uid, role,
+	)
+
 	return sql
 }
 
-func (q CertQuery) UpdateCertDomainQuery() string {
-	sql := `
-		UPDATE certificate_domains
-			SET certificate_domain_name = ?
-		WHERE company_id = ?
+func (q CertQuery) SelectRoleQuery(db *gorm.DB, uid int64, role string) *gorm.DB {
+	sql := db.Raw(`
+		SELECT
+			user_role
+		FROM 
+			user_roles
+		WHERE 
+			user_id = ?
+			AND user_role = ?
+	`, uid, role,
+	)
+
+	return sql
+}
+
+func (q CertQuery) UpdateRoleQuery(db *gorm.DB, uid int64, role string) *gorm.DB {
+	sql := db.Raw(`
+		UPDATE user_roles
+			SET user_role = ?
+		WHERE 
+			user_id = ?
+			AND user_role = ?
+	`, uid, role,
+	)
+
+	return sql
+}
+
+func (q CertQuery) DeleteRoleQuery(db *gorm.DB, uid int64, role string) *gorm.DB {
+	sql := db.Raw(`
+		DELETE FROM 
+			user_roles
+		WHERE 
+			AND user_id = ?
+			AND user_role = ?
+	`, uid, role,
+	)
+
+	return sql
+}
+
+func (q CertQuery) InsertScopeQuery(db *gorm.DB, uid, cid int64, auth string) *gorm.DB {
+	sql := db.Raw(`
+		INSERT INTO
+			user_certificate_scopes (user_id, certificate_domain_id, authority)
+		VALUES
+			(?, ?, ?)
+	`, uid, cid, auth,
+	)
+
+	return sql
+}
+
+func (q CertQuery) SelectScopeQuery(db *gorm.DB, uid int64, cid int64) *gorm.DB {
+	sql := db.Raw(`
+		SELECT
+			user_id,
+			certificate_domain_id,
+			authority
+		FROM 
+			user_certificate_scopes
+		WHERE 
+			user_id = ?
 			AND certificate_domain_id = ?
-	`
+	`, uid, cid,
+	)
+
+	return sql
+}
+
+func (q CertQuery) UpdateScopeQuery(db *gorm.DB, uid int64, cid int64, auth string) *gorm.DB {
+	sql := db.Raw(`
+		UPDATE user_certificate_scopes
+			SET authority = ?
+		WHERE 
+			user_id = ?
+			AND certificate_domain_id = ?
+	`, auth, uid, cid,
+	)
+
+	return sql
+}
+
+func (q CertQuery) DeleteScopeQuery(db *gorm.DB, uid int64, cid int64) *gorm.DB {
+	sql := db.Raw(`
+		DELETE 
+			FROM user_certificate_scopes
+		WHERE 
+			user_id = ?
+			AND certificate_domain_id = ?
+	`, uid, cid,
+	)
+
 	return sql
 }

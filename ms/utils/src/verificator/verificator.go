@@ -10,8 +10,8 @@ import (
 )
 
 // ValidateToken は、JWTを検証し、クレームを返します。
-func ValidateToken(tokenString, secretKey string) (*entity.Claims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &entity.Claims{}, func(token *jwt.Token) (interface{}, error) {
+func ValidateToken(tokenString, secretKey string) (*entity.Claim, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &entity.Claim{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
@@ -21,11 +21,11 @@ func ValidateToken(tokenString, secretKey string) (*entity.Claims, error) {
 		return nil, err
 	}
 
-	if claims, ok := token.Claims.(*entity.Claims); ok && token.Valid {
-		if claims.Expired < time.Now().Unix() {
+	if claim, ok := token.Claims.(*entity.Claim); ok && token.Valid {
+		if claim.Expired < time.Now().Unix() {
 			return nil, errors.New("token expired")
 		}
-		return claims, nil
+		return claim, nil
 	}
 
 	return nil, errors.New("invalid token")

@@ -71,14 +71,7 @@ func (rt Router) logout(w http.ResponseWriter, req *http.Request) {
 	req.Header.Set("x-trace-id", traceId)
 	utillog.ApiAccessLog(req, traceId)
 
-	aToken, err := utilhttp.RequestBearer(req)
-	if err != nil {
-		utillog.ApiErrorLog(req, traceId, http.StatusBadRequest, err)
-		utilhttp.ResponseBadRequest(w, response.Err{Error: err.Error()})
-		return
-	}
-
-	err = rt.AuthService.Logout(req.Context(), aToken)
+	err := rt.AuthService.Logout(req.Context(), w)
 	if err != nil {
 		utillog.ApiErrorLog(req, traceId, http.StatusInternalServerError, err)
 		utilhttp.ResponseBadRequest(w, response.Err{Error: err.Error()})
@@ -94,19 +87,20 @@ func (rt Router) refresh(w http.ResponseWriter, req *http.Request) {
 	req.Header.Set("x-trace-id", traceId)
 	utillog.ApiAccessLog(req, traceId)
 
-	r, err := utilhttp.RequestBody[request.RefreshRequest](req)
+	rToken, err := utilhttp.RequestBearer(req)
 	if err != nil {
 		utillog.ApiErrorLog(req, traceId, http.StatusBadRequest, err)
 		utilhttp.ResponseBadRequest(w, response.Err{Error: err.Error()})
 		return
 	}
 
-	if err := rt.AuthService.Refresh(req.Context(), r.RefreshToken); err != nil {
+	res, err := rt.AuthService.Refresh(req.Context(), rToken, rt.SecretKey)
+	if err != nil {
 		utillog.ApiErrorLog(req, traceId, http.StatusInternalServerError, err)
 		utilhttp.ResponseInternalServerError(w, response.Err{Error: err.Error()})
 		return
 	}
 
 	utillog.ApiSuccessLog(req, traceId, http.StatusOK)
-	utilhttp.ResponseOk(w, "")
+	utilhttp.ResponseOk(w, res)
 }

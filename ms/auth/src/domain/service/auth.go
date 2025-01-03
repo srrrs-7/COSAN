@@ -1,20 +1,25 @@
 package service
 
 import (
+	"auth/domain/entity"
 	"auth/driver/model"
+	"auth/driver/repository"
 	"auth/router/response"
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"net/url"
+	"time"
 	"utils/utilhttp"
 )
 
 type AuthService struct {
-	AuthRepo Autheticator
+	AuthRepo repository.Autheticator
 	BaseUrl  string
 }
 
-func NewAuth(a Autheticator, u string) AuthService {
+func NewAuth(a repository.Autheticator, u string) AuthService {
 	return AuthService{
 		AuthRepo: a,
 		BaseUrl:  u,
@@ -29,12 +34,12 @@ func (a AuthService) ProtagonistLogin(ctx context.Context, lid, psswd, secretKey
 		return nil, err
 	}
 	// get master data
-	master, err := utilhttp.HttpGetRequest[model.Protagonist](baseUrl, params, "")
+	protagonist, err := utilhttp.HttpGetRequest[model.Protagonist](baseUrl, params, "")
 	if err != nil {
 		return nil, err
 	}
 	// login
-	token, err := a.AuthRepo.Login(ctx, master.Pid, secretKey)
+	token, err := a.AuthRepo.Login(ctx, protagonist.Pid, secretKey)
 	if err != nil {
 		return nil, err
 	}
@@ -50,12 +55,12 @@ func (a AuthService) SupporterLogin(ctx context.Context, lid, psswd, secretKey s
 		return nil, err
 	}
 	// get master data
-	master, err := utilhttp.HttpGetRequest[model.Supporter](baseUrl, params, "")
+	supporter, err := utilhttp.HttpGetRequest[model.Supporter](baseUrl, params, "")
 	if err != nil {
 		return nil, err
 	}
 	// login
-	token, err := a.AuthRepo.Login(ctx, master.Sid, secretKey)
+	token, err := a.AuthRepo.Login(ctx, supporter.Sid, secretKey)
 	if err != nil {
 		return nil, err
 	}
@@ -64,13 +69,35 @@ func (a AuthService) SupporterLogin(ctx context.Context, lid, psswd, secretKey s
 }
 
 // logout services
-func (a AuthService) Logout(ctx context.Context, aToken string) error {
+func (a AuthService) Logout(ctx context.Context, w http.ResponseWriter) error {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "access_token",
+		Value:    "",
+		Path:     "/",
+		Expires:  time.Unix(0, 0),
+		HttpOnly: true,
+	})
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    "",
+		Path:     "/",
+		Expires:  time.Unix(0, 0),
+		HttpOnly: true,
+	})
+
 	return nil
 }
 
-// refresh service
-func (a AuthService) Refresh(ctx context.Context, aToken string) error {
-	return nil
+func (a AuthService) Refresh(ctx context.Context, rToken, secretKey string) (*response.Login, error) {
+	var claim entity.Claim
+	if err := json.Unmarshal([]byte(rToken), &claim); err != nil {
+		return nil, err
+	}
+
+	token := entity.NewToken(claim.Uid, claim.Role, claim.Scopes, secretKey)
+
+	return response.NewLoginResponse(token.AccessToken, token.RefreshToken, token.ExpiredAt, token.IssuedAt), nil
 }
 
 func (a AuthService) protagonistRequestParams(baseUrl, lid, psswd string) (*url.URL, url.Values, error) {

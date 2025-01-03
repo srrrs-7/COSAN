@@ -1,6 +1,7 @@
 package router
 
 import (
+	"auth/domain/service"
 	"auth/router/response"
 	"context"
 	"net/http"
@@ -11,22 +12,13 @@ import (
 	"github.com/go-chi/chi"
 )
 
-type Autheticator interface {
-	ProtagonistLogin(ctx context.Context, lid, psswd, secretKey string) (*response.Login, error)
-	SupporterLogin(ctx context.Context, lid, psswd, secretKey string) (*response.Login, error)
-	Logout(ctx context.Context, aToken string) error
-	Refresh(ctx context.Context, aToken string) error
-}
-
-type Certificator interface{}
-
 type Router struct {
-	AuthService Autheticator
-	CertService Certificator
+	AuthService service.Autheticator
+	CertService service.Certificator
 	SecretKey   string
 }
 
-func NewRouter(a Autheticator, c Certificator, secretKey string) Router {
+func NewRouter(a service.Autheticator, c service.Certificator, secretKey string) Router {
 	return Router{
 		AuthService: a,
 		CertService: c,

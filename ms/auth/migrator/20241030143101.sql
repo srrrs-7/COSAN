@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS user_roles (
     created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (user_role_id),
-    UNIQUE (user_id)
+    UNIQUE (user_id, user_role)
 );
 COMMENT ON TABLE user_roles IS 'user authentication information';
 COMMENT ON COLUMN user_roles.user_id IS 'user id';
