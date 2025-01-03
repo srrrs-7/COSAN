@@ -1,5 +1,12 @@
 package entity
 
-type Scope struct{}
+type Scope struct {
+	Uid  int64
+	Cid  int64
+	Auth string
+}
 
-type Role struct{}
+type Role struct {
+	Uid  int64
+	Role string
+}
