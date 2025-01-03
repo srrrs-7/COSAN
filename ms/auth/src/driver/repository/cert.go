@@ -21,9 +21,9 @@ func NewCertRepo(db *gorm.DB, q query.CertQuery) CertRepo {
 	}
 }
 
-func (r CertRepo) CreateRole(ctx context.Context, uid int64, rl string) error {
+func (r CertRepo) CreateRole(ctx context.Context, m model.InsertRole) error {
 	if err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		res := r.query.InsertRoleQuery(tx, uid, rl)
+		res := r.query.InsertRoleQuery(tx, m)
 		if res.Error != nil {
 			return res.Error
 		}
@@ -35,10 +35,10 @@ func (r CertRepo) CreateRole(ctx context.Context, uid int64, rl string) error {
 	return nil
 }
 
-func (r CertRepo) GetRole(ctx context.Context, uid int64, rl string) (*entity.Role, error) {
-	var role model.GetRole
+func (r CertRepo) GetRole(ctx context.Context, m model.SelectRole) (*entity.Role, error) {
+	var role model.SelectRole
 	if err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		res := r.query.InsertRoleQuery(tx, uid, rl).Scan(&role)
+		res := r.query.SelectRoleQuery(tx, m).Scan(&role)
 		if res.Error != nil {
 			return res.Error
 		}
@@ -50,9 +50,9 @@ func (r CertRepo) GetRole(ctx context.Context, uid int64, rl string) (*entity.Ro
 	return role.Entity(), nil
 }
 
-func (r CertRepo) UpdateRole(ctx context.Context, uid int64, rl string) error {
+func (r CertRepo) UpdateRole(ctx context.Context, m model.UpdateRole) error {
 	if err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		res := r.query.UpdateRoleQuery(tx, uid, rl)
+		res := r.query.UpdateRoleQuery(tx, m)
 		if res.Error != nil {
 			return res.Error
 		}
@@ -64,9 +64,9 @@ func (r CertRepo) UpdateRole(ctx context.Context, uid int64, rl string) error {
 	return nil
 }
 
-func (r CertRepo) DeleteRole(ctx context.Context, uid int64, rl string) error {
+func (r CertRepo) DeleteRole(ctx context.Context, m model.DeleteRole) error {
 	if err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		res := r.query.DeleteRoleQuery(tx, uid, rl)
+		res := r.query.DeleteRoleQuery(tx, m)
 		if res.Error != nil {
 			return res.Error
 		}
@@ -78,9 +78,9 @@ func (r CertRepo) DeleteRole(ctx context.Context, uid int64, rl string) error {
 	return nil
 }
 
-func (r CertRepo) CreateScope(ctx context.Context, uid int64, cid, auth string) error {
+func (r CertRepo) CreateScope(ctx context.Context, m model.InsertScope) error {
 	if err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		res := r.query.InsertScopeQuery(tx, uid, cid, auth)
+		res := r.query.InsertScopeQuery(tx, m)
 		if res.Error != nil {
 			return res.Error
 		}
@@ -92,10 +92,10 @@ func (r CertRepo) CreateScope(ctx context.Context, uid int64, cid, auth string) 
 	return nil
 }
 
-func (r CertRepo) GetScope(ctx context.Context, uid int64, cid string) (*entity.Scope, error) {
-	var scope model.GetScope
+func (r CertRepo) GetScope(ctx context.Context, m model.SelectScope) (*entity.Scope, error) {
+	var scope model.SelectScope
 	if err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		res := r.query.SelectScopeQuery(tx, uid, cid).Scan(&scope)
+		res := r.query.SelectScopeQuery(tx, m).Scan(&scope)
 		if res.Error != nil {
 			return res.Error
 		}
@@ -107,9 +107,9 @@ func (r CertRepo) GetScope(ctx context.Context, uid int64, cid string) (*entity.
 	return scope.Entity(), nil
 }
 
-func (r CertRepo) UpdateScope(ctx context.Context, uid int64, cid, auth string) error {
+func (r CertRepo) UpdateScope(ctx context.Context, m model.UpdateScope) error {
 	if err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		res := r.query.UpdateScopeQuery(tx, uid, cid, auth)
+		res := r.query.UpdateScopeQuery(tx, m)
 		if res.Error != nil {
 			return res.Error
 		}
@@ -121,9 +121,9 @@ func (r CertRepo) UpdateScope(ctx context.Context, uid int64, cid, auth string) 
 	return nil
 }
 
-func (r CertRepo) DeleteScope(ctx context.Context, uid int64, cid string) error {
+func (r CertRepo) DeleteScope(ctx context.Context, m model.DeleteScope) error {
 	if err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		res := r.query.DeleteScopeQuery(tx, uid, cid)
+		res := r.query.DeleteScopeQuery(tx, m)
 		if res.Error != nil {
 			return res.Error
 		}

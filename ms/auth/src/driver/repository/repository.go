@@ -2,6 +2,7 @@ package repository
 
 import (
 	"auth/domain/entity"
+	"auth/driver/model"
 	"context"
 )
 
@@ -10,12 +11,12 @@ type Autheticator interface {
 }
 
 type Certificater interface {
-	CreateScope(ctx context.Context, uid int64, cid, auth string) error
-	GetScope(ctx context.Context, uid int64, cid string) (*entity.Scope, error)
-	UpdateScope(ctx context.Context, uid int64, cid, auth string) error
-	DeleteScope(ctx context.Context, uid int64, cid string) error
-	CreateRole(ctx context.Context, uid int64, rl string) error
-	GetRole(ctx context.Context, uid int64, rl string) (*entity.Role, error)
-	UpdateRole(ctx context.Context, uid int64, rl string) error
-	DeleteRole(ctx context.Context, uid int64, rl string) error
+	CreateRole(ctx context.Context, m model.InsertRole) error
+	GetRole(ctx context.Context, m model.SelectRole) (*entity.Role, error)
+	UpdateRole(ctx context.Context, m model.UpdateRole) error
+	DeleteRole(ctx context.Context, m model.DeleteRole) error
+	CreateScope(ctx context.Context, m model.InsertScope) error
+	GetScope(ctx context.Context, m model.SelectScope) (*entity.Scope, error)
+	UpdateScope(ctx context.Context, m model.UpdateScope) error
+	DeleteScope(ctx context.Context, m model.DeleteScope) error
 }

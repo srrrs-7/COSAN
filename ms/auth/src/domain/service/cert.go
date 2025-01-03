@@ -1,6 +1,7 @@
 package service
 
 import (
+	"auth/driver/model"
 	"auth/driver/repository"
 	"auth/router/request"
 	"auth/router/response"
@@ -18,7 +19,11 @@ func NewCert(c repository.Certificater) CertService {
 }
 
 func (c CertService) CreateScope(ctx context.Context, req request.CreateScopeRequest) error {
-	if err := c.certRepo.CreateScope(ctx, req.Uid, req.Cid, req.Auth); err != nil {
+	if err := c.certRepo.CreateScope(ctx, model.InsertScope{
+		Uid:  req.Uid,
+		Cid:  req.Cid,
+		Auth: req.Auth,
+	}); err != nil {
 		return err
 	}
 
@@ -26,10 +31,14 @@ func (c CertService) CreateScope(ctx context.Context, req request.CreateScopeReq
 }
 
 func (c CertService) GetScope(ctx context.Context, req request.GetScopeRequest) (*response.GetScopeResponse, error) {
-	scope, err := c.certRepo.GetScope(ctx, req.Uid, req.Cid)
+	scope, err := c.certRepo.GetScope(ctx, model.SelectScope{
+		Uid: req.Uid,
+		Cid: req.Cid,
+	})
 	if err != nil {
 		return nil, err
 	}
+
 	return &response.GetScopeResponse{
 		Uid:  scope.Uid,
 		Cid:  scope.Cid,
@@ -38,7 +47,11 @@ func (c CertService) GetScope(ctx context.Context, req request.GetScopeRequest) 
 }
 
 func (c CertService) UpdateScope(ctx context.Context, req request.UpdateScopeRequest) error {
-	if err := c.certRepo.UpdateScope(ctx, req.Uid, req.Cid, req.Auth); err != nil {
+	if err := c.certRepo.UpdateScope(ctx, model.UpdateScope{
+		Uid:  req.Uid,
+		Cid:  req.Cid,
+		Auth: req.Auth,
+	}); err != nil {
 		return err
 	}
 
@@ -46,7 +59,10 @@ func (c CertService) UpdateScope(ctx context.Context, req request.UpdateScopeReq
 }
 
 func (c CertService) DeleteScope(ctx context.Context, req request.DeleteScopeRequest) error {
-	if err := c.certRepo.DeleteScope(ctx, req.Uid, req.Cid); err != nil {
+	if err := c.certRepo.DeleteScope(ctx, model.DeleteScope{
+		Uid: req.Uid,
+		Cid: req.Cid,
+	}); err != nil {
 		return err
 	}
 
@@ -54,7 +70,10 @@ func (c CertService) DeleteScope(ctx context.Context, req request.DeleteScopeReq
 }
 
 func (c CertService) CreateRole(ctx context.Context, req request.CreateRoleRequest) error {
-	if err := c.certRepo.CreateRole(ctx, req.Uid, req.Role); err != nil {
+	if err := c.certRepo.CreateRole(ctx, model.InsertRole{
+		Uid:  req.Uid,
+		Role: req.Role,
+	}); err != nil {
 		return err
 	}
 
@@ -62,10 +81,14 @@ func (c CertService) CreateRole(ctx context.Context, req request.CreateRoleReque
 }
 
 func (c CertService) GetRole(ctx context.Context, req request.GetRoleRequest) (*response.GetRoleResponse, error) {
-	role, err := c.certRepo.GetRole(ctx, req.Uid, req.Role)
+	role, err := c.certRepo.GetRole(ctx, model.SelectRole{
+		Uid:  req.Uid,
+		Role: req.Role,
+	})
 	if err != nil {
 		return nil, err
 	}
+
 	return &response.GetRoleResponse{
 		Uid:  role.Uid,
 		Role: role.Role,
@@ -73,7 +96,10 @@ func (c CertService) GetRole(ctx context.Context, req request.GetRoleRequest) (*
 }
 
 func (c CertService) UpdateRole(ctx context.Context, req request.UpdateRoleRequest) error {
-	if err := c.certRepo.UpdateRole(ctx, req.Uid, req.Role); err != nil {
+	if err := c.certRepo.UpdateRole(ctx, model.UpdateRole{
+		Uid:  req.Uid,
+		Role: req.Role,
+	}); err != nil {
 		return err
 	}
 
@@ -81,7 +107,10 @@ func (c CertService) UpdateRole(ctx context.Context, req request.UpdateRoleReque
 }
 
 func (c CertService) DeleteRole(ctx context.Context, req request.DeleteRoleRequest) error {
-	if err := c.certRepo.DeleteRole(ctx, req.Uid, req.Role); err != nil {
+	if err := c.certRepo.DeleteRole(ctx, model.DeleteRole{
+		Uid:  req.Uid,
+		Role: req.Role,
+	}); err != nil {
 		return err
 	}
 
