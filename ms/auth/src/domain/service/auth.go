@@ -10,21 +10,19 @@ import (
 )
 
 type AuthService struct {
-	AuthRepo  Autheticator
-	BaseUrl   string
-	SecretKey string
+	AuthRepo Autheticator
+	BaseUrl  string
 }
 
-func NewAuth(a Autheticator, u string, sk string) AuthService {
+func NewAuth(a Autheticator, u string) AuthService {
 	return AuthService{
-		AuthRepo:  a,
-		BaseUrl:   u,
-		SecretKey: sk,
+		AuthRepo: a,
+		BaseUrl:  u,
 	}
 }
 
 // protagonist login service
-func (a AuthService) ProtagonistLogin(ctx context.Context, lid, psswd string) (*response.Login, error) {
+func (a AuthService) ProtagonistLogin(ctx context.Context, lid, psswd, secretKey string) (*response.Login, error) {
 	// get http params
 	baseUrl, params, err := a.protagonistRequestParams(a.BaseUrl, lid, psswd)
 	if err != nil {
@@ -36,7 +34,7 @@ func (a AuthService) ProtagonistLogin(ctx context.Context, lid, psswd string) (*
 		return nil, err
 	}
 	// login
-	token, err := a.AuthRepo.Login(ctx, master.Pid, a.SecretKey)
+	token, err := a.AuthRepo.Login(ctx, master.Pid, secretKey)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +43,7 @@ func (a AuthService) ProtagonistLogin(ctx context.Context, lid, psswd string) (*
 }
 
 // supporter logout services
-func (a AuthService) SupporterLogin(ctx context.Context, lid, psswd string) (*response.Login, error) {
+func (a AuthService) SupporterLogin(ctx context.Context, lid, psswd, secretKey string) (*response.Login, error) {
 	// get http params
 	baseUrl, params, err := a.supporterRequestParams(a.BaseUrl, lid, psswd)
 	if err != nil {
@@ -57,7 +55,7 @@ func (a AuthService) SupporterLogin(ctx context.Context, lid, psswd string) (*re
 		return nil, err
 	}
 	// login
-	token, err := a.AuthRepo.Login(ctx, master.Sid, a.SecretKey)
+	token, err := a.AuthRepo.Login(ctx, master.Sid, secretKey)
 	if err != nil {
 		return nil, err
 	}

@@ -65,11 +65,11 @@ func main() {
 		service.NewAuth(
 			repository.NewAuthRepo(gormDb, query.NewAuthQuery()),
 			env.SupportUrl,
-			env.SecretKey,
 		),
 		service.NewCert(
 			repository.NewCertRepo(gormDb, query.NewCertQuery()),
 		),
+		env.SecretKey,
 	)
 
 	slog.Info("starting server 8080", "mode", env.Mode)

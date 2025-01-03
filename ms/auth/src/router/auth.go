@@ -27,7 +27,7 @@ func (rt Router) protagonistLogin(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	res, err := rt.AuthService.ProtagonistLogin(req.Context(), r.LoginId, r.Password)
+	res, err := rt.AuthService.ProtagonistLogin(req.Context(), r.LoginId, r.Password, rt.SecretKey)
 	if err != nil {
 		utillog.ApiErrorLog(req, traceId, http.StatusInternalServerError, err)
 		utilhttp.ResponseInternalServerError(w, response.Err{Error: err.Error()})
@@ -55,7 +55,7 @@ func (rt Router) supporterLogin(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	res, err := rt.AuthService.SupporterLogin(req.Context(), r.LoginId, r.Password)
+	res, err := rt.AuthService.SupporterLogin(req.Context(), r.LoginId, r.Password, rt.SecretKey)
 	if err != nil {
 		utillog.ApiErrorLog(req, traceId, http.StatusInternalServerError, err)
 		utilhttp.ResponseInternalServerError(w, response.Err{Error: err.Error()})
