@@ -15,21 +15,21 @@ import (
 )
 
 type AuthService struct {
-	AuthRepo repository.Autheticator
-	BaseUrl  string
+	authRepo repository.Autheticator
+	baseUrl  string
 }
 
 func NewAuth(a repository.Autheticator, u string) AuthService {
 	return AuthService{
-		AuthRepo: a,
-		BaseUrl:  u,
+		authRepo: a,
+		baseUrl:  u,
 	}
 }
 
 // protagonist login service
 func (a AuthService) ProtagonistLogin(ctx context.Context, lid, psswd, secretKey string) (*response.Login, error) {
 	// get http params
-	baseUrl, params, err := a.protagonistRequestParams(a.BaseUrl, lid, psswd)
+	baseUrl, params, err := a.protagonistRequestParams(a.baseUrl, lid, psswd)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (a AuthService) ProtagonistLogin(ctx context.Context, lid, psswd, secretKey
 		return nil, err
 	}
 	// login
-	token, err := a.AuthRepo.Login(ctx, protagonist.Pid, secretKey)
+	token, err := a.authRepo.Login(ctx, protagonist.Pid, secretKey)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (a AuthService) ProtagonistLogin(ctx context.Context, lid, psswd, secretKey
 // supporter logout services
 func (a AuthService) SupporterLogin(ctx context.Context, lid, psswd, secretKey string) (*response.Login, error) {
 	// get http params
-	baseUrl, params, err := a.supporterRequestParams(a.BaseUrl, lid, psswd)
+	baseUrl, params, err := a.supporterRequestParams(a.baseUrl, lid, psswd)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (a AuthService) SupporterLogin(ctx context.Context, lid, psswd, secretKey s
 		return nil, err
 	}
 	// login
-	token, err := a.AuthRepo.Login(ctx, supporter.Sid, secretKey)
+	token, err := a.authRepo.Login(ctx, supporter.Sid, secretKey)
 	if err != nil {
 		return nil, err
 	}

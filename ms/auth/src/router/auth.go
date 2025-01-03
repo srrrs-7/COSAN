@@ -27,7 +27,7 @@ func (rt Router) protagonistLogin(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	res, err := rt.AuthService.ProtagonistLogin(req.Context(), r.LoginId, r.Password, rt.SecretKey)
+	res, err := rt.authService.ProtagonistLogin(req.Context(), r.LoginId, r.Password, rt.secretKey)
 	if err != nil {
 		utillog.ApiErrorLog(req, traceId, http.StatusInternalServerError, err)
 		utilhttp.ResponseInternalServerError(w, response.Err{Error: err.Error()})
@@ -55,7 +55,7 @@ func (rt Router) supporterLogin(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	res, err := rt.AuthService.SupporterLogin(req.Context(), r.LoginId, r.Password, rt.SecretKey)
+	res, err := rt.authService.SupporterLogin(req.Context(), r.LoginId, r.Password, rt.secretKey)
 	if err != nil {
 		utillog.ApiErrorLog(req, traceId, http.StatusInternalServerError, err)
 		utilhttp.ResponseInternalServerError(w, response.Err{Error: err.Error()})
@@ -71,7 +71,7 @@ func (rt Router) logout(w http.ResponseWriter, req *http.Request) {
 	req.Header.Set("x-trace-id", traceId)
 	utillog.ApiAccessLog(req, traceId)
 
-	err := rt.AuthService.Logout(req.Context(), w)
+	err := rt.authService.Logout(req.Context(), w)
 	if err != nil {
 		utillog.ApiErrorLog(req, traceId, http.StatusInternalServerError, err)
 		utilhttp.ResponseBadRequest(w, response.Err{Error: err.Error()})
@@ -94,7 +94,7 @@ func (rt Router) refresh(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	res, err := rt.AuthService.Refresh(req.Context(), rToken, rt.SecretKey)
+	res, err := rt.authService.Refresh(req.Context(), rToken, rt.secretKey)
 	if err != nil {
 		utillog.ApiErrorLog(req, traceId, http.StatusInternalServerError, err)
 		utilhttp.ResponseInternalServerError(w, response.Err{Error: err.Error()})

@@ -8,18 +8,20 @@ import (
 )
 
 type CertRepo struct {
-	Db    *gorm.DB
-	Query query.CertQuery
+	db    *gorm.DB
+	query query.CertQuery
 }
 
 func NewCertRepo(db *gorm.DB, q query.CertQuery) CertRepo {
 	return CertRepo{
-		Db:    db,
-		Query: q,
+		db:    db,
+		query: q,
 	}
 }
 
-func (r CertRepo) CreateScope(ctx context.Context) {}
+func (r CertRepo) CreateScope(ctx context.Context, uid, cid int64, auth string) {
+	r.query.InsertScopeQuery(r.db, uid, cid, auth)
+}
 
 func (r CertRepo) GetScope(ctx context.Context) {}
 

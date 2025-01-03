@@ -10,22 +10,22 @@ import (
 )
 
 type AuthRepo struct {
-	Db    *gorm.DB
-	Query query.AuthQuery
+	db    *gorm.DB
+	query query.AuthQuery
 }
 
 func NewAuthRepo(db *gorm.DB, q query.AuthQuery) AuthRepo {
 	return AuthRepo{
-		Db:    db,
-		Query: q,
+		db:    db,
+		query: q,
 	}
 }
 
 func (r AuthRepo) Login(ctx context.Context, uid int64, secretKey string) (*entity.Token, error) {
 	var role model.UserRole
 	var scopes []model.UserScope
-	if err := r.Db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		authSql, scopeSql := r.Query.LoginQuery(tx, uid)
+	if err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		authSql, scopeSql := r.query.LoginQuery(tx, uid)
 		res := authSql.Scan(&role)
 		if res.Error != nil {
 			return res.Error

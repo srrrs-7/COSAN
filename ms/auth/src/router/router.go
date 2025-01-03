@@ -13,16 +13,16 @@ import (
 )
 
 type Router struct {
-	AuthService service.Autheticator
-	CertService service.Certificator
-	SecretKey   string
+	authService service.Autheticator
+	certService service.Certificator
+	secretKey   string
 }
 
 func NewRouter(a service.Autheticator, c service.Certificator, secretKey string) Router {
 	return Router{
-		AuthService: a,
-		CertService: c,
-		SecretKey:   secretKey,
+		authService: a,
+		certService: c,
+		secretKey:   secretKey,
 	}
 }
 
@@ -75,7 +75,7 @@ func (rt Router) middlewares(next http.Handler) http.Handler {
 			return
 		}
 
-		claim, err := verificator.ValidateToken(strings.TrimPrefix(authHeader, "Bearer "), rt.SecretKey)
+		claim, err := verificator.ValidateToken(strings.TrimPrefix(authHeader, "Bearer "), rt.secretKey)
 		if err != nil {
 			utilhttp.ResponseUnauthorized(w, response.Err{Error: err.Error()})
 			return
