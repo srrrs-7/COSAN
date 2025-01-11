@@ -7,7 +7,9 @@ ADD ./ms /ms
 WORKDIR /ms/support/support
 
 ENV RUSTFLAGS="-C link-arg=-fuse-ld=mold"
-RUN cargo build --release --bin api
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/app/target \
+    cargo build --release --bin api
 
 FROM gcr.io/distroless/cc-debian12
 COPY --from=builder /ms/support/support/target/release/api /usr/local/bin/api
