@@ -1,4 +1,4 @@
-.PHONY: init unittest fmt key cosan ui auth support new-migrate sqlx-prepare
+.PHONY: init unittest fmt key all ui auth support new-migrate sqlx-prepare
 
 init:
 	cp compose.override.yaml.sample compose.override.yaml
@@ -16,7 +16,7 @@ fmt:
 key:
 	cd ms/dev && ./key.sh
 
-cosan: ui auth support key
+all: ui auth cosan support key
 
 ui:
 	docker compose up -d ui --build
@@ -29,6 +29,13 @@ auth:
 	docker compose run --rm migrator migrate hash --dir file:///go/auth/migrator
 	docker compose run --rm migrator migrate apply --url postgres://root:root@auth-db:5432/auth?sslmode=disable --dir file:///go/auth/migrator
 	docker compose up -d auth --build
+
+cosan:
+	docker compose up -d cosan-db --build
+	sleep 3
+	docker compose run --rm migrator migrate hash --dir file:///go/cosan/migrator
+	docker compose run --rm migrator migrate apply --url postgres://root:root@cosan-db:5432/cosan?sslmode=disable --dir file:///go/cosan/migrator
+	docker compose up -d cosan --build
 
 support:
 	docker compose up -d support-db --build

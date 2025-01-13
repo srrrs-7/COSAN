@@ -19,6 +19,17 @@ services:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
       POSTGRES_DB: auth
+  
+  cosan:
+    environment:
+      MODE: debug # debug or release
+      COSAN_PG_URL: postgres://root:root@cosan-db:5432/cosan?sslmode=disable
+      SECRET_KEY: secret-key # copy part of /ms/utils/key/private_key.pem key
+  cosan-db:
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: cosan
 
   support:
     environment:

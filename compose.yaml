@@ -39,6 +39,20 @@ services:
     volumes:
       - ./ms/auth/migrator/data:/var/lib/postgresql/data
 
+  cosan:
+    build:
+      dockerfile: ./.image/cosan/Dockerfile
+    ports:
+      - 8082:8080
+    depends_on:
+      - cosan-db
+  cosan-db:
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    volumes:
+      - ./ms/cosan/.migrator/data:/var/lib/postgresql/data
+
   support:
     build:
       dockerfile: ./.image/support/Dockerfile
@@ -57,3 +71,4 @@ services:
     volumes:
       - ./ms/auth/migrator:/go/auth/migrator
       - ./ms/support/.migrator:/go/support/migrator
+      - ./ms/cosan/.migrator:/go/cosan/migrator

@@ -1,0 +1,355 @@
+use crate::util;
+use sqlx::FromRow;
+
+#[derive(Debug, FromRow)]
+pub struct GetUser {
+    pub user_id: i64,
+    pub last_name: String,
+    pub first_name: String,
+    pub login_id: String,
+    pub password: String,
+    pub email: String,
+    pub country: String,
+}
+
+impl GetUser {
+    pub fn new(
+        user_id: i64,
+        last_name: String,
+        first_name: String,
+        login_id: String,
+        password: String,
+        email: String,
+        country: String,
+    ) -> Self {
+        Self {
+            user_id,
+            last_name,
+            first_name,
+            login_id,
+            password,
+            email,
+            country,
+        }
+    }
+
+    pub fn is_valid(&self) -> bool {
+        self.user_id >= 0
+            && !self.last_name.is_empty()
+            && !self.first_name.is_empty()
+            && !self.login_id.is_empty()
+            && !self.password.is_empty()
+            && !self.email.is_empty()
+            && !self.country.is_empty()
+    }
+
+    pub async fn convert_hash_password(self) -> Result<Self, bcrypt::BcryptError> {
+        let hashed_password = util::crypt::hash_password(&self.password).await?;
+        Ok(Self {
+            password: hashed_password,
+            ..self
+        })
+    }
+}
+
+#[derive(Debug, FromRow)]
+pub struct CreateUser {
+    pub user_id: i64,
+    pub last_name: String,
+    pub first_name: String,
+    pub login_id: String,
+    pub password: String,
+    pub email: String,
+    pub country: String,
+}
+
+impl CreateUser {
+    pub fn new(
+        user_id: i64,
+        last_name: String,
+        first_name: String,
+        login_id: String,
+        password: String,
+        email: String,
+        country: String,
+    ) -> Self {
+        Self {
+            user_id,
+            last_name,
+            first_name,
+            login_id,
+            password,
+            email,
+            country,
+        }
+    }
+
+    pub fn is_valid(&self) -> bool {
+        self.user_id >= 0
+            && !self.last_name.is_empty()
+            && !self.first_name.is_empty()
+            && !self.login_id.is_empty()
+            && !self.password.is_empty()
+            && !self.email.is_empty()
+            && !self.country.is_empty()
+    }
+
+    pub async fn convert_hash_password(self) -> Result<Self, bcrypt::BcryptError> {
+        let hashed_password = util::crypt::hash_password(&self.password).await?;
+        Ok(Self {
+            password: hashed_password,
+            ..self
+        })
+    }
+}
+
+#[derive(Debug, FromRow)]
+pub struct UpdateUser {
+    pub user_id: i64,
+    pub last_name: String,
+    pub first_name: String,
+    pub login_id: String,
+    pub password: String,
+    pub email: String,
+    pub country: String,
+}
+
+impl UpdateUser {
+    pub fn new(
+        user_id: i64,
+        last_name: String,
+        first_name: String,
+        login_id: String,
+        password: String,
+        email: String,
+        country: String,
+    ) -> Self {
+        Self {
+            user_id,
+            last_name,
+            first_name,
+            login_id,
+            password,
+            email,
+            country,
+        }
+    }
+
+    pub fn is_valid(&self) -> bool {
+        self.user_id >= 0
+            && !self.last_name.is_empty()
+            && !self.first_name.is_empty()
+            && !self.login_id.is_empty()
+            && !self.password.is_empty()
+            && !self.email.is_empty()
+            && !self.country.is_empty()
+    }
+
+    pub async fn convert_hash_password(self) -> Result<Self, bcrypt::BcryptError> {
+        let hashed_password = util::crypt::hash_password(&self.password).await?;
+        Ok(Self {
+            password: hashed_password,
+            ..self
+        })
+    }
+}
+
+#[derive(Debug, FromRow)]
+pub struct GetSupporter {
+    pub supporter_id: i64,
+    pub last_name: String,
+    pub first_name: String,
+    pub login_id: String,
+    pub password: String,
+    pub email: String,
+    pub country: String,
+}
+
+impl GetSupporter {
+    pub fn new(
+        supporter_id: i64,
+        last_name: String,
+        first_name: String,
+        login_id: String,
+        password: String,
+        email: String,
+        country: String,
+    ) -> Self {
+        Self {
+            supporter_id,
+            last_name,
+            first_name,
+            login_id,
+            password,
+            email,
+            country,
+        }
+    }
+
+    pub fn is_valid(&self) -> bool {
+        self.supporter_id >= 0
+            && !self.last_name.is_empty()
+            && !self.first_name.is_empty()
+            && !self.login_id.is_empty()
+            && !self.password.is_empty()
+            && !self.email.is_empty()
+            && !self.country.is_empty()
+    }
+
+    pub async fn convert_hash_password(self) -> Result<Self, bcrypt::BcryptError> {
+        let hashed_password = util::crypt::hash_password(&self.password).await?;
+        Ok(Self {
+            password: hashed_password,
+            ..self
+        })
+    }
+}
+
+#[derive(Debug, FromRow)]
+pub struct CreateSupporter {
+    pub supporter_id: i64,
+    pub last_name: String,
+    pub first_name: String,
+    pub login_id: String,
+    pub password: String,
+    pub email: String,
+    pub country: String,
+}
+
+impl CreateSupporter {
+    pub fn new(
+        supporter_id: i64,
+        last_name: String,
+        first_name: String,
+        login_id: String,
+        password: String,
+        email: String,
+        country: String,
+    ) -> Self {
+        Self {
+            supporter_id,
+            last_name,
+            first_name,
+            login_id,
+            password,
+            email,
+            country,
+        }
+    }
+
+    pub fn is_valid(&self) -> bool {
+        self.supporter_id >= 0
+            && !self.last_name.is_empty()
+            && !self.first_name.is_empty()
+            && !self.login_id.is_empty()
+            && !self.password.is_empty()
+            && !self.email.is_empty()
+            && !self.country.is_empty()
+    }
+
+    pub async fn convert_hash_password(self) -> Result<Self, bcrypt::BcryptError> {
+        let hashed_password = util::crypt::hash_password(&self.password).await?;
+        Ok(Self {
+            password: hashed_password,
+            ..self
+        })
+    }
+}
+
+#[derive(Debug, FromRow)]
+pub struct UpdateSupporter {
+    pub supporter_id: i64,
+    pub last_name: String,
+    pub first_name: String,
+    pub login_id: String,
+    pub password: String,
+    pub email: String,
+    pub country: String,
+}
+
+impl UpdateSupporter {
+    pub fn new(
+        supporter_id: i64,
+        last_name: String,
+        first_name: String,
+        login_id: String,
+        password: String,
+        email: String,
+        country: String,
+    ) -> Self {
+        Self {
+            supporter_id,
+            last_name,
+            first_name,
+            login_id,
+            password,
+            email,
+            country,
+        }
+    }
+
+    pub fn is_valid(&self) -> bool {
+        self.supporter_id >= 0
+            && !self.last_name.is_empty()
+            && !self.first_name.is_empty()
+            && !self.login_id.is_empty()
+            && !self.password.is_empty()
+            && !self.email.is_empty()
+            && !self.country.is_empty()
+    }
+
+    pub async fn convert_hash_password(self) -> Result<Self, bcrypt::BcryptError> {
+        let hashed_password = util::crypt::hash_password(&self.password).await?;
+        Ok(Self {
+            password: hashed_password,
+            ..self
+        })
+    }
+}
+
+#[derive(Debug, FromRow)]
+pub struct GetProtagonistSupporter {
+    pub supporter_id: i64,
+    pub last_name: String,
+    pub first_name: String,
+    pub country: String,
+}
+
+impl GetProtagonistSupporter {
+    pub fn new(supporter_id: i64, last_name: String, first_name: String, country: String) -> Self {
+        Self {
+            supporter_id,
+            last_name,
+            first_name,
+            country,
+        }
+    }
+
+    pub fn is_valid(&self) -> bool {
+        self.supporter_id >= 0
+            && !self.last_name.is_empty()
+            && !self.first_name.is_empty()
+            && !self.country.is_empty()
+    }
+}
+
+#[derive(Debug, FromRow)]
+pub struct CreateProtagonistSupporter {
+    pub protagonist_supporter_id: i64,
+    pub protagonist_id: i64,
+    pub supporter_id: i64,
+}
+
+impl CreateProtagonistSupporter {
+    pub fn new(protagonist_supporter_id: i64, protagonist_id: i64, supporter_id: i64) -> Self {
+        Self {
+            protagonist_supporter_id,
+            protagonist_id,
+            supporter_id,
+        }
+    }
+
+    pub fn is_valid(&self) -> bool {
+        self.protagonist_id >= 0 && self.supporter_id >= 0 && self.protagonist_supporter_id >= 0
+    }
+}
