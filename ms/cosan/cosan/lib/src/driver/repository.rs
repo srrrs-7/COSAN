@@ -3,11 +3,11 @@ use crate::driver::model;
 use sqlx;
 
 #[derive(Clone)]
-pub struct SupportRepository {
+pub struct CosanRepository {
     db: sqlx::PgPool,
 }
 
-impl SupportRepository {
+impl CosanRepository {
     pub fn new(db: sqlx::PgPool) -> Self {
         Self { db }
     }
@@ -44,7 +44,7 @@ impl SupportRepository {
 
     pub async fn create_user(
         &self,
-        user: model::CreateUser,
+        model: model::CreateUser,
     ) -> Result<Option<entity::User>, sqlx::Error> {
         let row = sqlx::query_as::<_, model::CreateUser>(
             r#"
@@ -56,12 +56,12 @@ impl SupportRepository {
                 user_id, last_name, first_name, login_id, password, email, country;
             "#,
         )
-        .bind(user.last_name)
-        .bind(user.first_name)
-        .bind(user.login_id)
-        .bind(user.password)
-        .bind(user.email)
-        .bind(user.country)
+        .bind(model.last_name)
+        .bind(model.first_name)
+        .bind(model.login_id)
+        .bind(model.password)
+        .bind(model.email)
+        .bind(model.country)
         .fetch_one(&self.db)
         .await?;
 
@@ -82,7 +82,7 @@ impl SupportRepository {
 
     pub async fn update_user(
         &self,
-        user: model::UpdateUser,
+        model: model::UpdateUser,
     ) -> Result<Option<entity::User>, sqlx::Error> {
         let row = sqlx::query_as::<_, model::UpdateUser>(
             r#"
@@ -94,13 +94,13 @@ impl SupportRepository {
                 user_id, last_name, first_name, login_id, password, email, country;
             "#,
         )
-        .bind(user.last_name)
-        .bind(user.first_name)
-        .bind(user.login_id)
-        .bind(user.password)
-        .bind(user.email)
-        .bind(user.country)
-        .bind(user.user_id)
+        .bind(model.last_name)
+        .bind(model.first_name)
+        .bind(model.login_id)
+        .bind(model.password)
+        .bind(model.email)
+        .bind(model.country)
+        .bind(model.user_id)
         .fetch_one(&self.db)
         .await?;
 
@@ -168,21 +168,18 @@ impl SupportRepository {
         )))
     }
 
-    pub async fn get_supporter(
-        &self,
-        supporter_id: i64,
-    ) -> Result<Option<entity::Supporter>, sqlx::Error> {
-        let row = sqlx::query_as::<_, model::GetSupporter>(
+    pub async fn get_word(&self, word_id: i64) -> Result<Option<entity::Word>, sqlx::Error> {
+        let row = sqlx::query_as::<_, model::GetWord>(
             r#"
             SELECT 
-                supporter_id, last_name, first_name, login_id, password, email, country
+                word_id, word
             FROM 
-                supporters
+                words
             WHERE 
-                supporter_id = $1;
+                word_id = $1;
             "#,
         )
-        .bind(supporter_id)
+        .bind(word_id)
         .fetch_one(&self.db)
         .await?;
 
@@ -190,37 +187,27 @@ impl SupportRepository {
             return Ok(None);
         }
 
-        Ok(Some(entity::Supporter::new(
-            row.supporter_id,
-            row.last_name,
-            row.first_name,
-            row.login_id,
-            row.password,
-            row.email,
-            row.country,
+        Ok(Some(entity::Word::new(
+            u64::try_from(row.word_id).unwrap(),
+            row.word,
         )))
     }
 
-    pub async fn create_supporter(
+    pub async fn create_word(
         &self,
-        supporter: model::CreateSupporter,
-    ) -> Result<Option<entity::Supporter>, sqlx::Error> {
-        let row = sqlx::query_as::<_, model::CreateSupporter>(
+        model: model::CreateWord,
+    ) -> Result<Option<entity::Word>, sqlx::Error> {
+        let row = sqlx::query_as::<_, model::CreateWord>(
             r#"
             INSERT INTO 
-                supporters (last_name, first_name, login_id, password, email, country)
+                words (word)
             VALUES 
-                ($1, $2, $3, $4, $5, $6)
+                ($1)
             RETURNING 
-                supporter_id, last_name, first_name, login_id, password, email, country;
+                word_id, word;
             "#,
         )
-        .bind(supporter.last_name)
-        .bind(supporter.first_name)
-        .bind(supporter.login_id)
-        .bind(supporter.password)
-        .bind(supporter.email)
-        .bind(supporter.country)
+        .bind(model.word)
         .fetch_one(&self.db)
         .await?;
 
@@ -228,38 +215,28 @@ impl SupportRepository {
             return Ok(None);
         }
 
-        Ok(Some(entity::Supporter::new(
-            row.supporter_id,
-            row.last_name,
-            row.first_name,
-            row.login_id,
-            row.password,
-            row.email,
-            row.country,
+        Ok(Some(entity::Word::new(
+            u64::try_from(row.word_id).unwrap(),
+            row.word,
         )))
     }
 
-    pub async fn update_supporter(
+    pub async fn update_word(
         &self,
-        supporter: model::UpdateSupporter,
-    ) -> Result<Option<entity::Supporter>, sqlx::Error> {
-        let row = sqlx::query_as::<_, model::UpdateSupporter>(
+        model: model::UpdateWord,
+    ) -> Result<Option<entity::Word>, sqlx::Error> {
+        let row = sqlx::query_as::<_, model::UpdateWord>(
             r#"
-            UPDATE supporters
-                SET last_name = $1, first_name = $2, login_id = $3, password = $4, email = $5, country = $6
+            UPDATE words
+                SET word = $1
             WHERE 
-                supporter_id = $7
+                word_id = $2
             RETURNING 
-                supporter_id, last_name, first_name, login_id, password, email, country;
+                word_id, word;
             "#,
         )
-        .bind(supporter.last_name)
-        .bind(supporter.first_name)
-        .bind(supporter.login_id)
-        .bind(supporter.password)
-        .bind(supporter.email)
-        .bind(supporter.country)
-        .bind(supporter.supporter_id)
+        .bind(model.word)
+        .bind(model.word_id)
         .fetch_one(&self.db)
         .await?;
 
@@ -267,24 +244,19 @@ impl SupportRepository {
             return Ok(None);
         }
 
-        Ok(Some(entity::Supporter::new(
-            row.supporter_id,
-            row.last_name,
-            row.first_name,
-            row.login_id,
-            row.password,
-            row.email,
-            row.country,
+        Ok(Some(entity::Word::new(
+            u64::try_from(row.word_id).unwrap(),
+            row.word,
         )))
     }
 
-    pub async fn delete_supporter(&self, id: i64) -> Result<Option<()>, sqlx::Error> {
+    pub async fn delete_word(&self, id: i64) -> Result<Option<()>, sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM 
-                supporters
+                words
             WHERE 
-                supporter_id = $1;
+                word_id = $1;
             "#,
         )
         .bind(i64::try_from(id).unwrap())
@@ -294,59 +266,88 @@ impl SupportRepository {
         Ok(Some(()))
     }
 
-    pub async fn get_supporter_by_login_id_and_password(
+    pub async fn get_user_word_by_user_id_and_word_id(
         &self,
-        login_id: &str,
-    ) -> Result<Option<entity::Supporter>, sqlx::Error> {
-        let row = sqlx::query_as::<_, model::GetSupporter>(
+        model: model::GetUserWordId,
+    ) -> Result<Option<entity::UserWord>, sqlx::Error> {
+        let row = sqlx::query_as::<_, model::GetUserWord>(
             r#"
             SELECT 
-                supporter_id, last_name, first_name, login_id, password, email, country
+                uw.user_word_id,
+                u.user_id,
+                u.last_name,
+                u.first_name,
+                u.email,
+                u.country,
+                w.word_id,
+                w.word,
+                uw.created_at
             FROM 
-                supporters
+                user_words AS uw
+            INNER JOIN
+                users AS u 
+                    ON uw.user_id = u.user_id
+            INNER JOIN
+                words AS w 
+                    ON uw.word_id = w.word_id
             WHERE 
-                login_id = $1 
+                uw.user_id = $1
+                AND uw.word_id = $2
             "#,
         )
-        .bind(login_id)
+        .bind(model.user_id)
+        .bind(model.word_id)
         .fetch_one(&self.db)
         .await?;
 
-        if !row.is_valid() {
+        if row.is_valid() {
             return Ok(None);
         }
 
-        Ok(Some(entity::Supporter::new(
-            row.supporter_id,
+        Ok(Some(entity::UserWord::new(
+            u64::try_from(row.user_word_id).unwrap(),
+            u64::try_from(row.user_id).unwrap(),
             row.last_name,
             row.first_name,
-            row.login_id,
-            row.password,
             row.email,
             row.country,
+            u64::try_from(row.word_id).unwrap(),
+            row.word,
+            row.created_at,
         )))
     }
 
-    pub async fn get_protagonist_supporter(
+    pub async fn get_user_word_by_user_id(
         &self,
-        id: i64,
-    ) -> Result<Option<Vec<entity::ProtagonistSupporter>>, sqlx::Error> {
-        let rows = sqlx::query_as::<_, model::GetProtagonistSupporter>(
+        model: model::GetUserWordId,
+    ) -> Result<Option<Vec<entity::UserWord>>, sqlx::Error> {
+        let rows = sqlx::query_as::<_, model::GetUserWord>(
             r#"
             SELECT 
-                s.supporter_id, s.last_name, s.first_name, s.country
+                uw.user_word_id,
+                u.user_id,
+                u.last_name,
+                u.first_name,
+                u.email,
+                u.country,
+                w.word_id,
+                w.word,
+                uw.created_at
             FROM 
-                protagonist_supporters AS p
+                user_words AS uw
             INNER JOIN
-                supporters AS s 
-                    ON p.supporter_id = s.supporter_id
+                users AS u 
+                    ON uw.user_id = u.user_id
+            INNER JOIN
+                words AS w 
+                    ON uw.word_id = w.word_id
             WHERE 
-                p.protagonist_id = $1
+                uw.user_id = $1
             ORDER BY
-                created_at DESC;
+                created_at ASC;
             "#,
         )
-        .bind(i64::try_from(id).unwrap())
+        .bind(model.user_id)
         .fetch_all(&self.db)
         .await?;
 
@@ -354,37 +355,100 @@ impl SupportRepository {
             return Ok(None);
         }
 
-        let protagonist_supporters = rows
+        let user_words = rows
             .into_iter()
             .map(|row| {
-                entity::ProtagonistSupporter::new(
-                    row.supporter_id,
+                entity::UserWord::new(
+                    u64::try_from(row.user_word_id).unwrap(),
+                    u64::try_from(row.user_id).unwrap(),
                     row.last_name,
                     row.first_name,
+                    row.email,
                     row.country,
+                    u64::try_from(row.word_id).unwrap(),
+                    row.word,
+                    row.created_at,
                 )
             })
             .collect();
 
-        Ok(Some(protagonist_supporters))
+        Ok(Some(user_words))
     }
 
-    pub async fn create_protagonist_supporter(
+    pub async fn get_user_word_by_word_id(
         &self,
-        protagonist_supporter: model::CreateProtagonistSupporter,
-    ) -> Result<Option<entity::ProtagonistSupporterRelation>, sqlx::Error> {
-        let row = sqlx::query_as::<_, model::CreateProtagonistSupporter>(
+        model: model::GetUserWordId,
+    ) -> Result<Option<Vec<entity::UserWord>>, sqlx::Error> {
+        let rows = sqlx::query_as::<_, model::GetUserWord>(
+            r#"
+            SELECT 
+                uw.user_word_id,
+                u.user_id,
+                u.last_name,
+                u.first_name,
+                u.email,
+                u.country,
+                w.word_id,
+                w.word,
+                uw.created_at
+            FROM 
+                user_words AS uw
+            INNER JOIN
+                users AS u 
+                    ON uw.user_id = u.user_id
+            INNER JOIN
+                words AS w 
+                    ON uw.word_id = w.word_id
+            WHERE 
+                uw.word_id = $2
+            ORDER BY
+                created_at ASC;
+            "#,
+        )
+        .bind(model.word_id)
+        .fetch_all(&self.db)
+        .await?;
+
+        if rows.is_empty() {
+            return Ok(None);
+        }
+
+        let user_words = rows
+            .into_iter()
+            .map(|row| {
+                entity::UserWord::new(
+                    u64::try_from(row.user_word_id).unwrap(),
+                    u64::try_from(row.user_id).unwrap(),
+                    row.last_name,
+                    row.first_name,
+                    row.email,
+                    row.country,
+                    u64::try_from(row.word_id).unwrap(),
+                    row.word,
+                    row.created_at,
+                )
+            })
+            .collect();
+
+        Ok(Some(user_words))
+    }
+
+    pub async fn create_user_word(
+        &self,
+        model: model::CreateUserWord,
+    ) -> Result<Option<entity::UserWordRelation>, sqlx::Error> {
+        let row = sqlx::query_as::<_, model::GetUserWordRelation>(
             r#"
             INSERT INTO 
-                protagonist_supporters (protagonist_id, supporter_id)
+                user_words (user_id, word_id)
             VALUES 
                 ($1, $2)
             RETURNING 
-                protagonist_supporter_id, protagonist_id, supporter_id;
+                user_id, word_id;
             "#,
         )
-        .bind(protagonist_supporter.protagonist_id)
-        .bind(protagonist_supporter.supporter_id)
+        .bind(model.user_id)
+        .bind(model.word_id)
         .fetch_one(&self.db)
         .await?;
 
@@ -392,18 +456,20 @@ impl SupportRepository {
             return Ok(None);
         }
 
-        Ok(Some(entity::ProtagonistSupporterRelation::new(
-            row.protagonist_supporter_id,
+        Ok(Some(entity::UserWordRelation::new(
+            u64::try_from(row.user_id).unwrap(),
+            u64::try_from(row.word_id).unwrap(),
+            row.created_at,
         )))
     }
 
-    pub async fn delete_protagonist_supporter(&self, id: i64) -> Result<Option<()>, sqlx::Error> {
+    pub async fn delete_user_word(&self, id: i64) -> Result<Option<()>, sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM 
-                protagonist_supporters
+                user_words
             WHERE 
-                protagonist_id = $1;
+                user_word_id = $1;
             "#,
         )
         .bind(i64::try_from(id).unwrap())

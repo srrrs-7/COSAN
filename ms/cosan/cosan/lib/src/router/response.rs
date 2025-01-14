@@ -73,92 +73,109 @@ impl IntoResponse for DeleteUserResponse {
 }
 
 #[derive(Serialize)]
-pub struct GetSupporterResponse {
-    pub supporter_id: u64,
-    pub supporter_last_name: String,
-    pub supporter_first_name: String,
-    pub supporter_email: String,
-    pub supporter_country: String,
+pub struct GetWordResponse {
+    pub word_id: u64,
+    pub word: String,
 }
 
-impl IntoResponse for GetSupporterResponse {
+impl IntoResponse for GetWordResponse {
     fn into_response(self) -> Response {
         (StatusCode::OK, Json(self)).into_response()
     }
 }
 
 #[derive(Serialize)]
-pub struct CreateSupporterResponse {
-    pub supporter_id: u64,
-    pub supporter_last_name: String,
-    pub supporter_first_name: String,
-    pub supporter_email: String,
-    pub supporter_country: String,
+pub struct CreateWordResponse {
+    pub word_id: u64,
+    pub word: String,
 }
 
-impl IntoResponse for CreateSupporterResponse {
+impl IntoResponse for CreateWordResponse {
     fn into_response(self) -> Response {
         (StatusCode::CREATED, Json(self)).into_response()
     }
 }
 
 #[derive(Serialize)]
-pub struct UpdateSupporterResponse {
-    pub supporter_id: u64,
-    pub supporter_last_name: String,
-    pub supporter_first_name: String,
-    pub supporter_email: String,
-    pub supporter_country: String,
+pub struct UpdateWordResponse {
+    pub word_id: u64,
+    pub word: String,
 }
 
-impl IntoResponse for UpdateSupporterResponse {
+impl IntoResponse for UpdateWordResponse {
     fn into_response(self) -> Response {
         (StatusCode::OK, Json(self)).into_response()
     }
 }
 
 #[derive(Serialize)]
-pub struct DeleteSupporterResponse {
+pub struct DeleteWordResponse {
     pub status: String,
 }
 
-impl IntoResponse for DeleteSupporterResponse {
+impl IntoResponse for DeleteWordResponse {
     fn into_response(self) -> Response {
         (StatusCode::OK, Json(self)).into_response()
     }
 }
 
 #[derive(Serialize)]
-pub struct GetProtagonistSupporterResponse {
-    pub supporter_id: u64,
+pub struct GetUserWordResponse {
+    pub user_word_id: u64,
+    pub user_id: u64,
     pub last_name: String,
     pub first_name: String,
+    pub email: String,
     pub country: String,
+    pub word_id: u64,
+    pub word: String,
+    pub created_at: String,
 }
 
-impl IntoResponse for GetProtagonistSupporterResponse {
+impl IntoResponse for GetUserWordResponse {
     fn into_response(self) -> Response {
         (StatusCode::OK, Json(self)).into_response()
     }
 }
 
 #[derive(Serialize)]
-pub struct CreateProtagonistSupporterResponse {
-    pub protagonist_supporter_id: u64,
+pub struct CreateUserWordResponse {
+    pub user_word_id: u64,
+    pub user_id: u64,
+    pub last_name: String,
+    pub first_name: String,
+    pub email: String,
+    pub country: String,
+    pub word_id: u64,
+    pub word: String,
+    pub created_at: String,
 }
 
-impl IntoResponse for CreateProtagonistSupporterResponse {
+impl IntoResponse for CreateUserWordResponse {
     fn into_response(self) -> Response {
         (StatusCode::CREATED, Json(self)).into_response()
     }
 }
 
 #[derive(Serialize)]
-pub struct DeleteProtagonistSupporterResponse {
+pub struct CreateUserWordRelationResponse {
+    pub user_id: u64,
+    pub word_id: u64,
+    pub created_at: String,
+}
+
+impl IntoResponse for CreateUserWordRelationResponse {
+    fn into_response(self) -> Response {
+        (StatusCode::CREATED, Json(self)).into_response()
+    }
+}
+
+#[derive(Serialize)]
+pub struct DeleteUserWordResponse {
     pub status: String,
 }
 
-impl IntoResponse for DeleteProtagonistSupporterResponse {
+impl IntoResponse for DeleteUserWordResponse {
     fn into_response(self) -> Response {
         (StatusCode::OK, Json(self)).into_response()
     }

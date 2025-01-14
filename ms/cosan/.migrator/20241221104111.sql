@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS user_words (
     word_id BIGINT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (user_word_id),
+    UNIQUE (user_id, word_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (word_id) REFERENCES words(word_id)
 );

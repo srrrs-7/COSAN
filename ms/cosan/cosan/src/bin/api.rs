@@ -1,7 +1,7 @@
 use dotenv::dotenv;
 use lib::{
-    domain::service::SupportService,
-    driver::{database::new_database, repository::SupportRepository},
+    domain::service::CosanService,
+    driver::{database::new_database, repository::CosanRepository},
     router::router::AppRouter,
     util::slog::new_logger,
 };
@@ -9,20 +9,20 @@ use std::env;
 use tracing::{error, info, span, Level};
 
 const MODE: &'static str = "MODE";
-const SUPPORT_PG_URL: &'static str = "SUPPORT_PG_URL";
+const COSAN_PG_URL: &'static str = "COSAN_PG_URL";
 const SECRET_KEY: &'static str = "SECRET_KEY";
 
 #[derive(Debug)]
 struct Env {
     mode: String,
-    support_pg_url: String,
+    cosan_pg_url: String,
     secret_key: String,
 }
 
 async fn init_env() -> Env {
     dotenv().ok();
-    if env::var(MODE).is_err() | env::var(SUPPORT_PG_URL).is_err() | env::var(SECRET_KEY).is_err() {
-        error!("{} is not set", SUPPORT_PG_URL);
+    if env::var(MODE).is_err() | env::var(COSAN_PG_URL).is_err() | env::var(SECRET_KEY).is_err() {
+        error!("{} is not set", COSAN_PG_URL);
         panic!();
     }
 
@@ -37,7 +37,7 @@ async fn init_env() -> Env {
 
     Env {
         mode,
-        support_pg_url: env::var(SUPPORT_PG_URL).unwrap(),
+        cosan_pg_url: env::var(COSAN_PG_URL).unwrap(),
         secret_key: env::var(SECRET_KEY).unwrap(),
     }
 }
@@ -56,10 +56,10 @@ async fn main() {
         info!("Running in release mode");
     }
 
-    let support_service = SupportService::new(SupportRepository::new(
-        new_database(&env.support_pg_url).await.unwrap(),
+    let cosan_service = CosanService::new(CosanRepository::new(
+        new_database(&env.cosan_pg_url).await.unwrap(),
     ));
 
-    let router = AppRouter::new(support_service, env.secret_key);
+    let router = AppRouter::new(cosan_service, env.secret_key);
     router.serve().await.unwrap();
 }
