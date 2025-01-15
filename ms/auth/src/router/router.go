@@ -38,6 +38,7 @@ func (rt Router) Serve() *chi.Mux {
 	router.Route("/auth/v1", func(r chi.Router) {
 		// auth
 		r.Route("/auth", func(r chi.Router) {
+			r.Post("/user/login", rt.userLogin)
 			r.Post("/protagonist/login", rt.protagonistLogin)
 			r.Post("/supporter/login", rt.supporterLogin)
 			r.Group(func(r chi.Router) {

@@ -49,7 +49,7 @@ services:
   cosan-db:
     image: postgres:latest
     ports:
-      - 5432:5432
+      - 5434:5432
     volumes:
       - ./ms/cosan/.migrator/data:/var/lib/postgresql/data
 

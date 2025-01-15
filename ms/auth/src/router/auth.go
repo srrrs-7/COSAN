@@ -10,6 +10,24 @@ import (
 	"github.com/google/uuid"
 )
 
+func (rt Router) userLogin(w http.ResponseWriter, req *http.Request) {
+	traceId := uuid.New().String()
+	req.Header.Set("x-trace-id", traceId)
+	utillog.ApiAccessLog(req, traceId)
+
+	r, err := utilhttp.RequestBody[request.LoginRequest](req)
+	if err != nil {
+		utillog.ApiErrorLog(req, traceId, http.StatusBadRequest, err)
+		utilhttp.ResponseBadRequest(w, response.Err{Error: err.Error()})
+		return
+	}
+	if err := r.Validate(); err != nil {
+		utillog.ApiErrorLog(req, traceId, http.StatusBadRequest, err)
+		utilhttp.ResponseBadRequest(w, response.Err{Error: err.Error()})
+		return
+	}
+}
+
 func (rt Router) protagonistLogin(w http.ResponseWriter, req *http.Request) {
 	traceId := uuid.New().String()
 	req.Header.Set("x-trace-id", traceId)

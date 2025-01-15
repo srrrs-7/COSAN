@@ -26,10 +26,31 @@ func NewAuth(a repository.Autheticator, u string) AuthService {
 	}
 }
 
+// user login service
+func (a AuthService) UserLogin(ctx context.Context, lid, psswd, secretKey string) (*response.Login, error) {
+	// get http params
+	baseUrl, params, err := a.requestParams(a.baseUrl, "user", lid, psswd)
+	if err != nil {
+		return nil, err
+	}
+	// get master data
+	protagonist, err := utilhttp.HttpGetRequest[model.Protagonist](baseUrl, params, "")
+	if err != nil {
+		return nil, err
+	}
+	// login
+	token, err := a.authRepo.Login(ctx, protagonist.Pid, secretKey)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.NewLoginResponse(token.AccessToken, token.RefreshToken, token.ExpiredAt, token.IssuedAt), err
+}
+
 // protagonist login service
 func (a AuthService) ProtagonistLogin(ctx context.Context, lid, psswd, secretKey string) (*response.Login, error) {
 	// get http params
-	baseUrl, params, err := a.protagonistRequestParams(a.baseUrl, lid, psswd)
+	baseUrl, params, err := a.requestParams(a.baseUrl, "protagonist", lid, psswd)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +71,7 @@ func (a AuthService) ProtagonistLogin(ctx context.Context, lid, psswd, secretKey
 // supporter logout services
 func (a AuthService) SupporterLogin(ctx context.Context, lid, psswd, secretKey string) (*response.Login, error) {
 	// get http params
-	baseUrl, params, err := a.supporterRequestParams(a.baseUrl, lid, psswd)
+	baseUrl, params, err := a.requestParams(a.baseUrl, "supporter", lid, psswd)
 	if err != nil {
 		return nil, err
 	}
@@ -100,26 +121,12 @@ func (a AuthService) Refresh(ctx context.Context, rToken, secretKey string) (*re
 	return response.NewLoginResponse(token.AccessToken, token.RefreshToken, token.ExpiredAt, token.IssuedAt), nil
 }
 
-func (a AuthService) protagonistRequestParams(baseUrl, lid, psswd string) (*url.URL, url.Values, error) {
+func (a AuthService) requestParams(baseUrl, userType, lid, psswd string) (*url.URL, url.Values, error) {
 	params := url.Values{}
 	params.Add("login_id", lid)
 	params.Add("password", psswd)
 
-	u, err := url.Parse(fmt.Sprintf("%s/protagonist/login/%s/password/%s", baseUrl, lid, psswd))
-	if err != nil {
-		return nil, nil, err
-	}
-	u.RawQuery = params.Encode()
-
-	return u, params, nil
-}
-
-func (a AuthService) supporterRequestParams(baseUrl, lid, psswd string) (*url.URL, url.Values, error) {
-	params := url.Values{}
-	params.Add("login_id", lid)
-	params.Add("password", psswd)
-
-	u, err := url.Parse(fmt.Sprintf("%s/supporter/login/%s/password/%s", baseUrl, lid, psswd))
+	u, err := url.Parse(fmt.Sprintf("%s/%s/login/%s/password/%s", baseUrl, userType, lid, psswd))
 	if err != nil {
 		return nil, nil, err
 	}
