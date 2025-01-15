@@ -26,6 +26,16 @@ func (rt Router) userLogin(w http.ResponseWriter, req *http.Request) {
 		utilhttp.ResponseBadRequest(w, response.Err{Error: err.Error()})
 		return
 	}
+
+	res, err := rt.authService.UserLogin(req.Context(), r.LoginId, r.Password, rt.secretKey)
+	if err != nil {
+		utillog.ApiErrorLog(req, traceId, http.StatusInternalServerError, err)
+		utilhttp.ResponseInternalServerError(w, response.Err{Error: err.Error()})
+		return
+	}
+
+	utillog.ApiSuccessLog(req, traceId, http.StatusOK)
+	utilhttp.ResponseOk(w, res)
 }
 
 func (rt Router) protagonistLogin(w http.ResponseWriter, req *http.Request) {
