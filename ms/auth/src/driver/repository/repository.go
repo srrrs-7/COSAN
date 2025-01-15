@@ -6,6 +6,10 @@ import (
 	"context"
 )
 
+type User interface {
+	Login(ctx context.Context, uid int64, secretKey string) (*entity.Token, error)
+}
+
 type Autheticator interface {
 	Login(ctx context.Context, uid int64, secretKey string) (*entity.Token, error)
 }

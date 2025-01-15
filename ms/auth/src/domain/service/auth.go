@@ -26,27 +26,6 @@ func NewAuth(a repository.Autheticator, u string) AuthService {
 	}
 }
 
-// user login service
-func (a AuthService) UserLogin(ctx context.Context, lid, psswd, secretKey string) (*response.Login, error) {
-	// get http params
-	baseUrl, params, err := a.requestParams(a.baseUrl, "user", lid, psswd)
-	if err != nil {
-		return nil, err
-	}
-	// get master data
-	protagonist, err := utilhttp.HttpGetRequest[model.Protagonist](baseUrl, params, "")
-	if err != nil {
-		return nil, err
-	}
-	// login
-	token, err := a.authRepo.Login(ctx, protagonist.Pid, secretKey)
-	if err != nil {
-		return nil, err
-	}
-
-	return response.NewLoginResponse(token.AccessToken, token.RefreshToken, token.ExpiredAt, token.IssuedAt), err
-}
-
 // protagonist login service
 func (a AuthService) ProtagonistLogin(ctx context.Context, lid, psswd, secretKey string) (*response.Login, error) {
 	// get http params

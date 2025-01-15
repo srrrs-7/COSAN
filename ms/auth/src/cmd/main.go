@@ -21,6 +21,7 @@ const (
 	MODE        = "MODE"
 	AUTH_PG_URL = "AUTH_PG_URL"
 	SUPPORT_URL = "SUPPORT_URL"
+	COSAN_URL   = "COSAN_URL"
 	SECRET_KEY  = "SECRET_KEY"
 )
 
@@ -33,6 +34,7 @@ type Env struct {
 	Mode       string
 	AuthPgUrl  string
 	SupportUrl string
+	CosanUrl   string
 	SecretKey  string
 }
 
@@ -41,10 +43,11 @@ func newEnv() Env {
 		Mode:       os.Getenv(MODE),
 		AuthPgUrl:  os.Getenv(AUTH_PG_URL),
 		SupportUrl: os.Getenv(SUPPORT_URL),
+		CosanUrl:   os.Getenv(COSAN_URL),
 		SecretKey:  os.Getenv(SECRET_KEY),
 	}
 
-	if e.Mode == "" || e.AuthPgUrl == "" || e.SupportUrl == "" || e.SecretKey == "" {
+	if e.Mode == "" || e.AuthPgUrl == "" || e.SupportUrl == "" || e.CosanUrl == "" || e.SecretKey == "" {
 		panic(fmt.Sprintf("either of env is an empty string.: %v", e))
 	} else if e.Mode != DEBUG && e.Mode != RELEASE {
 		panic(fmt.Sprintf("invalid mode: debug or release only but got %v", e.Mode))
@@ -62,6 +65,10 @@ func main() {
 	defer db.Close()
 
 	r := router.NewRouter(
+		service.NewUser(
+			repository.NewUserRepo(gormDb, query.NewAuthQuery()),
+			env.CosanUrl,
+		),
 		service.NewAuth(
 			repository.NewAuthRepo(gormDb, query.NewAuthQuery()),
 			env.SupportUrl,

@@ -13,13 +13,15 @@ import (
 )
 
 type Router struct {
+	userService service.UserService
 	authService service.Autheticator
 	certService service.Certificator
 	secretKey   string
 }
 
-func NewRouter(a service.Autheticator, c service.Certificator, secretKey string) Router {
+func NewRouter(u service.UserService, a service.Autheticator, c service.Certificator, secretKey string) Router {
 	return Router{
+		userService: u,
 		authService: a,
 		certService: c,
 		secretKey:   secretKey,

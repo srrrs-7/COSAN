@@ -7,8 +7,11 @@ import (
 	"net/http"
 )
 
-type Autheticator interface {
+type User interface {
 	UserLogin(ctx context.Context, lid, psswd, secretKey string) (*response.Login, error)
+}
+
+type Autheticator interface {
 	ProtagonistLogin(ctx context.Context, lid, psswd, secretKey string) (*response.Login, error)
 	SupporterLogin(ctx context.Context, lid, psswd, secretKey string) (*response.Login, error)
 	Logout(ctx context.Context, w http.ResponseWriter) error
