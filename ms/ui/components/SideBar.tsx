@@ -6,11 +6,12 @@ export default function SideBar({ isOpen }: Props) {
   return (
     <aside
       style={{
+        width: "10%",
+        height: "100%",
         position: "fixed",
         top: 0,
         left: 0,
-        height: "100vh",
-        width: "16rem",
+        marginTop: "4rem",
         backgroundColor: "#4a5568",
         color: "white",
         transition: "transform 0.3s ease-in-out",

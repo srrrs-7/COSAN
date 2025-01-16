@@ -11,37 +11,17 @@ export default function Register() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-      <style>{`
-        .container {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          height: 100vh;
-        }
-
-        .title {
-          font-size: 48px;
-          margin-bottom: 0;
-        }
-
-        .subtitle {
-          font-size: 24px;
-          font-weight: bold;
-          margin-bottom: 24px;
-          margin-top: 8px;
-        }
-
-        .link {
-          margin-top: 24px;
-        }
-      `}</style>
-      {/*  Rest of the component is same as before */}
-      <h1 className="title">COSAN</h1>
-      <p className="subtitle">登録して古参になりましょう</p>
-      <RegisterForm />
+      <h1 style={{ fontSize: "48px" }}>COSAN</h1>
+      <p style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "24px", marginTop: "8px" }}>登録して古参になりましょう</p>
       <Agreement isAgreed={isAgreed} />
-      <div className="link">
+      <input
+        style={{ marginBottom: "24px" }} 
+        type="checkbox" 
+        checked={isAgreed} 
+        onChange={checkAgreed} 
+      />
+      <RegisterForm />
+      <div style={{ marginTop: "24px" }} >
         <a href="/mb">ログイン画面へ戻る</a>
       </div>
     </div>

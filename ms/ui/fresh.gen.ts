@@ -17,6 +17,7 @@ import * as $LoginForm from "./islands/LoginForm.tsx";
 import * as $MyPage from "./islands/MyPage.tsx";
 import * as $Register from "./islands/Register.tsx";
 import * as $common_Header from "./islands/common/Header.tsx";
+import * as $common_RankRecord_ from "./islands/common/RankRecord .tsx";
 import * as $mypage_Ranking from "./islands/mypage/Ranking.tsx";
 import * as $mypage_RegisterWord from "./islands/mypage/RegisterWord.tsx";
 import * as $register_RegisterForm from "./islands/register/RegisterForm.tsx";
@@ -41,6 +42,7 @@ const manifest = {
     "./islands/MyPage.tsx": $MyPage,
     "./islands/Register.tsx": $Register,
     "./islands/common/Header.tsx": $common_Header,
+    "./islands/common/RankRecord .tsx": $common_RankRecord_,
     "./islands/mypage/Ranking.tsx": $mypage_Ranking,
     "./islands/mypage/RegisterWord.tsx": $mypage_RegisterWord,
     "./islands/register/RegisterForm.tsx": $register_RegisterForm,

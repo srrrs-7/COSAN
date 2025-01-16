@@ -18,7 +18,6 @@ export default function MyPage() {
           position: "fixed",
           top: "1rem",
           left: "1rem",
-          zIndex: 1000,
           backgroundColor: "#4299e1",
           ":hover": {
             backgroundColor: "#2b6cb0",
@@ -34,7 +33,9 @@ export default function MyPage() {
         {isOpen ? "close" : "open"}
       </button>
       <Sidebar isOpen={isOpen} />
-      <RegisterWord />
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+        <RegisterWord />
+      </div>
     </div>
   );
 }
