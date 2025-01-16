@@ -1,27 +1,11 @@
-import { JSX } from "preact";
-import { useState } from "preact/hooks";
+interface Props {
+  isAgreed: boolean;
+}
 
-export default function Agreement() {
-  const [isAgreed, setIsAgreed] = useState(false);
-
-  const handleCheckboxChange = (e: JSX.TargetedEvent<HTMLInputElement>) => {
-    setIsAgreed(e.currentTarget.checked);
-  };
-
+export default function Agreement({ isAgreed }: Props) {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", margin: "20px 10px" }}>
       <p style={{ marginBottom: "10px" }}>利用規約とプライバシーポリシーへの同意が必要です</p>
-      <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "8px", marginBottom: "24px" }}>
-        <input
-          type="checkbox"
-          id="agreement-checkbox"
-          checked={isAgreed}
-          onChange={handleCheckboxChange}
-        />
-        <label htmlFor="agreement-checkbox">
-          利用規約とプライバシーポリシーに同意する
-        </label>
-      </div>
       <p style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "24px" }}>利用規約</p>
       <div style={{ width: "90%", maxWidth: "400px", height: "300px", overflow: "auto", border: "1px solid #ccc", borderRadius: "4px" }}>
         <div style={{ padding: "20px" }}>

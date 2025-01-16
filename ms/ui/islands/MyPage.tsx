@@ -1,6 +1,7 @@
 import { JSX } from "preact";
 import { useState } from "preact/hooks";
 import Sidebar from "../components/Sidebar.tsx";
+import RegisterWord from "../islands/mypage/RegisterWord.tsx";
 
 export default function MyPage() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -33,6 +34,7 @@ export default function MyPage() {
         {isOpen ? "close" : "open"}
       </button>
       <Sidebar isOpen={isOpen} />
+      <RegisterWord />
     </div>
   );
 }

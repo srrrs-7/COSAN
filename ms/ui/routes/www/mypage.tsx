@@ -1,5 +1,5 @@
+import Header from "../../islands/common/Header.tsx";
 import MyPage from "../../islands/MyPage.tsx";
-import Header from "../../islands/Header.tsx";
 
 export default function Top() {
     return (
