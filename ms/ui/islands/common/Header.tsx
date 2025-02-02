@@ -10,7 +10,7 @@ export default function Header() {
   }, []);
 
   return (
-    <header style={{ backgroundColor: "#4a5568", color: "white", padding: "10px", textAlign: "center" }}>
+    <header style={{ backgroundColor: "#59c1e2", color: "white", padding: "10px", textAlign: "center" }}>
       <a href={redirectPath} style={{ color: "white", textDecoration: "none", fontSize: "20px", fontWeight: "bold" }}>
         COSAN
       </a>

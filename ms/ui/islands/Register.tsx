@@ -5,7 +5,7 @@ import { useState } from "preact/hooks";
 export default function Register() {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-      <h1 style={{ fontSize: "24px", backgroundColor: "#4a5568", width: "100%", justifyContent:"center", textAlign: "center", color: "white" }}>COSAN</h1>
+      <h1 style={{ fontSize: "24px", backgroundColor: "#59c1e2", width: "100%", justifyContent:"center", textAlign: "center", color: "white" }}>COSAN</h1>
       <p style={{ fontSize: "20px", fontWeight: "bold" }}>登録して古参になりませんか？</p>
       <Agreement />
       <RegisterForm />
