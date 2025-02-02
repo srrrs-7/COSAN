@@ -13,7 +13,7 @@ export default function RegisterWord() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "500px", height: "500px", backgroundColor: "#4a5568", color: "white" }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "500px", height: "500px", color: "white" }}>
       <form
         onSubmit={handleSubmit}
         style={{ display: "flex", flexDirection: "column", gap: "8px" }}
