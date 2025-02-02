@@ -5,11 +5,11 @@ export default function MenuBar() {
   const [activeTab, setActiveTab] = useState("search"); // 初期タブ
 
   const tabs = [
-    { id: "search", icon: "/logo.svg", label: "検索" },
-    { id: "collection", icon: "/logo.svg", label: "コレクション" },
-    { id: "register", icon: "/logo.svg", label: "登録" },
-    { id: "community", icon: "/logo.svg", label: "コミュニティ" },
-    { id: "login", icon: "/logo.svg", label: "ログイン" },
+    { id: "search", nonActiveIcon: "/logo.svg", activeIcon: "/active-logo.svg", label: "検索" },
+    { id: "collection", nonActiveIcon: "/logo.svg", activeIcon: "/active-logo.svg", label: "コレクション" },
+    { id: "register", nonActiveIcon: "/logo.svg", activeIcon: "/active-logo.svg", label: "登録" },
+    { id: "community", nonActiveIcon: "/logo.svg", activeIcon: "/active-logo.svg", label: "コミュニティ" },
+    { id: "login", nonActiveIcon: "/logo.svg", activeIcon: "/active-logo.svg", label: "ログイン" },
   ];
 
   return (
@@ -17,7 +17,7 @@ export default function MenuBar() {
       position: "fixed", 
       bottom: 0, 
       width: "100%", 
-      backgroundColor: "#f0f0f0",
+      backgroundColor: "#bbb",
       padding: "10px",
       display: "flex",
       justifyContent: "space-around" 
@@ -34,15 +34,11 @@ export default function MenuBar() {
           onClick={() => setActiveTab(tab.id)}
         >
           <img 
-            src={tab.icon} 
+            src={ activeTab === tab.id ? tab.activeIcon : tab.nonActiveIcon } 
             alt={tab.label} 
-            style={{ 
-              width: "30px", 
-              height: "30px",
-              filter: activeTab === tab.id ? 'brightness(100%) saturate(100%) invert(44%) sepia(61%) saturate(650%) hue-rotate(100deg) brightness(100%) contrast(100%)' : 'none'
-            }} 
+            style={{ width: "30px", height: "30px"}} 
           />
-          <span style={{ fontSize: "12px", color: activeTab === tab.id ? "#6aac98" : "gray" }}>{tab.label}</span> {/* アクティブ時 */}
+          <span style={{ fontSize: "12px", color: activeTab === tab.id ? "#6aac98" : "#fff" }}>{tab.label}</span>
         </div>
       ))}
     </div>
