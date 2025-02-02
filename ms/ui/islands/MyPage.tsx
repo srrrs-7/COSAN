@@ -1,6 +1,6 @@
 import { JSX } from "preact";
 import { useState } from "preact/hooks";
-import Sidebar from "../components/Sidebar.tsx";
+import Sidebar from "../islands/Sidebar.tsx";
 import RegisterWord from "../islands/mypage/RegisterWord.tsx";
 
 export default function MyPage() {

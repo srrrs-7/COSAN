@@ -2,14 +2,14 @@ import { JSX } from "preact";
 import { useState } from "preact/hooks";
 
 export default function LoginForm() {
-  const [username, setUsername] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
 
   const handleSubmit = (e: JSX.TargetedEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    console.log('Username:', username);
-    console.log('Password:', password);
+    console.log("Username:", username);
+    console.log("Password:", password);
 
     // ここでログイン処理などを実行
   };

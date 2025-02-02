@@ -1,13 +1,8 @@
-interface Props {
-  isAgreed: boolean;
-}
-
-export default function Agreement({ isAgreed }: Props) {
+export default function Agreement() {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", margin: "20px 10px" }}>
-      <p style={{ marginBottom: "10px" }}>利用規約とプライバシーポリシーへの同意が必要です</p>
-      <p style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "24px" }}>利用規約</p>
-      <div style={{ width: "90%", maxWidth: "400px", height: "300px", overflow: "auto", border: "1px solid #ccc", borderRadius: "4px" }}>
+      <p style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "12px" }}>利用規約</p>
+      <div style={{ width: "90%", maxWidth: "400px", height: "250px", overflow: "auto", border: "1px solid #ccc", borderRadius: "4px" }}>
         <div style={{ padding: "20px" }}>
           <section style={{ marginBottom: "20px" }}>
             <h3>第1条（適用範囲）</h3>

@@ -7,15 +7,15 @@ import * as $_app from "./routes/_app.tsx";
 import * as $api_login from "./routes/api/login.ts";
 import * as $api_register from "./routes/api/register.ts";
 import * as $index from "./routes/index.tsx";
-import * as $mb_index from "./routes/mb/index.tsx";
-import * as $mb_mypage from "./routes/mb/mypage.tsx";
-import * as $mb_register from "./routes/mb/register.tsx";
 import * as $www_index from "./routes/www/index.tsx";
-import * as $www_mypage from "./routes/www/mypage.tsx";
+import * as $www_mypage_index from "./routes/www/mypage/index.tsx";
+import * as $www_mypage_register from "./routes/www/mypage/register.tsx";
+import * as $www_mypage_search from "./routes/www/mypage/search.tsx";
 import * as $www_register from "./routes/www/register.tsx";
 import * as $LoginForm from "./islands/LoginForm.tsx";
 import * as $MyPage from "./islands/MyPage.tsx";
 import * as $Register from "./islands/Register.tsx";
+import * as $SideBar from "./islands/SideBar.tsx";
 import * as $common_Header from "./islands/common/Header.tsx";
 import * as $common_RankRecord_ from "./islands/common/RankRecord .tsx";
 import * as $mypage_Ranking from "./islands/mypage/Ranking.tsx";
@@ -30,17 +30,17 @@ const manifest = {
     "./routes/api/login.ts": $api_login,
     "./routes/api/register.ts": $api_register,
     "./routes/index.tsx": $index,
-    "./routes/mb/index.tsx": $mb_index,
-    "./routes/mb/mypage.tsx": $mb_mypage,
-    "./routes/mb/register.tsx": $mb_register,
     "./routes/www/index.tsx": $www_index,
-    "./routes/www/mypage.tsx": $www_mypage,
+    "./routes/www/mypage/index.tsx": $www_mypage_index,
+    "./routes/www/mypage/register.tsx": $www_mypage_register,
+    "./routes/www/mypage/search.tsx": $www_mypage_search,
     "./routes/www/register.tsx": $www_register,
   },
   islands: {
     "./islands/LoginForm.tsx": $LoginForm,
     "./islands/MyPage.tsx": $MyPage,
     "./islands/Register.tsx": $Register,
+    "./islands/SideBar.tsx": $SideBar,
     "./islands/common/Header.tsx": $common_Header,
     "./islands/common/RankRecord .tsx": $common_RankRecord_,
     "./islands/mypage/Ranking.tsx": $mypage_Ranking,

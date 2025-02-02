@@ -1,8 +1,21 @@
+import { JSX } from "preact";
+import { useState, useEffect } from "preact/hooks";
+
 interface Props {
   isOpen: boolean;
 }
   
 export default function SideBar({ isOpen }: Props) {
+  const [searchPath, setSearchPath] = useState<string>("");
+  const [registerPath, setRegisterPath] = useState<string>("");
+
+  useEffect(() => {
+    const path = window.location.pathname;
+    const deviceType = path.split("/")[1];
+    setSearchPath(`/${deviceType}/mypage/search`);
+    setRegisterPath(`/${deviceType}/mypage/register`);
+  }, []);
+
   return (
     <aside
       style={{
@@ -23,26 +36,36 @@ export default function SideBar({ isOpen }: Props) {
         <h2 style={{ fontSize: "1.25rem", fontWeight: "bold" }}>
           Menu
         </h2>
-        <ul style={{listStyle: 'none', padding: 0}}>
+        <ul style={{listStyle: "none", padding: 0}}>
           <li style={{ marginTop: "1rem" }}>
-            <a href="#" style={{ color: "white", textDecoration: "none" }}>
-              古参登録画面
+            <a href={searchPath} style={{ color: "white", textDecoration: "none" }}>
+              検索
+            </a>
+          </li>
+          <li style={{ marginTop: "1rem" }}>
+            <a href={registerPath} style={{ color: "white", textDecoration: "none" }}>
+              登録
             </a>
           </li>
           <li style={{ marginTop: "1rem" }}>
             <a href="#" style={{ color: "white", textDecoration: "none" }}>
-              古参ランキング
+              コレクション
             </a>
           </li>
           <li style={{ marginTop: "1rem" }}>
             <a href="#" style={{ color: "white", textDecoration: "none" }}>
-              設定
+              コミュニティ
+            </a>
+          </li>
+          <li style={{ marginTop: "1rem" }}>
+            <a href="#" style={{ color: "white", textDecoration: "none" }}>
+              ログイン
             </a>
           </li>
         </ul>
       </div>
       {/* Media query handling for larger screens */}
-      {(typeof window !== 'undefined' && window.innerWidth >= 768) && (
+      {(typeof window !== "undefined" && window.innerWidth >= 768) && (
         <style jsx global>{`
           aside {
             display: none;

@@ -3,26 +3,14 @@ import Agreement from "../components/Agreement.tsx";
 import { useState } from "preact/hooks";
 
 export default function Register() {
-  const [isAgreed, setIsAgreed] = useState<boolean>(false);
-  
-  const checkAgreed = () => {
-    setIsOpen(!isOpen);
-  };
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-      <h1 style={{ fontSize: "48px" }}>COSAN</h1>
-      <p style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "24px", marginTop: "8px" }}>登録して古参になりましょう</p>
-      <Agreement isAgreed={isAgreed} />
-      <input
-        style={{ marginBottom: "24px" }} 
-        type="checkbox" 
-        checked={isAgreed} 
-        onChange={checkAgreed} 
-      />
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+      <h1 style={{ fontSize: "24px", backgroundColor: "#4a5568", width: "100%", justifyContent:"center", textAlign: "center", color: "white" }}>COSAN</h1>
+      <p style={{ fontSize: "20px", fontWeight: "bold" }}>登録して古参になりませんか？</p>
+      <Agreement />
       <RegisterForm />
-      <div style={{ marginTop: "24px" }} >
-        <a href="/mb">ログイン画面へ戻る</a>
+      <div style={{ marginTop: "12px" }} >
+        <a href="/www">ログイン画面へ戻る</a>
       </div>
     </div>
   );

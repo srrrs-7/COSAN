@@ -6,7 +6,7 @@ export default function Header() {
   useEffect(() => {
     const path = window.location.pathname;
     const deviceType = path.split("/")[1];
-    setRedirectPath(`/${deviceType}/top`);
+    setRedirectPath(`/${deviceType}/mypage`);
   }, []);
 
   return (

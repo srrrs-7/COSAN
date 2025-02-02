@@ -2,18 +2,18 @@ import { JSX } from "preact";
 import { useState } from "preact/hooks";
 
 export default function RegisterWord() {
-  const [word, setWord] = useState<string>('');
+  const [word, setWord] = useState<string>("");
 
   const handleSubmit = (e: JSX.TargetedEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    console.log('Word:', word);
+    console.log("Word:", word);
 
     // ここで登録処理などを実行
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '500px', height: '500px', backgroundColor: "#4a5568", color: "white" }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "500px", height: "500px", backgroundColor: "#4a5568", color: "white" }}>
       <form
         onSubmit={handleSubmit}
         style={{ display: "flex", flexDirection: "column", gap: "8px" }}

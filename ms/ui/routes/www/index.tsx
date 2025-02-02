@@ -15,14 +15,14 @@ export default function Login() {
       }}
     >
       <h1 style={{ fontSize: "48px", marginBottom: "16px" }}>COSAN</h1>
-      <p style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "24px" }}>
+      <p style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "24px" }}>
         「あなたの古参歴、唯一の証」
       </p>
       <p style={{ marginBottom: "8px" }}>
         COSAN は、「古参歴」を登録できるサイトです!
       </p>
       <p style={{ marginBottom: "8px" }}>
-        新たな推しの第一発見者になり、登録しましょう。
+        新たな推しの第一発見者になりませんか。
       </p>
       <p style={{ marginBottom: "8px" }}>推しとは多岐に渡るでしょう。</p>
       <p style={{ marginBottom: "8px" }}>アイドル?スポーツ選手? 身の回りの人?</p>
