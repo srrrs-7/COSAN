@@ -6,10 +6,8 @@ export default function MenuBar() {
 
   const tabs = [
     { id: "search", nonActiveIcon: "/logo.svg", activeIcon: "/active-logo.svg", label: "検索" },
-    { id: "collection", nonActiveIcon: "/logo.svg", activeIcon: "/active-logo.svg", label: "コレクション" },
     { id: "register", nonActiveIcon: "/logo.svg", activeIcon: "/active-logo.svg", label: "登録" },
-    { id: "community", nonActiveIcon: "/logo.svg", activeIcon: "/active-logo.svg", label: "コミュニティ" },
-    { id: "login", nonActiveIcon: "/logo.svg", activeIcon: "/active-logo.svg", label: "ログイン" },
+    { id: "login", nonActiveIcon: "/logo.svg", activeIcon: "/active-logo.svg", label: "ログイン/マイページ" },
   ];
 
   return (
