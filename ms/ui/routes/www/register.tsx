@@ -11,9 +11,9 @@ export default function register() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        padding: "10px", // Add padding for better spacing
-        textAlign: "center", // Center align text
-        fontFamily: "hiragino kaku gothic pro, sans-serif", // Set a default font family
+        padding: "10px",
+        textAlign: "center",
+        fontFamily: "hiragino kaku gothic pro, sans-serif",
       }}
     >
       <Header />

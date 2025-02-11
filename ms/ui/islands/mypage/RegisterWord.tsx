@@ -46,7 +46,6 @@ export default function RegisterWord() {
             height: "30px", 
             padding: "2px", 
             border: "none", 
-            borderRadius: "4px", 
             backgroundColor: "#6aac98", 
             cursor: "pointer", 
             alignSelf: "center",

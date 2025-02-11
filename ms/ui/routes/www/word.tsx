@@ -10,30 +10,26 @@ export default function word() {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            padding: "10px", // Add padding for better spacing
-            textAlign: "center", // Center align text
-            fontFamily: "hiragino kaku gothic pro, sans-serif", // Set a default font family
+            padding: "10px", 
+            textAlign: "center", 
+            fontFamily: "hiragino kaku gothic pro, sans-serif",
             }}
         >
             <Header />
             
-            <div>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
-                <p style={{ fontSize: "20px" }}>
-                    古参を証明する唯一の証
-                </p>
-                <p style={{ marginBottom: "8px" }}>
-                    あなたの推しを登録しましょう。
-                </p>
-                <p style={{ marginBottom: "8px" }}>
-                    あなたの推しを登録することで、古参であることを証明できます。
-                </p>
-                </div>
+            <p style={{ fontSize: "20px" }}>
+                古参を証明する唯一の証
+            </p>
+            <p style={{ marginBottom: "8px" }}>
+                あなたの推しを登録しましょう。
+            </p>
+            <p style={{ marginBottom: "8px" }}>
+                あなたの推しを登録することで、古参であることを証明できます。
+            </p>
+            
+            <RegisterWord />
 
-                <RegisterWord />
-
-                <MenuBar />
-            </div>
+            <MenuBar />
         </div>
     )
 }
