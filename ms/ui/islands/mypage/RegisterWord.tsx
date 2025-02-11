@@ -13,15 +13,22 @@ export default function RegisterWord() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "500px", height: "500px", color: "white" }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "500px", color: "black" }}>
       <form
         onSubmit={handleSubmit}
         style={{ display: "flex", flexDirection: "column", gap: "8px" }}
       >
         <div>
           <input
-            style={{ width: "300px", height: "20px", padding: "4px", border: "1px solid #ccc", borderRadius: "4px" }}
-            placeholder="登録文言"
+            style={{ 
+              width: "250px", 
+              height: "30px", 
+              padding: "4px", 
+              border: "4px solid #6aac98", 
+              borderRadius: "10px",
+              color: "black",
+            }}
+            placeholder="人物、モノ、場所、商品名、フレーズなど"
             type="text"
             id="word"
             value={word}
@@ -30,12 +37,26 @@ export default function RegisterWord() {
           />
         </div>
         <button
-          style={{ width: "300px", height: "30px", padding: "4px", border: "none", borderRadius: "4px", backgroundColor: "#007bff", color: "white", cursor: "pointer" }}
+          style={{ 
+            width: "100px", 
+            height: "30px", 
+            padding: "2px", 
+            border: "none", 
+            borderRadius: "4px", 
+            backgroundColor: "#6aac98", 
+            cursor: "pointer", 
+            alignSelf: "center",
+            borderRadius: "10px",
+          }}
           type="submit"
         >
-          文言を登録
+          登録
         </button>
       </form>
+
+      <div>
+        ranking
+      </div>
     </div>
   );
 }

@@ -10,9 +10,19 @@ export default function Header() {
   }, []);
 
   return (
-    <header style={{ backgroundColor: "#6aac98", color: "white", padding: "10px", textAlign: "center" }}>
-      <a href={redirectPath} style={{ color: "white", textDecoration: "none", fontSize: "20px", fontWeight: "bold" }}>
-        COSAN
+    <header
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        textAlign: "center",
+        padding: "10px",
+        fontFamily: "hiragino kaku gothic pro, sans-serif",
+      }}
+    >
+      <a href={redirectPath} style={{ textDecoration: "none", color: "black" }}>
+        <p style={{ fontSize: "32px" }}>COSAN</p>
       </a>
     </header>
   );

@@ -42,7 +42,7 @@ export default function LoginForm() {
         />
       </div>
       <button
-        style={{ width: "300px", height: "30px", padding: "4px", border: "none", borderRadius: "4px", backgroundColor: "#007bff", color: "white", cursor: "pointer" }}
+        style={{ width: "300px", height: "30px", padding: "4px", border: "none", borderRadius: "4px", backgroundColor: "#6aac98", color: "white", cursor: "pointer" }}
         type="submit"
       >
         ログイン
