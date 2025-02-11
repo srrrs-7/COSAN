@@ -17,7 +17,6 @@ export default function Header() {
         alignItems: "center",
         justifyContent: "center",
         textAlign: "center",
-        padding: "10px",
         fontFamily: "hiragino kaku gothic pro, sans-serif",
       }}
     >

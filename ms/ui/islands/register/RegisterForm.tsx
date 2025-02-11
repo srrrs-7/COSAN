@@ -28,16 +28,6 @@ export default function RegisterForm() {
       style={{ display: "flex", flexDirection: "column", gap: "8px" }}
     >
 
-      <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-        <p style={{ marginLeft: "12px" }}>利用規約とプライバシーポリシーへの同意が必要です</p>
-        <input
-          style={{ marginBottom: "12px" }} 
-          type="checkbox" 
-          checked={isAgreed} 
-          onChange={checkAgreed} 
-        />
-      </div>
-
       <div>
         <input
           style={{ width: "300px", height: "20px", padding: "4px", border: "1px solid #ccc", borderRadius: "10px" }}

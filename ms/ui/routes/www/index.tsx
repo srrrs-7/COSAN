@@ -10,7 +10,6 @@ export default function index() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        height: "100vh",
         padding: "10px", // Add padding for better spacing
         textAlign: "center", // Center align text
         fontFamily: "hiragino kaku gothic pro, sans-serif", // Set a default font family

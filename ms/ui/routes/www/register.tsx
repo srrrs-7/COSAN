@@ -1,6 +1,7 @@
 import Agreement from "../../components/Agreement.tsx";
 import RegisterForm from "../../islands/register/RegisterForm.tsx";
 import Header from "../../islands/common/Header.tsx";
+import MenuBar from "../../islands/common/MenuBar.tsx";
 
 export default function register() {
   return (
@@ -10,24 +11,24 @@ export default function register() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        height: "100vh",
         padding: "10px", // Add padding for better spacing
         textAlign: "center", // Center align text
         fontFamily: "hiragino kaku gothic pro, sans-serif", // Set a default font family
       }}
     >
-      
       <Header />
 
-      <p style={{ fontSize: "12px" }}>登録して古参になりませんか？</p>
-
-      <Agreement />
+      <p style={{ fontSize: "12px", margin: "10px" }}>登録して古参になりませんか？</p>
 
       <RegisterForm />
 
-      <div style={{ marginTop: "12px" }} >
-        <a href="/www">ログイン画面へ戻る</a>
+      <Agreement />
+
+      <div  style={{ marginTop: "4px" }}>
+        <a href="/www" style={{ color: "#007bff", textDecoration: "none" }}>ログイン画面へ戻る</a>
       </div>
+
+      <MenuBar />
     </div>
   );
 }

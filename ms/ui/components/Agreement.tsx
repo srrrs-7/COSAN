@@ -1,7 +1,7 @@
 export default function Agreement() {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", margin: "10px" }}>
-      <p style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "8px" }}>利用規約</p>
+      <p style={{ fontSize: "10px", marginBottom: "8px" }}>利用規約</p>
       <div style={{ width: "90%", maxWidth: "400px", height: "200px", overflow: "auto", border: "1px solid #ccc", borderRadius: "4px" }}>
         <div style={{ padding: "10px" }}>
 
