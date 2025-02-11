@@ -30,6 +30,7 @@ export default function LoginForm() {
           required
         />
       </div>
+
       <div>
         <input
           style={{ width: "300px", height: "20px", padding: "4px", border: "1px solid #ccc", borderRadius: "4px" }}
@@ -41,6 +42,7 @@ export default function LoginForm() {
           required
         />
       </div>
+      
       <button
         style={{ width: "300px", height: "30px", padding: "4px", border: "none", borderRadius: "4px", backgroundColor: "#6aac98", color: "white", cursor: "pointer" }}
         type="submit"

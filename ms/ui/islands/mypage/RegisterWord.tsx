@@ -1,8 +1,8 @@
 import { JSX } from "preact";
-import { useState } from "preact/hooks";
+import { useSignal } from "@preact/signals";
 
 export default function RegisterWord() {
-  const [word, setWord] = useState<string>("");
+  const word = useSignal("");
 
   const handleSubmit = (e: JSX.TargetedEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -32,8 +32,10 @@ export default function RegisterWord() {
             placeholder="人物、モノ、場所、商品名、フレーズなど"
             type="text"
             id="word"
-            value={word}
-            onInput={(e: JSX.TargetedEvent<HTMLInputElement>) => setWord(e.currentTarget.value)}
+            value={word.value}
+            onInput={(e: JSX.TargetedEvent<HTMLInputElement>) => {
+              word.value = e.currentTarget.value;
+            }}
             required
           />
         </div>

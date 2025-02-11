@@ -30,9 +30,7 @@ export default function word() {
                 </p>
                 </div>
 
-                <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                    <RegisterWord />
-                </div>
+                <RegisterWord />
 
                 <MenuBar />
             </div>
