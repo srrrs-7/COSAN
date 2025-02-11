@@ -18,6 +18,7 @@ export default function RegisterWord() {
         onSubmit={handleSubmit}
         style={{ display: "flex", flexDirection: "column", gap: "8px" }}
       >
+        
         <div>
           <input
             style={{ 
@@ -36,6 +37,7 @@ export default function RegisterWord() {
             required
           />
         </div>
+
         <button
           style={{ 
             width: "100px", 
@@ -52,6 +54,7 @@ export default function RegisterWord() {
         >
           登録
         </button>
+
       </form>
 
       <div>

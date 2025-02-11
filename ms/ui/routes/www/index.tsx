@@ -1,7 +1,8 @@
-import LoginForm from "../../islands/LoginForm.tsx";
+import Header from "../../islands/common/Header.tsx";
+import LoginForm from "../../islands/register/LoginForm.tsx";
 import MenuBar from "../../islands/common/MenuBar.tsx";
 
-export default function Login() {
+export default function index() {
   return (
     <div
       style={{
@@ -15,13 +16,16 @@ export default function Login() {
         fontFamily: "hiragino kaku gothic pro, sans-serif", // Set a default font family
       }}
     >
-      <p style={{ fontSize: "48px", marginBottom: "16px" }}>COSAN</p>
+      <Header />
+
       <LoginForm />
+
       <div style={{ marginTop: "24px" }}>
         <a href="/www/register" style={{ color: "#007bff", textDecoration: "none" }}>
           無料新規登録はこちら
         </a>
       </div>
+
       <MenuBar />
     </div>
   );

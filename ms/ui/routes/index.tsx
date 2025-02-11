@@ -1,4 +1,4 @@
-import LoginForm from "../islands/LoginForm.tsx";
+import LoginForm from "../islands/register/LoginForm.tsx";
 
 export default function Login() {
     return (

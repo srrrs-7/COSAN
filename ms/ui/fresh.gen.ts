@@ -8,17 +8,16 @@ import * as $api_login from "./routes/api/login.ts";
 import * as $api_register from "./routes/api/register.ts";
 import * as $index from "./routes/index.tsx";
 import * as $www_index from "./routes/www/index.tsx";
-import * as $www_mypage_index from "./routes/www/mypage/index.tsx";
-import * as $www_mypage_search from "./routes/www/mypage/search.tsx";
 import * as $www_register from "./routes/www/register.tsx";
-import * as $LoginForm from "./islands/LoginForm.tsx";
-import * as $MyPage from "./islands/MyPage.tsx";
-import * as $Register from "./islands/Register.tsx";
+import * as $www_search from "./routes/www/search.tsx";
+import * as $www_word from "./routes/www/word.tsx";
 import * as $common_Header from "./islands/common/Header.tsx";
 import * as $common_MenuBar from "./islands/common/MenuBar.tsx";
 import * as $common_RankRecord_ from "./islands/common/RankRecord .tsx";
 import * as $mypage_Ranking from "./islands/mypage/Ranking.tsx";
 import * as $mypage_RegisterWord from "./islands/mypage/RegisterWord.tsx";
+import * as $mypage_SearchWord from "./islands/mypage/SearchWord.tsx";
+import * as $register_LoginForm from "./islands/register/LoginForm.tsx";
 import * as $register_RegisterForm from "./islands/register/RegisterForm.tsx";
 import type { Manifest } from "$fresh/server.ts";
 
@@ -30,19 +29,18 @@ const manifest = {
     "./routes/api/register.ts": $api_register,
     "./routes/index.tsx": $index,
     "./routes/www/index.tsx": $www_index,
-    "./routes/www/mypage/index.tsx": $www_mypage_index,
-    "./routes/www/mypage/search.tsx": $www_mypage_search,
     "./routes/www/register.tsx": $www_register,
+    "./routes/www/search.tsx": $www_search,
+    "./routes/www/word.tsx": $www_word,
   },
   islands: {
-    "./islands/LoginForm.tsx": $LoginForm,
-    "./islands/MyPage.tsx": $MyPage,
-    "./islands/Register.tsx": $Register,
     "./islands/common/Header.tsx": $common_Header,
     "./islands/common/MenuBar.tsx": $common_MenuBar,
     "./islands/common/RankRecord .tsx": $common_RankRecord_,
     "./islands/mypage/Ranking.tsx": $mypage_Ranking,
     "./islands/mypage/RegisterWord.tsx": $mypage_RegisterWord,
+    "./islands/mypage/SearchWord.tsx": $mypage_SearchWord,
+    "./islands/register/LoginForm.tsx": $register_LoginForm,
     "./islands/register/RegisterForm.tsx": $register_RegisterForm,
   },
   baseUrl: import.meta.url,

@@ -5,8 +5,8 @@ export default function MenuBar() {
   const [activeTab, setActiveTab] = useState("search");
 
   const tabs = [
-    { id: "search", nonActiveIcon: "/logo.svg", activeIcon: "/active-logo.svg", label: "検索", redirectPath: "/www/mypage/search" },
-    { id: "mypage", nonActiveIcon: "/logo.svg", activeIcon: "/active-logo.svg", label: "登録", redirectPath: "/www/mypage" },
+    { id: "search", nonActiveIcon: "/logo.svg", activeIcon: "/active-logo.svg", label: "検索", redirectPath: "/www/search" },
+    { id: "word", nonActiveIcon: "/logo.svg", activeIcon: "/active-logo.svg", label: "登録", redirectPath: "/www/word" },
     { id: "www", nonActiveIcon: "/logo.svg", activeIcon: "/active-logo.svg", label: "ログイン/マイページ", redirectPath: "/www" },
   ];
 
