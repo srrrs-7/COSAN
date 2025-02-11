@@ -5,12 +5,6 @@ export default function RegisterForm() {
   const [mailAddress, setMailAddress] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [checkPassword, setCheckPassword] = useState<string>("");
-  const [isAgreed, setIsAgreed] = useState<boolean>(false);
-
-  const checkAgreed = () => {
-    setIsAgreed(!isAgreed);
-  };
-
 
   const handleSubmit = (e: JSX.TargetedEvent<HTMLFormElement>) => {
     e.preventDefault();

@@ -27,7 +27,7 @@ export default function LoginForm() {
           id="username"
           value={username}
           onInput={(e: JSX.TargetedEvent<HTMLInputElement>) => setUsername(e.currentTarget.value)}
-          required // Added required attribute
+          required
         />
       </div>
       <div>
@@ -38,7 +38,7 @@ export default function LoginForm() {
           id="password"
           value={password}
           onInput={(e: JSX.TargetedEvent<HTMLInputElement>) => setPassword(e.currentTarget.value)}
-          required // Added required attribute
+          required
         />
       </div>
       <button

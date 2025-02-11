@@ -112,7 +112,7 @@ export default function Agreement() {
             <p style={{ fontSize: "0.9rem", lineHeight: 1.6 }}>Eメール：playrooms.official@gmail.com</p>
           </section>
 
-          <section style={{ marginBottom: "20px" }}>
+          <section>
             <h3>7. 改定について</h3>
             <p style={{ fontSize: "0.9rem", lineHeight: 1.6 }}>
               本ポリシーは必要に応じて改定されます。改定後の内容は、本サービス上に掲載された時点で効力を生じます。
