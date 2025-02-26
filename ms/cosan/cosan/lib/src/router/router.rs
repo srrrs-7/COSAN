@@ -51,9 +51,9 @@ where
 
 impl<U, W, UW> AppRouter<U, W, UW>
 where
-    U: interface::UserRepositoryTrait,
-    W: interface::WordRepositoryTrait,
-    UW: interface::UserWordRepositoryTrait,
+    U: interface::UserRepositoryTrait + Send + Sync + 'static,
+    W: interface::WordRepositoryTrait + Send + Sync + 'static,
+    UW: interface::UserWordRepositoryTrait + Send + Sync,
 {
     pub fn new(service: CosanService<U, W, UW>, secret_key: String) -> Self {
         Self {
