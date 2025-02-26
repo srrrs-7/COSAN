@@ -1,7 +1,7 @@
 use dotenv::dotenv;
 use lib::{
     domain::service::CosanService,
-    driver::{database::new_database, repository::CosanRepository},
+    driver::{database::new_database, repository},
     router::router::AppRouter,
     util::slog::new_logger,
 };
@@ -56,9 +56,11 @@ async fn main() {
         info!("Running in release mode");
     }
 
-    let cosan_service = CosanService::new(CosanRepository::new(
-        new_database(&env.cosan_pg_url).await.unwrap(),
-    ));
+    let cosan_service = CosanService::new(
+        repository::UserRepository::new(new_database(&env.cosan_pg_url).await.unwrap()),
+        repository::WordRepository::new(new_database(&env.cosan_pg_url).await.unwrap()),
+        repository::UserWordRepository::new(new_database(&env.cosan_pg_url).await.unwrap()),
+    );
 
     let router = AppRouter::new(cosan_service, env.secret_key);
     router.serve().await.unwrap();

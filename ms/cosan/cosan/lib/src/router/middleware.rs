@@ -4,10 +4,10 @@ use axum::{extract::State, http, middleware::Next, response::Response, Json};
 use std::sync::Arc;
 use tracing::{error, info};
 
-pub async fn verify_token_middleware<B>(
+pub async fn verify_token_middleware(
     State(secret_key): State<Arc<String>>,
-    mut req: http::Request<B>,
-    next: Next<B>,
+    mut req: http::Request<axum::body::Body>,
+    next: Next,
 ) -> Result<Response, (http::StatusCode, Json<ErrorResponse>)> {
     let auth_header = req
         .headers()
@@ -67,9 +67,9 @@ pub async fn verify_token_middleware<B>(
     }
 }
 
-pub async fn request_log_middleware<B>(
-    req: http::Request<B>,
-    next: Next<B>,
+pub async fn request_log_middleware(
+    req: http::Request<axum::body::Body>,
+    next: Next,
 ) -> Result<Response, http::StatusCode> {
     info!("Request: {} {}", req.method(), req.uri());
     let res = next.run(req).await;
