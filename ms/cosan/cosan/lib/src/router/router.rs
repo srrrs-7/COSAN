@@ -77,128 +77,60 @@ where
     async fn init_router(&self) -> Result<Router, anyhow::Error> {
         let arc_secret_key = Arc::new(self.secret_key.clone());
 
-        let router =
-            Router::new()
-                .nest(
-                    "/cosan/v1",
-                    Router::new()
-                        .route("/health", get(Self::health_check))
-                        .nest(
-                            "/user",
-                            Router::new()
-                                .route(
-                                    "/:user_id",
-                                    get(|state, token, path| async move {
-                                        Self::get_user(state, token, path).await
-                                    }),
-                                )
-                                .route(
-                                    "/",
-                                    put(|state, token, body| async move {
-                                        Self::update_user(state, token, body).await
-                                    }),
-                                )
-                                .route(
-                                    "/:user_id",
-                                    delete(|state, token, path| async move {
-                                        Self::delete_user(state, token, path).await
-                                    }),
-                                )
-                                .route_layer(axum::middleware::from_fn_with_state(
-                                    arc_secret_key.clone(),
-                                    middleware::verify_token_middleware,
-                                ))
-                                .route(
-                                    "/",
-                                    post(|state, body| async move {
-                                        Self::create_user(state, body).await
-                                    }),
-                                )
-                                .route(
-                                    "/login/:login_id/password/:password",
-                                    get(|state, path| async move {
-                                        Self::get_user_by_login_id_and_password(state, path).await
-                                    }),
-                                ),
-                        )
-                        .nest(
-                            "/word",
-                            Router::new()
-                                .route(
-                                    "/",
-                                    post(|state, body| async move {
-                                        Self::create_word(state, body).await
-                                    }),
-                                )
-                                .route(
-                                    "/:word_id",
-                                    get(|state, token, path| async move {
-                                        Self::get_word(state, token, path).await
-                                    }),
-                                )
-                                .route(
-                                    "/",
-                                    put(|state, token, body| async move {
-                                        Self::update_word(state, token, body).await
-                                    }),
-                                )
-                                .route(
-                                    "/:word_id",
-                                    delete(|state, token, path| async move {
-                                        Self::delete_word(state, token, path).await
-                                    }),
-                                )
-                                .route_layer(axum::middleware::from_fn_with_state(
-                                    arc_secret_key.clone(),
-                                    middleware::verify_token_middleware,
-                                )),
-                        )
-                        .nest(
-                            "/user/word/relation",
-                            Router::new()
-                                .route(
-                                    "/user/:user_id/word/:user_word_id",
-                                    get(|state, token, path| async move {
-                                        Self::get_user_word_by_user_id_and_word_id(
-                                            state, token, path,
-                                        )
-                                        .await
-                                    }),
-                                )
-                                .route(
-                                    "/user/:user_id",
-                                    get(|state, token, path| async move {
-                                        Self::get_user_word_by_user_id(state, token, path).await
-                                    }),
-                                )
-                                .route(
-                                    "/word/:word_id",
-                                    get(|state, token, path| async move {
-                                        Self::get_user_word_by_word_id(state, token, path).await
-                                    }),
-                                )
-                                .route(
-                                    "/",
-                                    post(|state, token, body| async move {
-                                        Self::create_user_word(state, token, body).await
-                                    }),
-                                )
-                                .route(
-                                    "/:user_word_id",
-                                    delete(|state, token, path| async move {
-                                        Self::delete_user_word(state, token, path).await
-                                    }),
-                                )
-                                .route_layer(axum::middleware::from_fn_with_state(
-                                    arc_secret_key.clone(),
-                                    middleware::verify_token_middleware,
-                                )),
-                        )
-                        .layer(axum::middleware::from_fn(
-                            middleware::request_log_middleware,
-                        )),
-                )
-                .with_state(self.service.clone());
+        let router = Router::new()
+            .nest(
+                "/cosan/v1",
+                Router::new()
+                    .route("/health", get(Self::health_check))
+                    .nest(
+                        "/user",
+                        Router::new()
+                            .route("/:user_id", get(Self::get_user))
+                            .route("/", put(Self::update_user))
+                            .route("/:user_id", delete(Self::delete_user))
+                            .route_layer(axum::middleware::from_fn_with_state(
+                                arc_secret_key.clone(),
+                                middleware::verify_token_middleware,
+                            ))
+                            .route("/", post(Self::create_user))
+                            .route(
+                                "/login/:login_id/password/:password",
+                                get(Self::get_user_by_login_id_and_password),
+                            ),
+                    )
+                    .nest(
+                        "/word",
+                        Router::new()
+                            .route("/", post(Self::create_word))
+                            .route("/:word_id", get(Self::get_word))
+                            .route("/", put(Self::update_word))
+                            .route("/:word_id", delete(Self::delete_word))
+                            .route_layer(axum::middleware::from_fn_with_state(
+                                arc_secret_key.clone(),
+                                middleware::verify_token_middleware,
+                            )),
+                    )
+                    .nest(
+                        "/user/word/relation",
+                        Router::new()
+                            .route(
+                                "/user/:user_id/word/:user_word_id",
+                                get(Self::get_user_word_by_user_id_and_word_id),
+                            )
+                            .route("/user/:user_id", get(Self::get_user_word_by_user_id))
+                            .route("/word/:word_id", get(Self::get_user_word_by_word_id))
+                            .route("/", post(Self::create_user_word))
+                            .route("/:user_word_id", delete(Self::delete_user_word))
+                            .route_layer(axum::middleware::from_fn_with_state(
+                                arc_secret_key.clone(),
+                                middleware::verify_token_middleware,
+                            )),
+                    )
+                    .layer(axum::middleware::from_fn(
+                        middleware::request_log_middleware,
+                    )),
+            )
+            .with_state(self.service.clone());
 
         Ok(router)
     }
