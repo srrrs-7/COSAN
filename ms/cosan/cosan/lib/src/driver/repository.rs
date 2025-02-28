@@ -8,11 +8,13 @@ pub struct UserRepository {
     pool: sqlx::PgPool,
 }
 
-impl interface::UserRepositoryTrait for UserRepository {
+impl UserRepository {
     fn new(pool: sqlx::PgPool) -> Self {
         Self { pool }
     }
+}
 
+impl interface::UserRepositoryTrait for UserRepository {
     async fn get_user(&self, user_id: i64) -> Result<Option<entity::User>, sqlx::Error> {
         let row = sqlx::query_as::<_, model::GetUser>(
             r#"
@@ -175,6 +177,12 @@ pub struct WordRepository {
     pool: sqlx::PgPool,
 }
 
+impl WordRepository {
+    fn new(pool: sqlx::PgPool) -> Self {
+        Self { pool }
+    }
+}
+
 impl interface::WordRepositoryTrait for WordRepository {
     async fn get_word(&self, word_id: i64) -> Result<Option<entity::Word>, sqlx::Error> {
         let row = sqlx::query_as::<_, model::GetWord>(
@@ -278,6 +286,12 @@ impl interface::WordRepositoryTrait for WordRepository {
 #[derive(Clone)]
 pub struct UserWordRepository {
     pool: sqlx::PgPool,
+}
+
+impl UserWordRepository {
+    pub async fn new(pool: sqlx::PgPool) -> Self {
+        Self { pool }
+    }
 }
 
 impl interface::UserWordRepositoryTrait for UserWordRepository {
