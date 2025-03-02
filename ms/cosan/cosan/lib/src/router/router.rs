@@ -96,16 +96,16 @@ impl AppRouter {
                     .nest(
                         "/user",
                         Router::new()
-                            .route("/:user_id", get(Self::get_user))
+                            .route("/{user_id}", get(Self::get_user))
                             .route("/", put(Self::update_user))
-                            .route("/:user_id", delete(Self::delete_user))
+                            .route("/{user_id}", delete(Self::delete_user))
                             .route_layer(axum::middleware::from_fn_with_state(
                                 state.secret_key.clone(),
                                 middleware::verify_token_middleware,
                             ))
                             .route("/", post(Self::create_user))
                             .route(
-                                "/login/:login_id/password/:password",
+                                "/login/{login_id}/password/{password}",
                                 get(Self::get_user_by_login_id_and_password),
                             ),
                     )
@@ -113,9 +113,9 @@ impl AppRouter {
                         "/word",
                         Router::new()
                             .route("/", post(Self::create_word))
-                            .route("/:word_id", get(Self::get_word))
+                            .route("/{word_id}", get(Self::get_word))
                             .route("/", put(Self::update_word))
-                            .route("/:word_id", delete(Self::delete_word))
+                            .route("/{word_id}", delete(Self::delete_word))
                             .route_layer(axum::middleware::from_fn_with_state(
                                 state.secret_key.clone(),
                                 middleware::verify_token_middleware,
@@ -125,13 +125,13 @@ impl AppRouter {
                         "/user/word/relation",
                         Router::new()
                             .route(
-                                "/user/:user_id/word/:user_word_id",
+                                "/user/{user_id}/word/{user_word_id}",
                                 get(Self::get_user_word_by_user_id_and_word_id),
                             )
-                            .route("/user/:user_id", get(Self::get_user_word_by_user_id))
-                            .route("/word/:word_id", get(Self::get_user_word_by_word_id))
+                            .route("/user/{user_id}", get(Self::get_user_word_by_user_id))
+                            .route("/word/{word_id}", get(Self::get_user_word_by_word_id))
                             .route("/", post(Self::create_user_word))
-                            .route("/:user_word_id", delete(Self::delete_user_word))
+                            .route("/{user_word_id}", delete(Self::delete_user_word))
                             .route_layer(axum::middleware::from_fn_with_state(
                                 state.secret_key.clone(),
                                 middleware::verify_token_middleware,
@@ -246,17 +246,12 @@ impl AppRouter {
             ));
         }
 
-        let user = state.service.create_user(body).await;
-        match user {
-            Ok(user) => Ok((http::StatusCode::CREATED, Json(user))),
-            Err(err) => Err((
-                http::StatusCode::CONFLICT,
-                Json(response::ErrorResponse {
-                    error: err.to_string(),
-                    message: "User already exists".to_string(),
-                }),
-            )),
-        }
+        Self::handle_result(
+            state.service.create_user(body).await,
+            http::StatusCode::CREATED,
+            "User already exists",
+        )
+        .await
     }
 
     async fn update_user<U, W, UW>(
@@ -286,23 +281,18 @@ impl AppRouter {
             ));
         }
 
-        let protagonist = state.service.update_user(body).await;
-        match protagonist {
-            Ok(protagonist) => Ok((http::StatusCode::OK, Json(protagonist))),
-            Err(err) => Err((
-                http::StatusCode::NOT_FOUND,
-                Json(response::ErrorResponse {
-                    error: err.to_string(),
-                    message: "User not found".to_string(),
-                }),
-            )),
-        }
+        Self::handle_result(
+            state.service.update_user(body).await,
+            http::StatusCode::OK,
+            "User not found",
+        )
+        .await
     }
 
     async fn delete_user<U, W, UW>(
         State(state): State<AppState<U, W, UW>>,
         Token(token): Token,
-        Path(protagonist_id): Path<u64>,
+        Path(user_id): Path<u64>,
     ) -> Result<
         (http::StatusCode, Json<response::DeleteUserResponse>),
         (http::StatusCode, Json<response::ErrorResponse>),
@@ -315,26 +305,22 @@ impl AppRouter {
         info!("Delete user");
         info!(token = ?token);
 
-        let result = state
-            .service
-            .delete_user(i64::try_from(protagonist_id).unwrap())
-            .await;
-
-        match result {
-            Ok(_) => Ok((
-                http::StatusCode::OK,
-                Json(response::DeleteUserResponse {
-                    status: "The user has been deleted".to_string(),
-                }),
-            )),
-            Err(err) => Err((
-                http::StatusCode::NOT_FOUND,
+        let user_id = i64::try_from(user_id).map_err(|_| {
+            (
+                http::StatusCode::BAD_REQUEST,
                 Json(response::ErrorResponse {
-                    error: err.to_string(),
-                    message: "User not found".to_string(),
+                    error: "Invalid user ID".to_string(),
+                    message: "User ID must be a valid integer".to_string(),
                 }),
-            )),
-        }
+            )
+        })?;
+
+        Self::handle_result(
+            state.service.delete_user(user_id).await,
+            http::StatusCode::OK,
+            "User not found",
+        )
+        .await
     }
 
     async fn get_user_by_login_id_and_password<U, W, UW>(
@@ -364,33 +350,15 @@ impl AppRouter {
             ));
         }
 
-        let user = state
-            .service
-            .get_user_by_login_id_and_password(request.unwrap())
-            .await;
-
-        match user {
-            Ok(user) => Ok((http::StatusCode::OK, Json(user))),
-            Err(err) => {
-                if err.to_string().contains("no rows") {
-                    Err((
-                        http::StatusCode::NOT_FOUND,
-                        Json(response::ErrorResponse {
-                            error: err.to_string(),
-                            message: "User not found".to_string(),
-                        }),
-                    ))
-                } else {
-                    Err((
-                        http::StatusCode::INTERNAL_SERVER_ERROR,
-                        Json(response::ErrorResponse {
-                            error: err.to_string(),
-                            message: "Internal Server Error".to_string(),
-                        }),
-                    ))
-                }
-            }
-        }
+        Self::handle_result(
+            state
+                .service
+                .get_user_by_login_id_and_password(request.unwrap())
+                .await,
+            http::StatusCode::OK,
+            "User not found",
+        )
+        .await
     }
 
     async fn get_word<U, W, UW>(
@@ -409,33 +377,25 @@ impl AppRouter {
         info!("Get word");
         info!(token = ?token);
 
-        let word = state
-            .service
-            .get_word(i64::try_from(word_id).unwrap())
-            .await;
+        let word_id = i64::try_from(word_id).map_err(|_| {
+            (
+                http::StatusCode::BAD_REQUEST,
+                Json(response::ErrorResponse {
+                    error: "Invalid user ID".to_string(),
+                    message: "Word ID must be a valid integer".to_string(),
+                }),
+            )
+        })?;
 
-        match word {
-            Ok(word) => Ok((http::StatusCode::OK, Json(word))),
-            Err(err) => {
-                if err.to_string().contains("no rows") {
-                    Err((
-                        http::StatusCode::NOT_FOUND,
-                        Json(response::ErrorResponse {
-                            error: err.to_string(),
-                            message: "Word not found".to_string(),
-                        }),
-                    ))
-                } else {
-                    Err((
-                        http::StatusCode::INTERNAL_SERVER_ERROR,
-                        Json(response::ErrorResponse {
-                            error: err.to_string(),
-                            message: "Internal Server Error".to_string(),
-                        }),
-                    ))
-                }
-            }
-        }
+        Self::handle_result(
+            state
+                .service
+                .get_word(i64::try_from(word_id).unwrap())
+                .await,
+            http::StatusCode::OK,
+            "Word not found",
+        )
+        .await
     }
 
     async fn create_word<U, W, UW>(
@@ -463,17 +423,12 @@ impl AppRouter {
             ));
         }
 
-        let word = state.service.create_word(body).await;
-        match word {
-            Ok(word) => Ok((http::StatusCode::CREATED, Json(word))),
-            Err(err) => Err((
-                http::StatusCode::CONFLICT,
-                Json(response::ErrorResponse {
-                    error: err.to_string(),
-                    message: "Word already exists".to_string(),
-                }),
-            )),
-        }
+        Self::handle_result(
+            state.service.create_word(body).await,
+            http::StatusCode::CREATED,
+            "Word already exists",
+        )
+        .await
     }
 
     async fn update_word<U, W, UW>(
@@ -503,17 +458,12 @@ impl AppRouter {
             ));
         }
 
-        let word = state.service.update_word(body).await;
-        match word {
-            Ok(word) => Ok((http::StatusCode::OK, Json(word))),
-            Err(err) => Err((
-                http::StatusCode::NOT_FOUND,
-                Json(response::ErrorResponse {
-                    error: err.to_string(),
-                    message: "Word not found".to_string(),
-                }),
-            )),
-        }
+        Self::handle_result(
+            state.service.update_word(body).await,
+            http::StatusCode::OK,
+            "Word not found",
+        )
+        .await
     }
 
     async fn delete_word<U, W, UW>(
@@ -532,26 +482,22 @@ impl AppRouter {
         info!("Delete word");
         info!(token = ?token);
 
-        let result = state
-            .service
-            .delete_word(i64::try_from(word_id).unwrap())
-            .await;
-
-        match result {
-            Ok(_) => Ok((
-                http::StatusCode::OK,
-                Json(response::DeleteWordResponse {
-                    status: "The word has been deleted".to_string(),
-                }),
-            )),
-            Err(err) => Err((
-                http::StatusCode::NOT_FOUND,
+        let word_id = i64::try_from(word_id).map_err(|_| {
+            (
+                http::StatusCode::BAD_REQUEST,
                 Json(response::ErrorResponse {
-                    error: err.to_string(),
-                    message: "Word not found".to_string(),
+                    error: "Invalid user ID".to_string(),
+                    message: "Word ID must be a valid integer".to_string(),
                 }),
-            )),
-        }
+            )
+        })?;
+
+        Self::handle_result(
+            state.service.delete_word(word_id).await,
+            http::StatusCode::OK,
+            "Word not found",
+        )
+        .await
     }
 
     async fn get_user_word_by_user_id_and_word_id<U, W, UW>(
@@ -581,32 +527,15 @@ impl AppRouter {
             ));
         }
 
-        let user_word = state
-            .service
-            .get_user_word_by_user_id_and_word_id(request)
-            .await;
-        match user_word {
-            Ok(user_word) => Ok((http::StatusCode::OK, Json(user_word))),
-            Err(err) => {
-                if err.to_string().contains("no rows") {
-                    Err((
-                        http::StatusCode::NOT_FOUND,
-                        Json(response::ErrorResponse {
-                            error: err.to_string(),
-                            message: "User word not found".to_string(),
-                        }),
-                    ))
-                } else {
-                    Err((
-                        http::StatusCode::INTERNAL_SERVER_ERROR,
-                        Json(response::ErrorResponse {
-                            error: err.to_string(),
-                            message: "Internal Server Error".to_string(),
-                        }),
-                    ))
-                }
-            }
-        }
+        Self::handle_result(
+            state
+                .service
+                .get_user_word_by_user_id_and_word_id(request)
+                .await,
+            http::StatusCode::OK,
+            "User word not found",
+        )
+        .await
     }
 
     async fn get_user_word_by_user_id<U, W, UW>(
@@ -625,36 +554,18 @@ impl AppRouter {
         info!("Get user word");
         info!(token = ?token);
 
-        let user_words = state
-            .service
-            .get_user_word_by_user_id(request::GetUserWordRequest {
-                user_id: u64::try_from(user_id).unwrap(),
-                word_id: 0,
-            })
-            .await;
-
-        match user_words {
-            Ok(user_words) => Ok((http::StatusCode::OK, Json(user_words))),
-            Err(err) => {
-                if err.to_string().contains("no rows") {
-                    Err((
-                        http::StatusCode::NOT_FOUND,
-                        Json(response::ErrorResponse {
-                            error: err.to_string(),
-                            message: "User word not found".to_string(),
-                        }),
-                    ))
-                } else {
-                    Err((
-                        http::StatusCode::INTERNAL_SERVER_ERROR,
-                        Json(response::ErrorResponse {
-                            error: err.to_string(),
-                            message: "Internal Server Error".to_string(),
-                        }),
-                    ))
-                }
-            }
-        }
+        Self::handle_result(
+            state
+                .service
+                .get_user_word_by_user_id(request::GetUserWordRequest {
+                    user_id,
+                    word_id: 0,
+                })
+                .await,
+            http::StatusCode::OK,
+            "User word not found",
+        )
+        .await
     }
 
     async fn get_user_word_by_word_id<U, W, UW>(
@@ -673,36 +584,18 @@ impl AppRouter {
         info!("Get user word");
         info!(token = ?token);
 
-        let user_words = state
-            .service
-            .get_user_word_by_word_id(request::GetUserWordRequest {
-                user_id: 0,
-                word_id: u64::try_from(word_id).unwrap(),
-            })
-            .await;
-
-        match user_words {
-            Ok(user_words) => Ok((http::StatusCode::OK, Json(user_words))),
-            Err(err) => {
-                if err.to_string().contains("no rows") {
-                    Err((
-                        http::StatusCode::NOT_FOUND,
-                        Json(response::ErrorResponse {
-                            error: err.to_string(),
-                            message: "User word not found".to_string(),
-                        }),
-                    ))
-                } else {
-                    Err((
-                        http::StatusCode::INTERNAL_SERVER_ERROR,
-                        Json(response::ErrorResponse {
-                            error: err.to_string(),
-                            message: "Internal Server Error".to_string(),
-                        }),
-                    ))
-                }
-            }
-        }
+        Self::handle_result(
+            state
+                .service
+                .get_user_word_by_word_id(request::GetUserWordRequest {
+                    user_id: 0,
+                    word_id: u64::try_from(word_id).unwrap(),
+                })
+                .await,
+            http::StatusCode::OK,
+            "User word not found",
+        )
+        .await
     }
 
     async fn create_user_word<U, W, UW>(
@@ -735,17 +628,12 @@ impl AppRouter {
             ));
         }
 
-        let user_word = state.service.create_user_word(body).await;
-        match user_word {
-            Ok(user_word) => Ok((http::StatusCode::CREATED, Json(user_word))),
-            Err(err) => Err((
-                http::StatusCode::CONFLICT,
-                Json(response::ErrorResponse {
-                    error: err.to_string(),
-                    message: "Protagonist supporter already exists".to_string(),
-                }),
-            )),
-        }
+        Self::handle_result(
+            state.service.create_user_word(body).await,
+            http::StatusCode::CREATED,
+            "User word already exists",
+        )
+        .await
     }
 
     async fn delete_user_word<U, W, UW>(
@@ -764,25 +652,14 @@ impl AppRouter {
         info!("Delete protagonist supporter");
         info!(token = ?token);
 
-        let result = state
-            .service
-            .delete_user_word(i64::try_from(user_word_id).unwrap())
-            .await;
-
-        match result {
-            Ok(_) => Ok((
-                http::StatusCode::OK,
-                Json(response::DeleteUserWordResponse {
-                    status: "The protagonist supporter has been deleted".to_string(),
-                }),
-            )),
-            Err(err) => Err((
-                http::StatusCode::NOT_FOUND,
-                Json(response::ErrorResponse {
-                    error: err.to_string(),
-                    message: "Protagonist supporter not found".to_string(),
-                }),
-            )),
-        }
+        Self::handle_result(
+            state
+                .service
+                .delete_user_word(i64::try_from(user_word_id).unwrap())
+                .await,
+            http::StatusCode::OK,
+            "Protagonist supporter not found",
+        )
+        .await
     }
 }

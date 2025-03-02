@@ -109,10 +109,15 @@ impl<
         }
     }
 
-    pub async fn delete_user(&self, id: i64) -> Result<(), anyhow::Error> {
+    pub async fn delete_user(
+        &self,
+        id: i64,
+    ) -> Result<response::DeleteUserResponse, anyhow::Error> {
         let result = self.user_repository.delete_user(id).await?;
         match result {
-            Some(_) => Ok(()),
+            Some(_) => Ok(response::DeleteUserResponse {
+                status: "success".to_string(),
+            }),
             None => Err(anyhow::anyhow!("User not deleted")),
         }
     }
@@ -199,10 +204,15 @@ impl<
         }
     }
 
-    pub async fn delete_word(&self, id: i64) -> Result<(), anyhow::Error> {
+    pub async fn delete_word(
+        &self,
+        id: i64,
+    ) -> Result<response::DeleteWordResponse, anyhow::Error> {
         let result = self.word_repository.delete_word(id).await?;
         match result {
-            Some(_) => Ok(()),
+            Some(_) => Ok(response::DeleteWordResponse {
+                status: "success".to_string(),
+            }),
             None => Err(anyhow::anyhow!("Word not deleted")),
         }
     }
@@ -319,10 +329,15 @@ impl<
         }
     }
 
-    pub async fn delete_user_word(&self, id: i64) -> Result<(), anyhow::Error> {
+    pub async fn delete_user_word(
+        &self,
+        id: i64,
+    ) -> Result<response::DeleteUserWordResponse, anyhow::Error> {
         let result = self.user_word_repository.delete_user_word(id).await?;
         match result {
-            Some(_) => Ok(()),
+            Some(_) => Ok(response::DeleteUserWordResponse {
+                status: "success".to_string(),
+            }),
             None => Err(anyhow::anyhow!("User word not deleted")),
         }
     }
