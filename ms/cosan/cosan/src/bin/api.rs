@@ -1,11 +1,13 @@
 use dotenv::dotenv;
 use lib::{
+    domain::interface::{UserRepositoryTrait, UserWordRepositoryTrait, WordRepositoryTrait},
     domain::service::CosanService,
     driver::{database::new_database, repository},
     router::router::AppRouter,
     util::slog::new_logger,
 };
 use std::env;
+use std::sync::Arc;
 use tracing::{error, info, span, Level};
 
 const MODE: &'static str = "MODE";
@@ -56,12 +58,13 @@ async fn main() {
         info!("Running in release mode");
     }
 
+    let pg_pool = new_database(&env.cosan_pg_url).await.unwrap();
     let cosan_service = CosanService::new(
-        repository::UserRepository::new(new_database(&env.cosan_pg_url).await.unwrap()),
-        repository::WordRepository::new(new_database(&env.cosan_pg_url).await.unwrap()),
-        repository::UserWordRepository::new(new_database(&env.cosan_pg_url).await.unwrap()),
+        repository::UserRepository::new(pg_pool.clone()),
+        repository::WordRepository::new(pg_pool.clone()),
+        repository::UserWordRepository::new(pg_pool.clone()),
     );
 
-    let router = AppRouter::new(cosan_service, env.secret_key);
+    let router = AppRouter::new(Arc::new(cosan_service), Arc::new(env.secret_key));
     router.serve().await.unwrap();
 }

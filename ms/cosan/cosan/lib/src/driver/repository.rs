@@ -2,19 +2,17 @@ use crate::domain::entity;
 use crate::domain::interface;
 use crate::driver::model;
 use sqlx;
+use sqlx::Pool;
 
 #[derive(Clone)]
 pub struct UserRepository {
     pool: sqlx::PgPool,
 }
 
-impl UserRepository {
-    pub fn new(pool: sqlx::PgPool) -> Self {
+impl interface::UserRepositoryTrait for UserRepository {
+    fn new(pool: Pool<sqlx::Postgres>) -> Self {
         Self { pool }
     }
-}
-
-impl interface::UserRepositoryTrait for UserRepository {
     async fn get_user(&self, user_id: i64) -> Result<Option<entity::User>, sqlx::Error> {
         let row = sqlx::query_as::<_, model::GetUser>(
             r#"
@@ -174,16 +172,13 @@ impl interface::UserRepositoryTrait for UserRepository {
 
 #[derive(Clone)]
 pub struct WordRepository {
-    pool: sqlx::PgPool,
-}
-
-impl WordRepository {
-    pub fn new(pool: sqlx::PgPool) -> Self {
-        Self { pool }
-    }
+    pool: Pool<sqlx::Postgres>,
 }
 
 impl interface::WordRepositoryTrait for WordRepository {
+    fn new(pool: Pool<sqlx::Postgres>) -> Self {
+        Self { pool }
+    }
     async fn get_word(&self, word_id: i64) -> Result<Option<entity::Word>, sqlx::Error> {
         let row = sqlx::query_as::<_, model::GetWord>(
             r#"
@@ -285,16 +280,13 @@ impl interface::WordRepositoryTrait for WordRepository {
 
 #[derive(Clone)]
 pub struct UserWordRepository {
-    pool: sqlx::PgPool,
-}
-
-impl UserWordRepository {
-    pub async fn new(pool: sqlx::PgPool) -> Self {
-        Self { pool }
-    }
+    pool: Pool<sqlx::Postgres>,
 }
 
 impl interface::UserWordRepositoryTrait for UserWordRepository {
+    fn new(pool: Pool<sqlx::Postgres>) -> Self {
+        Self { pool }
+    }
     async fn get_user_word_by_user_id_and_word_id(
         &self,
         model: model::GetUserWordId,

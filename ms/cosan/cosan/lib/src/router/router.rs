@@ -22,10 +22,6 @@ where
     secret_key: Arc<String>,
 }
 
-pub struct AppRouter {
-    pub router: Router,
-}
-
 // Add this struct to extract the token
 pub struct Token(pub Arc<util::auth::Token>);
 
@@ -53,8 +49,12 @@ where
     }
 }
 
+pub struct AppRouter {
+    pub router: Router,
+}
+
 impl AppRouter {
-    pub fn new<U, W, UW>(service: Arc<CosanService<U, W, UW>>, secret_key: String) -> Self
+    pub fn new<U, W, UW>(service: Arc<CosanService<U, W, UW>>, secret_key: Arc<String>) -> Self
     where
         U: interface::UserRepositoryTrait,
         W: interface::WordRepositoryTrait,
@@ -62,19 +62,22 @@ impl AppRouter {
     {
         let app_state = AppState {
             service,
-            secret_key: Arc::new(secret_key),
+            secret_key,
         };
 
         Self::init_router(app_state)
     }
 
-    pub async fn serve(router: Router) -> Result<(), anyhow::Error> {
+    pub async fn serve(self) -> Result<(), anyhow::Error> {
         let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
         info!("Listening on {}", addr);
 
-        axum::serve(tokio::net::TcpListener::bind(&addr).await.unwrap(), router)
-            .await
-            .unwrap();
+        axum::serve(
+            tokio::net::TcpListener::bind(&addr).await.unwrap(),
+            self.router,
+        )
+        .await
+        .unwrap();
 
         Ok(())
     }

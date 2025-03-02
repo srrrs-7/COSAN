@@ -253,6 +253,48 @@ The `new` function in `AppRouter` was declared to return `Self` (which is `AppRo
 
 ---
 
+_**User**_
+
+For the code present, we get this error:
+```
+method `new` is not a member of trait `interface::UserRepositoryTrait`
+not a member of trait `interface::UserRepositoryTrait`
+```
+How can I resolve this? If you propose a fix, please make it concise.
+
+---
+
+_**Assistant**_
+
+```rust:src/driver/repository.rs
+impl interface::UserRepositoryTrait for UserRepository {
+    // Removed pub here
+    fn new(pool: Pool<sqlx::Postgres>) -> Self {
+        Self { pool }
+    }
+// ...
+```
+
+```rust:src/domain/interface.rs
+// Add this new function to the trait
+pub trait UserRepositoryTrait: Send + Sync {
+    fn new(pool: Pool<sqlx::Postgres>) -> Self;
+    // ... rest of the trait
+}
+```
+
+The error message `method 'new' is not a member of trait 'interface::UserRepositoryTrait'` means exactly what it says: the `UserRepositoryTrait` trait, as defined in `src/domain/interface.rs`, does *not* have a `new` method.  You've implemented a `new` method on `UserRepository` in `src/driver/repository.rs`, but that doesn't automatically add it to the trait.  The `impl interface::UserRepositoryTrait for UserRepository` block must *only* contain implementations of methods that are part of the `UserRepositoryTrait` trait.
+
+The fix has two parts:
+
+1.  **Add `new` to the trait:**  In `src/domain/interface.rs`, add the `new` method signature to the `UserRepositoryTrait` definition.  This makes it a required method for any type that implements the trait.
+2.  **Remove `pub` from the implementation:** In `src/driver/repository.rs`, remove the `pub` keyword from the `new` function *inside* the `impl UserRepositoryTrait` block.  Methods in a trait implementation take their visibility from the trait definition. Since the trait is defined in another module, the `new` function in the trait is implicitly public. Adding `pub` inside the `impl` block is a syntax error.  The `new` function *outside* the `impl` block (for `WordRepository` and `UserWordRepository`) should keep their `pub` visibility.
+
+By adding `new` to the trait definition, you're telling Rust, "Any type that wants to be a `UserRepositoryTrait` *must* have a `new` function with this signature."  By removing the extra `pub`, you fix the syntax error in the implementation.
+
+
+---
+
 
 
 ---

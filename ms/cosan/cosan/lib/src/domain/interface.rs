@@ -1,9 +1,11 @@
 use crate::domain::entity;
 use crate::driver::model;
 use sqlx;
+use sqlx::Pool;
 use std::future::Future;
 
 pub trait UserRepositoryTrait: Clone + Send + Sync + 'static {
+    fn new(pool: Pool<sqlx::Postgres>) -> Self;
     fn get_user(
         &self,
         user_id: i64,
@@ -24,6 +26,7 @@ pub trait UserRepositoryTrait: Clone + Send + Sync + 'static {
 }
 
 pub trait WordRepositoryTrait: Clone + Send + Sync + 'static {
+    fn new(pool: Pool<sqlx::Postgres>) -> Self;
     fn get_word(
         &self,
         word_id: i64,
@@ -40,6 +43,7 @@ pub trait WordRepositoryTrait: Clone + Send + Sync + 'static {
 }
 
 pub trait UserWordRepositoryTrait: Clone + Send + Sync + 'static {
+    fn new(pool: Pool<sqlx::Postgres>) -> Self;
     fn get_user_word_by_user_id_and_word_id(
         &self,
         model: model::GetUserWordId,
