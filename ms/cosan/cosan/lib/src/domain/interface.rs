@@ -1,53 +1,63 @@
 use crate::domain::entity;
 use crate::driver::model;
 use sqlx;
+use std::future::Future;
 
 pub trait UserRepositoryTrait: Clone + Send + Sync + 'static {
-    async fn get_user(&self, user_id: i64) -> Result<Option<entity::User>, sqlx::Error>;
-    async fn create_user(
+    fn get_user(
+        &self,
+        user_id: i64,
+    ) -> impl Future<Output = Result<Option<entity::User>, sqlx::Error>> + Send;
+    fn create_user(
         &self,
         model: model::CreateUser,
-    ) -> Result<Option<entity::User>, sqlx::Error>;
-    async fn update_user(
+    ) -> impl Future<Output = Result<Option<entity::User>, sqlx::Error>> + Send;
+    fn update_user(
         &self,
         model: model::UpdateUser,
-    ) -> Result<Option<entity::User>, sqlx::Error>;
-    async fn delete_user(&self, id: i64) -> Result<Option<()>, sqlx::Error>;
-    async fn get_user_by_login_id_and_password(
+    ) -> impl Future<Output = Result<Option<entity::User>, sqlx::Error>> + Send;
+    fn delete_user(&self, id: i64) -> impl Future<Output = Result<Option<()>, sqlx::Error>> + Send;
+    fn get_user_by_login_id_and_password(
         &self,
         login_id: &str,
-    ) -> Result<Option<entity::User>, sqlx::Error>;
+    ) -> impl Future<Output = Result<Option<entity::User>, sqlx::Error>> + Send;
 }
 
 pub trait WordRepositoryTrait: Clone + Send + Sync + 'static {
-    async fn get_word(&self, word_id: i64) -> Result<Option<entity::Word>, sqlx::Error>;
-    async fn create_word(
+    fn get_word(
+        &self,
+        word_id: i64,
+    ) -> impl Future<Output = Result<Option<entity::Word>, sqlx::Error>> + Send;
+    fn create_word(
         &self,
         model: model::CreateWord,
-    ) -> Result<Option<entity::Word>, sqlx::Error>;
-    async fn update_word(
+    ) -> impl Future<Output = Result<Option<entity::Word>, sqlx::Error>> + Send;
+    fn update_word(
         &self,
         model: model::UpdateWord,
-    ) -> Result<Option<entity::Word>, sqlx::Error>;
-    async fn delete_word(&self, id: i64) -> Result<Option<()>, sqlx::Error>;
+    ) -> impl Future<Output = Result<Option<entity::Word>, sqlx::Error>> + Send;
+    fn delete_word(&self, id: i64) -> impl Future<Output = Result<Option<()>, sqlx::Error>> + Send;
 }
 
 pub trait UserWordRepositoryTrait: Clone + Send + Sync + 'static {
-    async fn get_user_word_by_user_id_and_word_id(
+    fn get_user_word_by_user_id_and_word_id(
         &self,
         model: model::GetUserWordId,
-    ) -> Result<Option<entity::UserWord>, sqlx::Error>;
-    async fn get_user_word_by_user_id(
+    ) -> impl Future<Output = Result<Option<entity::UserWord>, sqlx::Error>> + Send;
+    fn get_user_word_by_user_id(
         &self,
         model: model::GetUserWordId,
-    ) -> Result<Option<Vec<entity::UserWord>>, sqlx::Error>;
-    async fn get_user_word_by_word_id(
+    ) -> impl Future<Output = Result<Option<Vec<entity::UserWord>>, sqlx::Error>> + Send;
+    fn get_user_word_by_word_id(
         &self,
         model: model::GetUserWordId,
-    ) -> Result<Option<Vec<entity::UserWord>>, sqlx::Error>;
-    async fn create_user_word(
+    ) -> impl Future<Output = Result<Option<Vec<entity::UserWord>>, sqlx::Error>> + Send;
+    fn create_user_word(
         &self,
         model: model::CreateUserWord,
-    ) -> Result<Option<entity::UserWordRelation>, sqlx::Error>;
-    async fn delete_user_word(&self, id: i64) -> Result<Option<()>, sqlx::Error>;
+    ) -> impl Future<Output = Result<Option<entity::UserWordRelation>, sqlx::Error>> + Send;
+    fn delete_user_word(
+        &self,
+        id: i64,
+    ) -> impl Future<Output = Result<Option<()>, sqlx::Error>> + Send;
 }

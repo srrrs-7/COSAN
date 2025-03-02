@@ -12,14 +12,18 @@ use std::{net::SocketAddr, sync::Arc};
 use tracing::info;
 
 #[derive(Clone)]
-pub struct AppRouter<U, W, UW>
+pub struct AppState<U, W, UW>
 where
-    U: interface::UserRepositoryTrait + Send + Sync + 'static,
-    W: interface::WordRepositoryTrait + Send + Sync + 'static,
-    UW: interface::UserWordRepositoryTrait + Send + Sync + 'static,
+    U: interface::UserRepositoryTrait + Clone + Send + Sync + 'static,
+    W: interface::WordRepositoryTrait + Clone + Send + Sync + 'static,
+    UW: interface::UserWordRepositoryTrait + Clone + Send + Sync + 'static,
 {
-    service: CosanService<U, W, UW>,
-    secret_key: String,
+    service: Arc<CosanService<U, W, UW>>,
+    secret_key: Arc<String>,
+}
+
+pub struct AppRouter {
+    pub router: Router,
 }
 
 // Add this struct to extract the token
@@ -49,21 +53,22 @@ where
     }
 }
 
-impl<U, W, UW> AppRouter<U, W, UW>
-where
-    U: interface::UserRepositoryTrait + Send + Sync + 'static,
-    W: interface::WordRepositoryTrait + Send + Sync + 'static,
-    UW: interface::UserWordRepositoryTrait + Send + Sync,
-{
-    pub fn new(service: CosanService<U, W, UW>, secret_key: String) -> Self {
-        Self {
+impl AppRouter {
+    pub fn new<U, W, UW>(service: Arc<CosanService<U, W, UW>>, secret_key: String) -> Self
+    where
+        U: interface::UserRepositoryTrait,
+        W: interface::WordRepositoryTrait,
+        UW: interface::UserWordRepositoryTrait,
+    {
+        let app_state = AppState {
             service,
-            secret_key,
-        }
+            secret_key: Arc::new(secret_key),
+        };
+
+        Self::init_router(app_state)
     }
 
-    pub async fn serve(&self) -> Result<(), anyhow::Error> {
-        let router = Self::init_router(self).await?;
+    pub async fn serve(router: Router) -> Result<(), anyhow::Error> {
         let addr = SocketAddr::from(([0, 0, 0, 0], 8080));
         info!("Listening on {}", addr);
 
@@ -74,9 +79,12 @@ where
         Ok(())
     }
 
-    async fn init_router(&self) -> Result<Router, anyhow::Error> {
-        let arc_secret_key = Arc::new(self.secret_key.clone());
-
+    fn init_router<U, W, UW>(state: AppState<U, W, UW>) -> AppRouter
+    where
+        U: interface::UserRepositoryTrait + Clone + Send + Sync + 'static,
+        W: interface::WordRepositoryTrait + Clone + Send + Sync + 'static,
+        UW: interface::UserWordRepositoryTrait + Clone + Send + Sync + 'static,
+    {
         let router = Router::new()
             .nest(
                 "/cosan/v1",
@@ -89,7 +97,7 @@ where
                             .route("/", put(Self::update_user))
                             .route("/:user_id", delete(Self::delete_user))
                             .route_layer(axum::middleware::from_fn_with_state(
-                                arc_secret_key.clone(),
+                                state.secret_key.clone(),
                                 middleware::verify_token_middleware,
                             ))
                             .route("/", post(Self::create_user))
@@ -106,7 +114,7 @@ where
                             .route("/", put(Self::update_word))
                             .route("/:word_id", delete(Self::delete_word))
                             .route_layer(axum::middleware::from_fn_with_state(
-                                arc_secret_key.clone(),
+                                state.secret_key.clone(),
                                 middleware::verify_token_middleware,
                             )),
                     )
@@ -122,7 +130,7 @@ where
                             .route("/", post(Self::create_user_word))
                             .route("/:user_word_id", delete(Self::delete_user_word))
                             .route_layer(axum::middleware::from_fn_with_state(
-                                arc_secret_key.clone(),
+                                state.secret_key.clone(),
                                 middleware::verify_token_middleware,
                             )),
                     )
@@ -130,50 +138,35 @@ where
                         middleware::request_log_middleware,
                     )),
             )
-            .with_state(self.service.clone());
+            .with_state(state);
 
-        Ok(router)
+        AppRouter { router }
     }
 
-    async fn health_check(
-        State(_): State<CosanService<U, W, UW>>,
-    ) -> Result<(http::StatusCode, Json<response::HealthCheckResponse>), ()> {
-        info!("Health check");
-
-        Ok((
-            http::StatusCode::OK,
-            Json(response::HealthCheckResponse { status: "ok" }),
-        ))
-    }
-
-    async fn get_user(
-        State(service): State<CosanService<U, W, UW>>,
-        Token(token): Token,
-        Path(user_id): Path<u64>,
-    ) -> Result<
-        (http::StatusCode, Json<response::GetUserResponse>),
-        (http::StatusCode, Json<response::ErrorResponse>),
-    > {
-        info!("Get user");
-        info!(token = ?token);
-
-        let protagonist = service.get_user(i64::try_from(user_id).unwrap()).await;
-        match protagonist {
-            Ok(protagonist) => Ok((http::StatusCode::OK, Json(protagonist))),
+    // Helper function to handle Result with custom error responses.
+    async fn handle_result<T, E: ToString>(
+        result: Result<T, E>,
+        success_status: http::StatusCode,
+        not_found_message: &str,
+    ) -> Result<(http::StatusCode, Json<T>), (http::StatusCode, Json<response::ErrorResponse>)>
+    {
+        match result {
+            Ok(value) => Ok((success_status, Json(value))),
             Err(err) => {
-                if err.to_string().contains("no rows") {
+                let error_message = err.to_string();
+                if error_message.contains("no rows") {
                     Err((
                         http::StatusCode::NOT_FOUND,
                         Json(response::ErrorResponse {
-                            error: err.to_string(),
-                            message: "User not found".to_string(),
+                            error: error_message,
+                            message: not_found_message.to_string(),
                         }),
                     ))
                 } else {
                     Err((
                         http::StatusCode::INTERNAL_SERVER_ERROR,
                         Json(response::ErrorResponse {
-                            error: err.to_string(),
+                            error: error_message,
                             message: "Internal Server Error".to_string(),
                         }),
                     ))
@@ -182,13 +175,61 @@ where
         }
     }
 
-    async fn create_user(
-        State(service): State<CosanService<U, W, UW>>,
+    async fn health_check() -> Result<(http::StatusCode, Json<response::HealthCheckResponse>), ()> {
+        info!("Health check");
+
+        Ok((
+            http::StatusCode::OK,
+            Json(response::HealthCheckResponse { status: "ok" }),
+        ))
+    }
+
+    async fn get_user<U, W, UW>(
+        State(state): State<AppState<U, W, UW>>,
+        Token(token): Token,
+        Path(user_id): Path<u64>,
+    ) -> Result<
+        (http::StatusCode, Json<response::GetUserResponse>),
+        (http::StatusCode, Json<response::ErrorResponse>),
+    >
+    where
+        U: interface::UserRepositoryTrait + Clone + Send + Sync + 'static,
+        W: interface::WordRepositoryTrait + Clone + Send + Sync + 'static,
+        UW: interface::UserWordRepositoryTrait + Clone + Send + Sync + 'static,
+    {
+        info!("Get user");
+        info!(token = ?token);
+
+        let user_id = i64::try_from(user_id).map_err(|_| {
+            (
+                http::StatusCode::BAD_REQUEST,
+                Json(response::ErrorResponse {
+                    error: "Invalid user ID".to_string(),
+                    message: "User ID must be a valid integer".to_string(),
+                }),
+            )
+        })?;
+
+        Self::handle_result(
+            state.service.get_user(user_id).await,
+            http::StatusCode::OK,
+            "User not found",
+        )
+        .await
+    }
+
+    async fn create_user<U, W, UW>(
+        State(state): State<AppState<U, W, UW>>,
         Json(body): Json<request::CreateUserRequest>,
     ) -> Result<
         (http::StatusCode, Json<response::CreateUserResponse>),
         (http::StatusCode, Json<response::ErrorResponse>),
-    > {
+    >
+    where
+        U: interface::UserRepositoryTrait + Clone + Send + Sync + 'static,
+        W: interface::WordRepositoryTrait + Clone + Send + Sync + 'static,
+        UW: interface::UserWordRepositoryTrait + Clone + Send + Sync + 'static,
+    {
         info!("Create user");
 
         let valid = body.validate().await;
@@ -202,7 +243,7 @@ where
             ));
         }
 
-        let user = service.create_user(body).await;
+        let user = state.service.create_user(body).await;
         match user {
             Ok(user) => Ok((http::StatusCode::CREATED, Json(user))),
             Err(err) => Err((
@@ -215,14 +256,19 @@ where
         }
     }
 
-    async fn update_user(
-        State(service): State<CosanService<U, W, UW>>,
+    async fn update_user<U, W, UW>(
+        State(state): State<AppState<U, W, UW>>,
         Token(token): Token,
         Json(body): Json<request::UpdateUserRequest>,
     ) -> Result<
         (http::StatusCode, Json<response::UpdateUserResponse>),
         (http::StatusCode, Json<response::ErrorResponse>),
-    > {
+    >
+    where
+        U: interface::UserRepositoryTrait + Clone + Send + Sync + 'static,
+        W: interface::WordRepositoryTrait + Clone + Send + Sync + 'static,
+        UW: interface::UserWordRepositoryTrait + Clone + Send + Sync + 'static,
+    {
         info!("Update user");
         info!(token = ?token);
 
@@ -237,7 +283,7 @@ where
             ));
         }
 
-        let protagonist = service.update_user(body).await;
+        let protagonist = state.service.update_user(body).await;
         match protagonist {
             Ok(protagonist) => Ok((http::StatusCode::OK, Json(protagonist))),
             Err(err) => Err((
@@ -250,18 +296,24 @@ where
         }
     }
 
-    async fn delete_user(
-        State(service): State<CosanService<U, W, UW>>,
+    async fn delete_user<U, W, UW>(
+        State(state): State<AppState<U, W, UW>>,
         Token(token): Token,
         Path(protagonist_id): Path<u64>,
     ) -> Result<
         (http::StatusCode, Json<response::DeleteUserResponse>),
         (http::StatusCode, Json<response::ErrorResponse>),
-    > {
+    >
+    where
+        U: interface::UserRepositoryTrait + Clone + Send + Sync + 'static,
+        W: interface::WordRepositoryTrait + Clone + Send + Sync + 'static,
+        UW: interface::UserWordRepositoryTrait + Clone + Send + Sync + 'static,
+    {
         info!("Delete user");
         info!(token = ?token);
 
-        let result = service
+        let result = state
+            .service
             .delete_user(i64::try_from(protagonist_id).unwrap())
             .await;
 
@@ -282,13 +334,18 @@ where
         }
     }
 
-    async fn get_user_by_login_id_and_password(
-        State(service): State<CosanService<U, W, UW>>,
+    async fn get_user_by_login_id_and_password<U, W, UW>(
+        State(state): State<AppState<U, W, UW>>,
         Path(login_request): Path<request::GetUserRequest>,
     ) -> Result<
         (http::StatusCode, Json<response::GetUserResponse>),
         (http::StatusCode, Json<response::ErrorResponse>),
-    > {
+    >
+    where
+        U: interface::UserRepositoryTrait + Clone + Send + Sync + 'static,
+        W: interface::WordRepositoryTrait + Clone + Send + Sync + 'static,
+        UW: interface::UserWordRepositoryTrait + Clone + Send + Sync + 'static,
+    {
         info!("Get user by login_id and password");
 
         let request = request::GetUserRequest::new(login_request.login_id, login_request.password)
@@ -304,7 +361,8 @@ where
             ));
         }
 
-        let user = service
+        let user = state
+            .service
             .get_user_by_login_id_and_password(request.unwrap())
             .await;
 
@@ -332,18 +390,26 @@ where
         }
     }
 
-    async fn get_word(
-        State(service): State<CosanService<U, W, UW>>,
+    async fn get_word<U, W, UW>(
+        State(state): State<AppState<U, W, UW>>,
         Token(token): Token,
         Path(word_id): Path<u64>,
     ) -> Result<
         (http::StatusCode, Json<response::GetWordResponse>),
         (http::StatusCode, Json<response::ErrorResponse>),
-    > {
+    >
+    where
+        U: interface::UserRepositoryTrait + Clone + Send + Sync + 'static,
+        W: interface::WordRepositoryTrait + Clone + Send + Sync + 'static,
+        UW: interface::UserWordRepositoryTrait + Clone + Send + Sync + 'static,
+    {
         info!("Get word");
         info!(token = ?token);
 
-        let word = service.get_word(i64::try_from(word_id).unwrap()).await;
+        let word = state
+            .service
+            .get_word(i64::try_from(word_id).unwrap())
+            .await;
 
         match word {
             Ok(word) => Ok((http::StatusCode::OK, Json(word))),
@@ -369,13 +435,18 @@ where
         }
     }
 
-    async fn create_word(
-        State(service): State<CosanService<U, W, UW>>,
+    async fn create_word<U, W, UW>(
+        State(state): State<AppState<U, W, UW>>,
         Json(body): Json<request::CreateWordRequest>,
     ) -> Result<
         (http::StatusCode, Json<response::CreateWordResponse>),
         (http::StatusCode, Json<response::ErrorResponse>),
-    > {
+    >
+    where
+        U: interface::UserRepositoryTrait + Clone + Send + Sync + 'static,
+        W: interface::WordRepositoryTrait + Clone + Send + Sync + 'static,
+        UW: interface::UserWordRepositoryTrait + Clone + Send + Sync + 'static,
+    {
         info!("Create word");
 
         let valid = body.validate().await;
@@ -389,7 +460,7 @@ where
             ));
         }
 
-        let word = service.create_word(body).await;
+        let word = state.service.create_word(body).await;
         match word {
             Ok(word) => Ok((http::StatusCode::CREATED, Json(word))),
             Err(err) => Err((
@@ -402,14 +473,19 @@ where
         }
     }
 
-    async fn update_word(
-        State(service): State<CosanService<U, W, UW>>,
+    async fn update_word<U, W, UW>(
+        State(state): State<AppState<U, W, UW>>,
         Token(token): Token,
         Json(body): Json<request::UpdateWordRequest>,
     ) -> Result<
         (http::StatusCode, Json<response::UpdateWordResponse>),
         (http::StatusCode, Json<response::ErrorResponse>),
-    > {
+    >
+    where
+        U: interface::UserRepositoryTrait + Clone + Send + Sync + 'static,
+        W: interface::WordRepositoryTrait + Clone + Send + Sync + 'static,
+        UW: interface::UserWordRepositoryTrait + Clone + Send + Sync + 'static,
+    {
         info!("Update supporter");
         info!(token = ?token);
 
@@ -424,7 +500,7 @@ where
             ));
         }
 
-        let word = service.update_word(body).await;
+        let word = state.service.update_word(body).await;
         match word {
             Ok(word) => Ok((http::StatusCode::OK, Json(word))),
             Err(err) => Err((
@@ -437,18 +513,26 @@ where
         }
     }
 
-    async fn delete_word(
-        State(service): State<CosanService<U, W, UW>>,
+    async fn delete_word<U, W, UW>(
+        State(state): State<AppState<U, W, UW>>,
         Token(token): Token,
         Path(word_id): Path<u64>,
     ) -> Result<
         (http::StatusCode, Json<response::DeleteWordResponse>),
         (http::StatusCode, Json<response::ErrorResponse>),
-    > {
+    >
+    where
+        U: interface::UserRepositoryTrait + Clone + Send + Sync + 'static,
+        W: interface::WordRepositoryTrait + Clone + Send + Sync + 'static,
+        UW: interface::UserWordRepositoryTrait + Clone + Send + Sync + 'static,
+    {
         info!("Delete word");
         info!(token = ?token);
 
-        let result = service.delete_word(i64::try_from(word_id).unwrap()).await;
+        let result = state
+            .service
+            .delete_word(i64::try_from(word_id).unwrap())
+            .await;
 
         match result {
             Ok(_) => Ok((
@@ -467,14 +551,19 @@ where
         }
     }
 
-    async fn get_user_word_by_user_id_and_word_id(
-        State(service): State<CosanService<U, W, UW>>,
+    async fn get_user_word_by_user_id_and_word_id<U, W, UW>(
+        State(state): State<AppState<U, W, UW>>,
         Token(token): Token,
         Path(request): Path<request::GetUserWordRequest>,
     ) -> Result<
         (http::StatusCode, Json<response::GetUserWordResponse>),
         (http::StatusCode, Json<response::ErrorResponse>),
-    > {
+    >
+    where
+        U: interface::UserRepositoryTrait + Clone + Send + Sync + 'static,
+        W: interface::WordRepositoryTrait + Clone + Send + Sync + 'static,
+        UW: interface::UserWordRepositoryTrait + Clone + Send + Sync + 'static,
+    {
         info!("Get user word");
         info!(token = ?token);
 
@@ -489,7 +578,10 @@ where
             ));
         }
 
-        let user_word = service.get_user_word_by_user_id_and_word_id(request).await;
+        let user_word = state
+            .service
+            .get_user_word_by_user_id_and_word_id(request)
+            .await;
         match user_word {
             Ok(user_word) => Ok((http::StatusCode::OK, Json(user_word))),
             Err(err) => {
@@ -514,18 +606,24 @@ where
         }
     }
 
-    async fn get_user_word_by_user_id(
-        State(service): State<CosanService<U, W, UW>>,
+    async fn get_user_word_by_user_id<U, W, UW>(
+        State(state): State<AppState<U, W, UW>>,
         Token(token): Token,
         Path(user_id): Path<u64>,
     ) -> Result<
         (http::StatusCode, Json<Vec<response::GetUserWordResponse>>),
         (http::StatusCode, Json<response::ErrorResponse>),
-    > {
+    >
+    where
+        U: interface::UserRepositoryTrait + Clone + Send + Sync + 'static,
+        W: interface::WordRepositoryTrait + Clone + Send + Sync + 'static,
+        UW: interface::UserWordRepositoryTrait + Clone + Send + Sync + 'static,
+    {
         info!("Get user word");
         info!(token = ?token);
 
-        let user_words = service
+        let user_words = state
+            .service
             .get_user_word_by_user_id(request::GetUserWordRequest {
                 user_id: u64::try_from(user_id).unwrap(),
                 word_id: 0,
@@ -556,18 +654,24 @@ where
         }
     }
 
-    async fn get_user_word_by_word_id(
-        State(service): State<CosanService<U, W, UW>>,
+    async fn get_user_word_by_word_id<U, W, UW>(
+        State(state): State<AppState<U, W, UW>>,
         Token(token): Token,
         Path(word_id): Path<u64>,
     ) -> Result<
         (http::StatusCode, Json<Vec<response::GetUserWordResponse>>),
         (http::StatusCode, Json<response::ErrorResponse>),
-    > {
+    >
+    where
+        U: interface::UserRepositoryTrait + Clone + Send + Sync + 'static,
+        W: interface::WordRepositoryTrait + Clone + Send + Sync + 'static,
+        UW: interface::UserWordRepositoryTrait + Clone + Send + Sync + 'static,
+    {
         info!("Get user word");
         info!(token = ?token);
 
-        let user_words = service
+        let user_words = state
+            .service
             .get_user_word_by_word_id(request::GetUserWordRequest {
                 user_id: 0,
                 word_id: u64::try_from(word_id).unwrap(),
@@ -598,8 +702,8 @@ where
         }
     }
 
-    async fn create_user_word(
-        State(service): State<CosanService<U, W, UW>>,
+    async fn create_user_word<U, W, UW>(
+        State(state): State<AppState<U, W, UW>>,
         Token(token): Token,
         Json(body): Json<request::CreateUserWordRequest>,
     ) -> Result<
@@ -608,7 +712,12 @@ where
             Json<response::CreateUserWordRelationResponse>,
         ),
         (http::StatusCode, Json<response::ErrorResponse>),
-    > {
+    >
+    where
+        U: interface::UserRepositoryTrait + Clone + Send + Sync + 'static,
+        W: interface::WordRepositoryTrait + Clone + Send + Sync + 'static,
+        UW: interface::UserWordRepositoryTrait + Clone + Send + Sync + 'static,
+    {
         info!("Create user word");
         info!(token = ?token);
 
@@ -623,7 +732,7 @@ where
             ));
         }
 
-        let user_word = service.create_user_word(body).await;
+        let user_word = state.service.create_user_word(body).await;
         match user_word {
             Ok(user_word) => Ok((http::StatusCode::CREATED, Json(user_word))),
             Err(err) => Err((
@@ -636,18 +745,24 @@ where
         }
     }
 
-    async fn delete_user_word(
-        State(service): State<CosanService<U, W, UW>>,
+    async fn delete_user_word<U, W, UW>(
+        State(state): State<AppState<U, W, UW>>,
         Token(token): Token,
         Path(user_word_id): Path<u64>,
     ) -> Result<
         (http::StatusCode, Json<response::DeleteUserWordResponse>),
         (http::StatusCode, Json<response::ErrorResponse>),
-    > {
+    >
+    where
+        U: interface::UserRepositoryTrait + Clone + Send + Sync + 'static,
+        W: interface::WordRepositoryTrait + Clone + Send + Sync + 'static,
+        UW: interface::UserWordRepositoryTrait + Clone + Send + Sync + 'static,
+    {
         info!("Delete protagonist supporter");
         info!(token = ?token);
 
-        let result = service
+        let result = state
+            .service
             .delete_user_word(i64::try_from(user_word_id).unwrap())
             .await;
 

@@ -5,9 +5,9 @@ use crate::{domain::interface, driver::model};
 #[derive(Clone)]
 pub struct CosanService<U, W, UW>
 where
-    U: interface::UserRepositoryTrait + Send + Sync,
-    W: interface::WordRepositoryTrait + Send + Sync,
-    UW: interface::UserWordRepositoryTrait + Send + Sync,
+    U: interface::UserRepositoryTrait + Clone + Send + Sync + 'static,
+    W: interface::WordRepositoryTrait + Clone + Send + Sync + 'static,
+    UW: interface::UserWordRepositoryTrait + Clone + Send + Sync + 'static,
 {
     user_repository: U,
     word_repository: W,
@@ -15,9 +15,9 @@ where
 }
 
 impl<
-        U: interface::UserRepositoryTrait,
-        W: interface::WordRepositoryTrait,
-        UW: interface::UserWordRepositoryTrait,
+        U: interface::UserRepositoryTrait + Clone + Send + Sync + 'static,
+        W: interface::WordRepositoryTrait + Clone + Send + Sync + 'static,
+        UW: interface::UserWordRepositoryTrait + Clone + Send + Sync + 'static,
     > CosanService<U, W, UW>
 {
     pub fn new(user_repository: U, word_repository: W, user_word_repository: UW) -> Self {

@@ -9,7 +9,7 @@ pub struct UserRepository {
 }
 
 impl UserRepository {
-    fn new(pool: sqlx::PgPool) -> Self {
+    pub fn new(pool: sqlx::PgPool) -> Self {
         Self { pool }
     }
 }
@@ -178,7 +178,7 @@ pub struct WordRepository {
 }
 
 impl WordRepository {
-    fn new(pool: sqlx::PgPool) -> Self {
+    pub fn new(pool: sqlx::PgPool) -> Self {
         Self { pool }
     }
 }
