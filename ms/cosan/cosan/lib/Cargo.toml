@@ -20,3 +20,4 @@ tokio = {version = "1", features = ["full"]}
 tower-http = {version = "0.6.2", features = ["trace"]}
 tracing = "0.1"
 tracing-subscriber = {version = "0.3", features = ["json"]}
+async-trait ="0.1.87"
