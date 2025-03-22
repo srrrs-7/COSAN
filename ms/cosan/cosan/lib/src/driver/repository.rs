@@ -1,6 +1,7 @@
 use crate::domain::entity;
 use crate::domain::interface;
 use crate::driver::model;
+use async_trait::async_trait;
 use sqlx;
 use sqlx::Pool;
 
@@ -9,6 +10,7 @@ pub struct UserRepository {
     pool: sqlx::PgPool,
 }
 
+#[async_trait]
 impl interface::UserRepositoryTrait for UserRepository {
     fn new(pool: Pool<sqlx::Postgres>) -> Self {
         Self { pool }
@@ -175,6 +177,7 @@ pub struct WordRepository {
     pool: Pool<sqlx::Postgres>,
 }
 
+#[async_trait]
 impl interface::WordRepositoryTrait for WordRepository {
     fn new(pool: Pool<sqlx::Postgres>) -> Self {
         Self { pool }
@@ -283,6 +286,7 @@ pub struct UserWordRepository {
     pool: Pool<sqlx::Postgres>,
 }
 
+#[async_trait]
 impl interface::UserWordRepositoryTrait for UserWordRepository {
     fn new(pool: Pool<sqlx::Postgres>) -> Self {
         Self { pool }
