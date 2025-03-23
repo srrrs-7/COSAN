@@ -64,26 +64,6 @@ pub struct CreateUser {
 }
 
 impl CreateUser {
-    pub fn new(
-        user_id: i64,
-        last_name: String,
-        first_name: String,
-        login_id: String,
-        password: String,
-        email: String,
-        country: String,
-    ) -> Self {
-        Self {
-            user_id,
-            last_name,
-            first_name,
-            login_id,
-            password,
-            email,
-            country,
-        }
-    }
-
     pub fn is_valid(&self) -> bool {
         self.user_id >= 0
             && !self.last_name.is_empty()
@@ -115,26 +95,6 @@ pub struct UpdateUser {
 }
 
 impl UpdateUser {
-    pub fn new(
-        user_id: i64,
-        last_name: String,
-        first_name: String,
-        login_id: String,
-        password: String,
-        email: String,
-        country: String,
-    ) -> Self {
-        Self {
-            user_id,
-            last_name,
-            first_name,
-            login_id,
-            password,
-            email,
-            country,
-        }
-    }
-
     pub fn is_valid(&self) -> bool {
         self.user_id >= 0
             && !self.last_name.is_empty()
@@ -161,10 +121,6 @@ pub struct GetWord {
 }
 
 impl GetWord {
-    pub fn new(word_id: i64, word: String) -> Self {
-        Self { word_id, word }
-    }
-
     pub fn is_valid(&self) -> bool {
         self.word_id >= 0 && !self.word.is_empty()
     }
@@ -177,10 +133,6 @@ pub struct CreateWord {
 }
 
 impl CreateWord {
-    pub fn new(word_id: i64, word: String) -> Self {
-        Self { word_id, word }
-    }
-
     pub fn is_valid(&self) -> bool {
         self.word_id >= 0 && self.word.is_empty()
     }
@@ -193,10 +145,6 @@ pub struct UpdateWord {
 }
 
 impl UpdateWord {
-    pub fn new(word_id: i64, word: String) -> Self {
-        Self { word_id, word }
-    }
-
     pub fn is_valid(&self) -> bool {
         self.word_id >= 0 && !self.word.is_empty()
     }
@@ -216,30 +164,6 @@ pub struct GetUserWord {
 }
 
 impl GetUserWord {
-    pub fn new(
-        user_word_id: i64,
-        user_id: i64,
-        last_name: String,
-        first_name: String,
-        email: String,
-        country: String,
-        word_id: i64,
-        word: String,
-        created_at: String,
-    ) -> Self {
-        Self {
-            user_word_id,
-            user_id,
-            last_name,
-            first_name,
-            email,
-            country,
-            word_id,
-            word,
-            created_at,
-        }
-    }
-
     pub fn is_valid(&self) -> bool {
         self.user_word_id >= 0
             && self.user_id >= 0
@@ -260,10 +184,6 @@ pub struct GetUserWordId {
 }
 
 impl GetUserWordId {
-    pub fn new(user_id: i64, word_id: i64) -> Self {
-        Self { user_id, word_id }
-    }
-
     pub fn is_valid(&self) -> bool {
         self.user_id >= 0 && self.word_id >= 0
     }
@@ -277,14 +197,6 @@ pub struct GetUserWordRelation {
 }
 
 impl GetUserWordRelation {
-    pub fn new(user_id: i64, word_id: i64, created_at: String) -> Self {
-        Self {
-            user_id,
-            word_id,
-            created_at,
-        }
-    }
-
     pub fn is_valid(&self) -> bool {
         self.user_id >= 0 && self.word_id >= 0
     }
@@ -297,10 +209,6 @@ pub struct CreateUserWord {
 }
 
 impl CreateUserWord {
-    pub fn new(user_id: i64, word_id: i64) -> Self {
-        Self { user_id, word_id }
-    }
-
     pub fn is_valid(&self) -> bool {
         self.user_id >= 0 && self.word_id >= 0
     }

@@ -1,5 +1,4 @@
 use crate::domain::entity;
-use crate::driver::model;
 use async_trait::async_trait;
 use sqlx;
 use sqlx::Pool;
@@ -12,12 +11,23 @@ pub trait UserRepositoryTrait: Clone + Send + Sync + 'static {
 
     async fn create_user(
         &self,
-        model: model::CreateUser,
+        last_name: &str,
+        first_name: &str,
+        login_id: &str,
+        password: &str,
+        email: &str,
+        country: &str,
     ) -> Result<Option<entity::User>, sqlx::Error>;
 
     async fn update_user(
         &self,
-        model: model::UpdateUser,
+        user_id: i64,
+        last_name: &str,
+        first_name: &str,
+        login_id: &str,
+        password: &str,
+        email: &str,
+        country: &str,
     ) -> Result<Option<entity::User>, sqlx::Error>;
 
     async fn delete_user(&self, id: i64) -> Result<Option<()>, sqlx::Error>;
@@ -25,6 +35,7 @@ pub trait UserRepositoryTrait: Clone + Send + Sync + 'static {
     async fn get_user_by_login_id_and_password(
         &self,
         login_id: &str,
+        hashed_password: &str,
     ) -> Result<Option<entity::User>, sqlx::Error>;
 }
 
@@ -34,14 +45,12 @@ pub trait WordRepositoryTrait: Clone + Send + Sync + 'static {
 
     async fn get_word(&self, word_id: i64) -> Result<Option<entity::Word>, sqlx::Error>;
 
-    async fn create_word(
-        &self,
-        model: model::CreateWord,
-    ) -> Result<Option<entity::Word>, sqlx::Error>;
+    async fn create_word(&self, word: &str) -> Result<Option<entity::Word>, sqlx::Error>;
 
     async fn update_word(
         &self,
-        model: model::UpdateWord,
+        word_id: i64,
+        word: &str,
     ) -> Result<Option<entity::Word>, sqlx::Error>;
 
     async fn delete_word(&self, id: i64) -> Result<Option<()>, sqlx::Error>;
@@ -53,22 +62,24 @@ pub trait UserWordRepositoryTrait: Clone + Send + Sync + 'static {
 
     async fn get_user_word_by_user_id_and_word_id(
         &self,
-        model: model::GetUserWordId,
+        user_id: i64,
+        word_id: i64,
     ) -> Result<Option<entity::UserWord>, sqlx::Error>;
 
     async fn get_user_word_by_user_id(
         &self,
-        model: model::GetUserWordId,
+        user_id: i64,
     ) -> Result<Option<Vec<entity::UserWord>>, sqlx::Error>;
 
     async fn get_user_word_by_word_id(
         &self,
-        model: model::GetUserWordId,
+        word_id: i64,
     ) -> Result<Option<Vec<entity::UserWord>>, sqlx::Error>;
 
     async fn create_user_word(
         &self,
-        model: model::CreateUserWord,
+        user_id: i64,
+        word_id: i64,
     ) -> Result<Option<entity::UserWordRelation>, sqlx::Error>;
 
     async fn delete_user_word(&self, id: i64) -> Result<Option<()>, sqlx::Error>;

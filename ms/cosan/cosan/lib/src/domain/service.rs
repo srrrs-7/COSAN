@@ -1,6 +1,8 @@
+use crate::domain::interface;
 use crate::router::request;
 use crate::router::response;
-use crate::{domain::interface, driver::model};
+
+use super::entity;
 
 #[derive(Clone)]
 pub struct CosanService<U, W, UW>
@@ -29,14 +31,16 @@ impl<
     }
 
     pub async fn get_user(&self, id: i64) -> Result<response::GetUserResponse, anyhow::Error> {
-        let user = self.user_repository.get_user(id).await?;
+        let user_id = entity::UserId::new(id);
+
+        let user = self.user_repository.get_user(user_id.value()).await?;
         match user {
             Some(user) => Ok(response::GetUserResponse {
-                user_id: u64::try_from(user.user_id).unwrap(),
-                user_last_name: user.last_name,
-                user_first_name: user.first_name,
-                user_email: user.email,
-                user_country: user.country,
+                user_id: u64::try_from(user.user_id.value()).unwrap(),
+                user_last_name: user.last_name.value().to_string(),
+                user_first_name: user.first_name.value().to_string(),
+                user_email: user.email.value().to_string(),
+                user_country: user.country.value().to_string(),
             }),
             None => Err(anyhow::anyhow!("User not found")),
         }
@@ -46,31 +50,34 @@ impl<
         &self,
         request: request::CreateUserRequest,
     ) -> Result<response::CreateUserResponse, anyhow::Error> {
-        // protagonist_id is set to -1 because it is auto-incremented in the database
+        let last_name = entity::LastName::new(request.last_name.as_str());
+        let first_name = entity::FirstName::new(request.first_name.as_str());
+        let login_id = entity::LoginId::new(request.login_id.as_str());
+        let hashed_password = entity::Password::new(request.password.as_str())
+            .hash()
+            .await?;
+        let email = entity::Email::new(request.email.as_str());
+        let country = entity::Country::new(request.country.as_str());
+
         let result = self
             .user_repository
             .create_user(
-                model::CreateUser::new(
-                    -1,
-                    request.last_name,
-                    request.first_name,
-                    request.login_id,
-                    request.password,
-                    request.email,
-                    request.country,
-                )
-                .convert_hash_password()
-                .await?,
+                last_name.value(),
+                first_name.value(),
+                login_id.value(),
+                hashed_password.value(),
+                email.value(),
+                country.value(),
             )
             .await?;
 
         match result {
             Some(user) => Ok(response::CreateUserResponse {
-                user_id: u64::try_from(user.user_id).unwrap(),
-                user_last_name: user.last_name,
-                user_first_name: user.first_name,
-                user_email: user.email,
-                user_country: user.country,
+                user_id: user.user_id.value() as u64,
+                user_last_name: user.last_name.value().to_string(),
+                user_first_name: user.first_name.value().to_string(),
+                user_email: user.email.value().to_string(),
+                user_country: user.country.value().to_string(),
             }),
             None => Err(anyhow::anyhow!("User not created")),
         }
@@ -80,30 +87,36 @@ impl<
         &self,
         request: request::UpdateUserRequest,
     ) -> Result<response::UpdateUserResponse, anyhow::Error> {
+        let user_id = entity::UserId::new(request.user_id);
+        let last_name = entity::LastName::new(request.last_name.as_str());
+        let first_name = entity::FirstName::new(request.first_name.as_str());
+        let login_id = entity::LoginId::new(request.login_id.as_str());
+        let hashed_password = entity::Password::new(request.password.as_str())
+            .hash()
+            .await?;
+        let email = entity::Email::new(request.email.as_str());
+        let country = entity::Country::new(request.country.as_str());
+
         let user = self
             .user_repository
             .update_user(
-                model::UpdateUser::new(
-                    request.user_id,
-                    request.last_name,
-                    request.first_name,
-                    request.login_id,
-                    request.password,
-                    request.email,
-                    request.country,
-                )
-                .convert_hash_password()
-                .await?,
+                user_id.value(),
+                last_name.value(),
+                first_name.value(),
+                login_id.value(),
+                hashed_password.value(),
+                email.value(),
+                country.value(),
             )
             .await?;
 
         match user {
             Some(user) => Ok(response::UpdateUserResponse {
-                user_id: u64::try_from(user.user_id).unwrap(),
-                user_last_name: user.last_name,
-                user_first_name: user.first_name,
-                user_email: user.email,
-                user_country: user.country,
+                user_id: user.user_id.value() as u64,
+                user_last_name: user.last_name.value().to_string(),
+                user_first_name: user.first_name.value().to_string(),
+                user_email: user.email.value().to_string(),
+                user_country: user.country.value().to_string(),
             }),
             None => Err(anyhow::anyhow!("User not updated")),
         }
@@ -113,7 +126,9 @@ impl<
         &self,
         id: i64,
     ) -> Result<response::DeleteUserResponse, anyhow::Error> {
-        let result = self.user_repository.delete_user(id).await?;
+        let user_id = entity::UserId::new(id);
+
+        let result = self.user_repository.delete_user(user_id.value()).await?;
         match result {
             Some(_) => Ok(response::DeleteUserResponse {
                 status: "success".to_string(),
@@ -124,29 +139,30 @@ impl<
 
     pub async fn get_user_by_login_id_and_password(
         &self,
-        login_request: request::GetUserRequest,
+        login_id: String,
+        password: String,
     ) -> Result<response::GetUserResponse, anyhow::Error> {
+        let login_id = entity::LoginId::new(login_id.as_str());
+        let hashed_password = entity::Password::new(password.as_str()).hash().await?;
+
         let user = self
             .user_repository
-            .get_user_by_login_id_and_password(login_request.login_id.as_str())
+            .get_user_by_login_id_and_password(login_id.value(), hashed_password.clone().value())
             .await?;
 
         match user {
             Some(user) => {
-                let valid = user
-                    .verify_password(login_request.password.as_str())
-                    .await
-                    .map_err(|e| anyhow::anyhow!("Error verifying password: {}", e.to_string()))?;
+                let valid = user.password.verify(hashed_password.value()).await?;
                 if !valid {
                     return Err(anyhow::anyhow!("Invalid password"));
                 }
 
                 Ok(response::GetUserResponse {
-                    user_id: u64::try_from(user.user_id).unwrap(),
-                    user_last_name: user.last_name,
-                    user_first_name: user.first_name,
-                    user_email: user.email,
-                    user_country: user.country,
+                    user_id: user.user_id.value() as u64,
+                    user_last_name: user.last_name.value().to_string(),
+                    user_first_name: user.first_name.value().to_string(),
+                    user_email: user.email.value().to_string(),
+                    user_country: user.country.value().to_string(),
                 })
             }
             None => Err(anyhow::anyhow!("User not found")),
@@ -154,11 +170,13 @@ impl<
     }
 
     pub async fn get_word(&self, id: i64) -> Result<response::GetWordResponse, anyhow::Error> {
-        let word = self.word_repository.get_word(id).await?;
+        let word_id = entity::WordId::new(id);
+
+        let word = self.word_repository.get_word(word_id.value()).await?;
         match word {
             Some(word) => Ok(response::GetWordResponse {
-                word_id: u64::try_from(word.word_id).unwrap(),
-                word: word.word,
+                word_id: word.word_id.value() as u64,
+                word: word.word.value().to_string(),
             }),
             None => Err(anyhow::anyhow!("Word not found")),
         }
@@ -168,16 +186,14 @@ impl<
         &self,
         request: request::CreateWordRequest,
     ) -> Result<response::CreateWordResponse, anyhow::Error> {
-        // support_id is set to -1 because it is auto-incremented in the database
-        let word = self
-            .word_repository
-            .create_word(model::CreateWord::new(-1, request.word))
-            .await?;
+        let word = entity::WordString::new(request.word.as_str());
+
+        let word = self.word_repository.create_word(word.value()).await?;
 
         match word {
             Some(word) => Ok(response::CreateWordResponse {
-                word_id: u64::try_from(word.word_id).unwrap(),
-                word: word.word,
+                word_id: word.word_id.value() as u64,
+                word: word.word.value().to_string(),
             }),
             None => Err(anyhow::anyhow!("Word not created")),
         }
@@ -187,18 +203,18 @@ impl<
         &self,
         request: request::UpdateWordRequest,
     ) -> Result<response::UpdateWordResponse, anyhow::Error> {
+        let word_id = entity::WordId::new(request.word_id as i64);
+        let word = entity::WordString::new(request.word.as_str());
+
         let word = self
             .word_repository
-            .update_word(model::UpdateWord::new(
-                i64::try_from(request.word_id).unwrap(),
-                request.word,
-            ))
+            .update_word(word_id.value(), word.value())
             .await?;
 
         match word {
             Some(word) => Ok(response::UpdateWordResponse {
-                word_id: u64::try_from(word.word_id).unwrap(),
-                word: word.word,
+                word_id: word.word_id.value() as u64,
+                word: word.word.value().to_string(),
             }),
             None => Err(anyhow::anyhow!("Word not updated")),
         }
@@ -221,25 +237,25 @@ impl<
         &self,
         request: request::GetUserWordRequest,
     ) -> Result<response::GetUserWordResponse, anyhow::Error> {
+        let user_id = entity::UserId::new(request.user_id as i64);
+        let word_id = entity::WordId::new(request.word_id as i64);
+
         let user_word = self
             .user_word_repository
-            .get_user_word_by_user_id_and_word_id(model::GetUserWordId::new(
-                i64::try_from(request.user_id).unwrap(),
-                i64::try_from(request.word_id).unwrap(),
-            ))
+            .get_user_word_by_user_id_and_word_id(user_id.value(), word_id.value())
             .await?;
 
         match user_word {
             Some(user_word) => Ok(response::GetUserWordResponse {
-                user_word_id: u64::try_from(user_word.user_word_id).unwrap(),
-                user_id: u64::try_from(user_word.user_id).unwrap(),
-                last_name: user_word.last_name,
-                first_name: user_word.first_name,
-                email: user_word.email,
-                country: user_word.country,
-                word_id: u64::try_from(user_word.word_id).unwrap(),
-                word: user_word.word,
-                created_at: user_word.created_at,
+                user_word_id: user_word.user_word_id.value() as u64,
+                user_id: user_word.user_id.value() as u64,
+                last_name: user_word.last_name.value().to_string(),
+                first_name: user_word.first_name.value().to_string(),
+                email: user_word.email.value().to_string(),
+                country: user_word.country.value().to_string(),
+                word_id: user_word.word_id.value() as u64,
+                word: user_word.word.value().to_string(),
+                created_at: user_word.created_at.value().to_string(),
             }),
             None => Err(anyhow::anyhow!("User word not found")),
         }
@@ -249,27 +265,26 @@ impl<
         &self,
         request: request::GetUserWordRequest,
     ) -> Result<Vec<response::GetUserWordResponse>, anyhow::Error> {
+        let word_id = entity::WordId::new(request.word_id as i64);
+
         let user_words = self
             .user_word_repository
-            .get_user_word_by_word_id(model::GetUserWordId::new(
-                -1,
-                i64::try_from(request.word_id).unwrap(),
-            ))
+            .get_user_word_by_word_id(word_id.value())
             .await?;
 
         match user_words {
             Some(user_words) => Ok(user_words
                 .into_iter()
                 .map(|user_word| response::GetUserWordResponse {
-                    user_word_id: u64::try_from(user_word.user_word_id).unwrap(),
-                    user_id: u64::try_from(user_word.user_id).unwrap(),
-                    last_name: user_word.last_name,
-                    first_name: user_word.first_name,
-                    email: user_word.email,
-                    country: user_word.country,
-                    word_id: u64::try_from(user_word.word_id).unwrap(),
-                    word: user_word.word,
-                    created_at: user_word.created_at,
+                    user_word_id: user_word.user_word_id.value() as u64,
+                    user_id: user_word.user_id.value() as u64,
+                    last_name: user_word.last_name.value().to_string(),
+                    first_name: user_word.first_name.value().to_string(),
+                    email: user_word.email.value().to_string(),
+                    country: user_word.country.value().to_string(),
+                    word_id: user_word.word_id.value() as u64,
+                    word: user_word.word.value().to_string(),
+                    created_at: user_word.created_at.value().to_string(),
                 })
                 .collect()),
             None => Err(anyhow::anyhow!("User word not found")),
@@ -280,27 +295,26 @@ impl<
         &self,
         request: request::GetUserWordRequest,
     ) -> Result<Vec<response::GetUserWordResponse>, anyhow::Error> {
+        let user_id = entity::UserId::new(request.user_id as i64);
+
         let user_words = self
             .user_word_repository
-            .get_user_word_by_user_id(model::GetUserWordId::new(
-                i64::try_from(request.user_id).unwrap(),
-                -1,
-            ))
+            .get_user_word_by_user_id(user_id.value())
             .await?;
 
         match user_words {
             Some(user_words) => Ok(user_words
                 .into_iter()
                 .map(|user_word| response::GetUserWordResponse {
-                    user_word_id: u64::try_from(user_word.user_word_id).unwrap(),
-                    user_id: u64::try_from(user_word.user_id).unwrap(),
-                    last_name: user_word.last_name,
-                    first_name: user_word.first_name,
-                    email: user_word.email,
-                    country: user_word.country,
-                    word_id: u64::try_from(user_word.word_id).unwrap(),
-                    word: user_word.word,
-                    created_at: user_word.created_at,
+                    user_word_id: user_word.user_word_id.value() as u64,
+                    user_id: user_word.user_id.value() as u64,
+                    last_name: user_word.last_name.value().to_string(),
+                    first_name: user_word.first_name.value().to_string(),
+                    email: user_word.email.value().to_string(),
+                    country: user_word.country.value().to_string(),
+                    word_id: user_word.word_id.value() as u64,
+                    word: user_word.word.value().to_string(),
+                    created_at: user_word.created_at.value().to_string(),
                 })
                 .collect()),
             None => Err(anyhow::anyhow!("User word not found")),
@@ -311,19 +325,19 @@ impl<
         &self,
         request: request::CreateUserWordRequest,
     ) -> Result<response::CreateUserWordRelationResponse, anyhow::Error> {
+        let user_id = entity::UserId::new(request.user_id as i64);
+        let word_id = entity::WordId::new(request.word_id as i64);
+
         let user_word = self
             .user_word_repository
-            .create_user_word(model::CreateUserWord::new(
-                i64::try_from(request.user_id).unwrap(),
-                i64::try_from(request.word_id).unwrap(),
-            ))
+            .create_user_word(user_id.value(), word_id.value())
             .await?;
 
         match user_word {
             Some(user_word) => Ok(response::CreateUserWordRelationResponse {
-                user_id: u64::try_from(user_word.user_id).unwrap(),
-                word_id: u64::try_from(user_word.word_id).unwrap(),
-                created_at: user_word.created_at,
+                user_id: user_word.user_id.value() as u64,
+                word_id: user_word.word_id.value() as u64,
+                created_at: user_word.created_at.value().to_string(),
             }),
             None => Err(anyhow::anyhow!("User word relation not created")),
         }

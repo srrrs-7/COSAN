@@ -325,7 +325,7 @@ impl AppRouter {
 
     async fn get_user_by_login_id_and_password<U, W, UW>(
         State(state): State<AppState<U, W, UW>>,
-        Path(login_request): Path<request::GetUserRequest>,
+        Path(request): Path<request::GetUserRequest>,
     ) -> Result<
         (http::StatusCode, Json<response::GetUserResponse>),
         (http::StatusCode, Json<response::ErrorResponse>),
@@ -337,23 +337,23 @@ impl AppRouter {
     {
         info!("Get user by login_id and password");
 
-        let request = request::GetUserRequest::new(login_request.login_id, login_request.password)
+        let request = request::GetUserRequest::new(request.login_id, request.password)
             .validate()
-            .await;
-        if request.is_err() {
-            return Err((
-                http::StatusCode::BAD_REQUEST,
-                Json(response::ErrorResponse {
-                    error: "Bad Request".to_string(),
-                    message: request.err().unwrap().to_string(),
-                }),
-            ));
-        }
+            .await
+            .map_err(|_| {
+                (
+                    http::StatusCode::BAD_REQUEST,
+                    Json(response::ErrorResponse {
+                        error: "Bad Request".to_string(),
+                        message: "Invalid login ID or password".to_string(),
+                    }),
+                )
+            })?;
 
         Self::handle_result(
             state
                 .service
-                .get_user_by_login_id_and_password(request.unwrap())
+                .get_user_by_login_id_and_password(request.login_id, request.password)
                 .await,
             http::StatusCode::OK,
             "User not found",

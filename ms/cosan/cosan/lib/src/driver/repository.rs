@@ -2,6 +2,8 @@ use crate::domain::entity;
 use crate::domain::interface;
 use crate::driver::model;
 use async_trait::async_trait;
+use chrono::DateTime;
+use chrono::Utc;
 use sqlx;
 use sqlx::Pool;
 
@@ -16,7 +18,7 @@ impl interface::UserRepositoryTrait for UserRepository {
         Self { pool }
     }
     async fn get_user(&self, user_id: i64) -> Result<Option<entity::User>, sqlx::Error> {
-        let row = sqlx::query_as::<_, model::GetUser>(
+        let record = sqlx::query_as::<_, model::GetUser>(
             r#"
             SELECT 
                 user_id, last_name, first_name, login_id, password, email, country
@@ -30,26 +32,31 @@ impl interface::UserRepositoryTrait for UserRepository {
         .fetch_one(&self.pool)
         .await?;
 
-        if !row.is_valid() {
+        if !record.is_valid() {
             return Ok(None);
         }
 
         Ok(Some(entity::User::new(
-            row.user_id,
-            row.last_name,
-            row.first_name,
-            row.login_id,
-            row.password,
-            row.email,
-            row.country,
+            entity::UserId::new(record.user_id),
+            entity::LastName::new(record.last_name.as_str()),
+            entity::FirstName::new(record.first_name.as_str()),
+            entity::LoginId::new(record.login_id.as_str()),
+            entity::PasswordHash::new(record.password.as_str()),
+            entity::Email::new(record.email.as_str()),
+            entity::Country::new(record.country.as_str()),
         )))
     }
 
     async fn create_user(
         &self,
-        model: model::CreateUser,
+        last_name: &str,
+        first_name: &str,
+        login_id: &str,
+        password: &str,
+        email: &str,
+        country: &str,
     ) -> Result<Option<entity::User>, sqlx::Error> {
-        let row = sqlx::query_as::<_, model::CreateUser>(
+        let record = sqlx::query_as::<_, model::CreateUser>(
             r#"
             INSERT INTO 
                 users (last_name, first_name, login_id, password, email, country)
@@ -59,35 +66,41 @@ impl interface::UserRepositoryTrait for UserRepository {
                 user_id, last_name, first_name, login_id, password, email, country;
             "#,
         )
-        .bind(model.last_name)
-        .bind(model.first_name)
-        .bind(model.login_id)
-        .bind(model.password)
-        .bind(model.email)
-        .bind(model.country)
+        .bind(last_name)
+        .bind(first_name)
+        .bind(login_id)
+        .bind(password)
+        .bind(email)
+        .bind(country)
         .fetch_one(&self.pool)
         .await?;
 
-        if !row.is_valid() {
+        if !record.is_valid() {
             return Ok(None);
         }
 
         Ok(Some(entity::User::new(
-            row.user_id,
-            row.last_name,
-            row.first_name,
-            row.login_id,
-            row.password,
-            row.email,
-            row.country,
+            entity::UserId::new(record.user_id),
+            entity::LastName::new(record.last_name.as_str()),
+            entity::FirstName::new(record.first_name.as_str()),
+            entity::LoginId::new(record.login_id.as_str()),
+            entity::PasswordHash::new(record.password.as_str()),
+            entity::Email::new(record.email.as_str()),
+            entity::Country::new(record.country.as_str()),
         )))
     }
 
     async fn update_user(
         &self,
-        model: model::UpdateUser,
+        user_id: i64,
+        last_name: &str,
+        first_name: &str,
+        login_id: &str,
+        password: &str,
+        email: &str,
+        country: &str,
     ) -> Result<Option<entity::User>, sqlx::Error> {
-        let row = sqlx::query_as::<_, model::UpdateUser>(
+        let record = sqlx::query_as::<_, model::UpdateUser>(
             r#"
             UPDATE users
                 SET last_name = $1, first_name = $2, login_id = $3, password = $4, email = $5, country = $6
@@ -97,28 +110,28 @@ impl interface::UserRepositoryTrait for UserRepository {
                 user_id, last_name, first_name, login_id, password, email, country;
             "#,
         )
-        .bind(model.last_name)
-        .bind(model.first_name)
-        .bind(model.login_id)
-        .bind(model.password)
-        .bind(model.email)
-        .bind(model.country)
-        .bind(model.user_id)
+        .bind(last_name)
+        .bind(first_name)
+        .bind(login_id)
+        .bind(password)
+        .bind(email)
+        .bind(country)
+        .bind(user_id)
         .fetch_one(&self.pool)
         .await?;
 
-        if !row.is_valid() {
+        if !record.is_valid() {
             return Ok(None);
         }
 
         Ok(Some(entity::User::new(
-            row.user_id,
-            row.last_name,
-            row.first_name,
-            row.login_id,
-            row.password,
-            row.email,
-            row.country,
+            entity::UserId::new(record.user_id),
+            entity::LastName::new(record.last_name.as_str()),
+            entity::FirstName::new(record.first_name.as_str()),
+            entity::LoginId::new(record.login_id.as_str()),
+            entity::PasswordHash::new(record.password.as_str()),
+            entity::Email::new(record.email.as_str()),
+            entity::Country::new(record.country.as_str()),
         )))
     }
 
@@ -141,8 +154,9 @@ impl interface::UserRepositoryTrait for UserRepository {
     async fn get_user_by_login_id_and_password(
         &self,
         login_id: &str,
+        hashed_password: &str,
     ) -> Result<Option<entity::User>, sqlx::Error> {
-        let row = sqlx::query_as::<_, model::GetUser>(
+        let record = sqlx::query_as::<_, model::GetUser>(
             r#"
             SELECT 
                 user_id, last_name, first_name, login_id, password, email, country
@@ -150,24 +164,26 @@ impl interface::UserRepositoryTrait for UserRepository {
                 users
             WHERE 
                 login_id = $1 
+                AND password = $2;
             "#,
         )
         .bind(login_id)
+        .bind(hashed_password)
         .fetch_one(&self.pool)
         .await?;
 
-        if !row.is_valid() {
+        if !record.is_valid() {
             return Ok(None);
         }
 
         Ok(Some(entity::User::new(
-            row.user_id,
-            row.last_name,
-            row.first_name,
-            row.login_id,
-            row.password,
-            row.email,
-            row.country,
+            entity::UserId::new(record.user_id),
+            entity::LastName::new(record.last_name.as_str()),
+            entity::FirstName::new(record.first_name.as_str()),
+            entity::LoginId::new(record.login_id.as_str()),
+            entity::PasswordHash::new(record.password.as_str()),
+            entity::Email::new(record.email.as_str()),
+            entity::Country::new(record.country.as_str()),
         )))
     }
 }
@@ -183,7 +199,7 @@ impl interface::WordRepositoryTrait for WordRepository {
         Self { pool }
     }
     async fn get_word(&self, word_id: i64) -> Result<Option<entity::Word>, sqlx::Error> {
-        let row = sqlx::query_as::<_, model::GetWord>(
+        let record = sqlx::query_as::<_, model::GetWord>(
             r#"
             SELECT 
                 word_id, word
@@ -197,21 +213,18 @@ impl interface::WordRepositoryTrait for WordRepository {
         .fetch_one(&self.pool)
         .await?;
 
-        if !row.is_valid() {
+        if !record.is_valid() {
             return Ok(None);
         }
 
         Ok(Some(entity::Word::new(
-            u64::try_from(row.word_id).unwrap(),
-            row.word,
+            entity::WordId::new(record.word_id),
+            entity::WordString::new(record.word.as_str()),
         )))
     }
 
-    async fn create_word(
-        &self,
-        model: model::CreateWord,
-    ) -> Result<Option<entity::Word>, sqlx::Error> {
-        let row = sqlx::query_as::<_, model::CreateWord>(
+    async fn create_word(&self, word: &str) -> Result<Option<entity::Word>, sqlx::Error> {
+        let record = sqlx::query_as::<_, model::CreateWord>(
             r#"
             INSERT INTO 
                 words (word)
@@ -221,25 +234,26 @@ impl interface::WordRepositoryTrait for WordRepository {
                 word_id, word;
             "#,
         )
-        .bind(model.word)
+        .bind(word)
         .fetch_one(&self.pool)
         .await?;
 
-        if !row.is_valid() {
+        if !record.is_valid() {
             return Ok(None);
         }
 
         Ok(Some(entity::Word::new(
-            u64::try_from(row.word_id).unwrap(),
-            row.word,
+            entity::WordId::new(record.word_id),
+            entity::WordString::new(record.word.as_str()),
         )))
     }
 
     async fn update_word(
         &self,
-        model: model::UpdateWord,
+        word_id: i64,
+        word: &str,
     ) -> Result<Option<entity::Word>, sqlx::Error> {
-        let row = sqlx::query_as::<_, model::UpdateWord>(
+        let record = sqlx::query_as::<_, model::UpdateWord>(
             r#"
             UPDATE words
                 SET word = $1
@@ -249,18 +263,18 @@ impl interface::WordRepositoryTrait for WordRepository {
                 word_id, word;
             "#,
         )
-        .bind(model.word)
-        .bind(model.word_id)
+        .bind(word)
+        .bind(word_id)
         .fetch_one(&self.pool)
         .await?;
 
-        if !row.is_valid() {
+        if !record.is_valid() {
             return Ok(None);
         }
 
         Ok(Some(entity::Word::new(
-            u64::try_from(row.word_id).unwrap(),
-            row.word,
+            entity::WordId::new(record.word_id),
+            entity::WordString::new(record.word.as_str()),
         )))
     }
 
@@ -293,9 +307,10 @@ impl interface::UserWordRepositoryTrait for UserWordRepository {
     }
     async fn get_user_word_by_user_id_and_word_id(
         &self,
-        model: model::GetUserWordId,
+        user_id: i64,
+        word_id: i64,
     ) -> Result<Option<entity::UserWord>, sqlx::Error> {
-        let row = sqlx::query_as::<_, model::GetUserWord>(
+        let record = sqlx::query_as::<_, model::GetUserWord>(
             r#"
             SELECT 
                 uw.user_word_id,
@@ -320,33 +335,37 @@ impl interface::UserWordRepositoryTrait for UserWordRepository {
                 AND uw.word_id = $2
             "#,
         )
-        .bind(model.user_id)
-        .bind(model.word_id)
+        .bind(user_id)
+        .bind(word_id)
         .fetch_one(&self.pool)
         .await?;
 
-        if row.is_valid() {
+        if record.is_valid() {
             return Ok(None);
         }
 
         Ok(Some(entity::UserWord::new(
-            u64::try_from(row.user_word_id).unwrap(),
-            u64::try_from(row.user_id).unwrap(),
-            row.last_name,
-            row.first_name,
-            row.email,
-            row.country,
-            u64::try_from(row.word_id).unwrap(),
-            row.word,
-            row.created_at,
+            entity::UserWordId::new(record.user_word_id),
+            entity::UserId::new(record.user_id),
+            entity::LastName::new(record.last_name.as_str()),
+            entity::FirstName::new(record.first_name.as_str()),
+            entity::Email::new(record.email.as_str()),
+            entity::Country::new(record.country.as_str()),
+            entity::WordId::new(record.word_id),
+            entity::WordString::new(record.word.as_str()),
+            entity::CreatedAt::new(
+                DateTime::parse_from_rfc3339(record.created_at.as_str())
+                    .expect("Invalid date")
+                    .with_timezone(&Utc),
+            ),
         )))
     }
 
     async fn get_user_word_by_user_id(
         &self,
-        model: model::GetUserWordId,
+        user_id: i64,
     ) -> Result<Option<Vec<entity::UserWord>>, sqlx::Error> {
-        let rows = sqlx::query_as::<_, model::GetUserWord>(
+        let records = sqlx::query_as::<_, model::GetUserWord>(
             r#"
             SELECT 
                 uw.user_word_id,
@@ -372,27 +391,31 @@ impl interface::UserWordRepositoryTrait for UserWordRepository {
                 created_at ASC;
             "#,
         )
-        .bind(model.user_id)
+        .bind(user_id)
         .fetch_all(&self.pool)
         .await?;
 
-        if rows.is_empty() {
+        if records.is_empty() {
             return Ok(None);
         }
 
-        let user_words = rows
+        let user_words = records
             .into_iter()
-            .map(|row| {
+            .map(|record| {
                 entity::UserWord::new(
-                    u64::try_from(row.user_word_id).unwrap(),
-                    u64::try_from(row.user_id).unwrap(),
-                    row.last_name,
-                    row.first_name,
-                    row.email,
-                    row.country,
-                    u64::try_from(row.word_id).unwrap(),
-                    row.word,
-                    row.created_at,
+                    entity::UserWordId::new(record.user_word_id),
+                    entity::UserId::new(record.user_id),
+                    entity::LastName::new(record.last_name.as_str()),
+                    entity::FirstName::new(record.first_name.as_str()),
+                    entity::Email::new(record.email.as_str()),
+                    entity::Country::new(record.country.as_str()),
+                    entity::WordId::new(record.word_id),
+                    entity::WordString::new(record.word.as_str()),
+                    entity::CreatedAt::new(
+                        DateTime::parse_from_rfc3339(record.created_at.as_str())
+                            .expect("Invalid date")
+                            .with_timezone(&Utc),
+                    ),
                 )
             })
             .collect();
@@ -402,9 +425,9 @@ impl interface::UserWordRepositoryTrait for UserWordRepository {
 
     async fn get_user_word_by_word_id(
         &self,
-        model: model::GetUserWordId,
+        word_id: i64,
     ) -> Result<Option<Vec<entity::UserWord>>, sqlx::Error> {
-        let rows = sqlx::query_as::<_, model::GetUserWord>(
+        let records = sqlx::query_as::<_, model::GetUserWord>(
             r#"
             SELECT 
                 uw.user_word_id,
@@ -430,27 +453,31 @@ impl interface::UserWordRepositoryTrait for UserWordRepository {
                 created_at ASC;
             "#,
         )
-        .bind(model.word_id)
+        .bind(word_id)
         .fetch_all(&self.pool)
         .await?;
 
-        if rows.is_empty() {
+        if records.is_empty() {
             return Ok(None);
         }
 
-        let user_words = rows
+        let user_words = records
             .into_iter()
-            .map(|row| {
+            .map(|record| {
                 entity::UserWord::new(
-                    u64::try_from(row.user_word_id).unwrap(),
-                    u64::try_from(row.user_id).unwrap(),
-                    row.last_name,
-                    row.first_name,
-                    row.email,
-                    row.country,
-                    u64::try_from(row.word_id).unwrap(),
-                    row.word,
-                    row.created_at,
+                    entity::UserWordId::new(record.user_word_id),
+                    entity::UserId::new(record.user_id),
+                    entity::LastName::new(record.last_name.as_str()),
+                    entity::FirstName::new(record.first_name.as_str()),
+                    entity::Email::new(record.email.as_str()),
+                    entity::Country::new(record.country.as_str()),
+                    entity::WordId::new(record.word_id),
+                    entity::WordString::new(record.word.as_str()),
+                    entity::CreatedAt::new(
+                        DateTime::parse_from_rfc3339(record.created_at.as_str())
+                            .expect("Invalid date")
+                            .with_timezone(&Utc),
+                    ),
                 )
             })
             .collect();
@@ -460,9 +487,10 @@ impl interface::UserWordRepositoryTrait for UserWordRepository {
 
     async fn create_user_word(
         &self,
-        model: model::CreateUserWord,
+        user_id: i64,
+        word_id: i64,
     ) -> Result<Option<entity::UserWordRelation>, sqlx::Error> {
-        let row = sqlx::query_as::<_, model::GetUserWordRelation>(
+        let record = sqlx::query_as::<_, model::GetUserWordRelation>(
             r#"
             INSERT INTO 
                 user_words (user_id, word_id)
@@ -472,19 +500,23 @@ impl interface::UserWordRepositoryTrait for UserWordRepository {
                 user_id, word_id;
             "#,
         )
-        .bind(model.user_id)
-        .bind(model.word_id)
+        .bind(user_id)
+        .bind(word_id)
         .fetch_one(&self.pool)
         .await?;
 
-        if !row.is_valid() {
+        if !record.is_valid() {
             return Ok(None);
         }
 
         Ok(Some(entity::UserWordRelation::new(
-            u64::try_from(row.user_id).unwrap(),
-            u64::try_from(row.word_id).unwrap(),
-            row.created_at,
+            entity::UserId::new(record.user_id),
+            entity::WordId::new(record.word_id),
+            entity::CreatedAt::new(
+                DateTime::parse_from_rfc3339(record.created_at.as_str())
+                    .expect("Invalid date")
+                    .with_timezone(&Utc),
+            ),
         )))
     }
 
